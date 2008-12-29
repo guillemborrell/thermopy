@@ -13,9 +13,9 @@
 
 from __future__ import division
 try:
-    from xml.etree.ElementTree import ElementTree
+    from xml.etree.ElementTree import parse
 except ImportError:
-    from elementtree import ElementTree
+    from elementtree import parse
 from numpy import empty,array,dot,log,float64
 import doctest
 import os
@@ -386,7 +386,8 @@ class Elementdb(object):
         Create the instance and the elements at boot, otherwise be
         prepared to face huge computation times.
         """
-        tree = ElementTree(file=os.curdir+os.sep+"BURCAT_THR.xml")
+        database = open("BURCAT_THR.xml",'r')
+        tree = parse(database)
         self.db = tree.getroot()
 
     def search(self,formula):
