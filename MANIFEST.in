@@ -1,0 +1,8 @@
+include README
+include LICENSE
+include AUTHORS
+include TODO
+
+include ez_setup.py
+
+recursive-include thermopy *.xml

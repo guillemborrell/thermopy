@@ -1,7 +1,6 @@
 from __future__ import division
 from burcat import Mixture
 from scipy import optimize
-from numpy import float64
 
 class SimpleCombustor(object):
     """
@@ -104,25 +103,21 @@ class CustomCombustor(object):
     def __init__(self,reactants,products):
         pass
 
-def run():
+def test_combustion():
     from burcat import Elementdb
     db = Elementdb()
     methane = db.getelementdata("CH4   RRHO")
     combustor = SimpleCombustor(methane,1.1,db)
-    print 'heat of combustion',combustor.heat_of_comb(298.15)
+    assert combustor.heat_of_comb(298.15) == 50027136.34030433
 
     # Test Ta
     butane = db.getelementdata('C4H10 n-butane')
     combustor = SimpleCombustor(butane,1,db)
-    print 'Ta',combustor.adiabatic_flame_temp(298.15)
+    assert combustor.adiabatic_flame_temp(298.15) == 1
     
 
 
 
             
-if __name__ == "__main__":
-    #from doctest import testmod
-    #testmod()
-    run()
 
     

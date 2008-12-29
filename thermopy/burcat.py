@@ -18,6 +18,7 @@ except ImportError:
     from elementtree import ElementTree
 from numpy import empty,array,dot,log,float64
 import doctest
+import os
 
 # Universal gas constant R
 R = 8.314472
@@ -385,7 +386,7 @@ class Elementdb(object):
         Create the instance and the elements at boot, otherwise be
         prepared to face huge computation times.
         """
-        tree = ElementTree(file="BURCAT_THR.xml")
+        tree = ElementTree(file=os.curdir+os.sep+"BURCAT_THR.xml")
         self.db = tree.getroot()
 
     def search(self,formula):

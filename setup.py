@@ -13,5 +13,5 @@ setup(name="thermopy",
       package_data = {
         '': ['*.xml', '*.rst'],
         },
-      install_requires = ['numpy>=1.2.1','scipy>=0.6.0'],
+      install_requires = ['scipy>=0.6.0','numpy>=1.2.1'],
       )
