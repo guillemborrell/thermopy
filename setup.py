@@ -10,8 +10,7 @@ setup(name="thermopy",
       author_email="guillem@torroja.dmt.upm.es",
       url="http://torroja.dmt.upm.es/guillem/blog/",
       packages = find_packages(),
-      package_data = {
-        '': ['*.xml', '*.rst'],
-        },
+      include_package_data = True,
       install_requires = ['scipy>=0.6.0','numpy>=1.2.1'],
+      zip_safe = False
       )

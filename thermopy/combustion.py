@@ -16,6 +16,10 @@ class SimpleCombustor(object):
 
     def __init__(self,fuel,phi,db):
         """
+        :fuel:
+        
+          The formula of the fuel
+        
         :phi:
 
           Equivalence ratio
@@ -77,6 +81,9 @@ class SimpleCombustor(object):
 
         return float(hreac-hprod)/self.reactants[0][0].mm
 
+    @property
+    def lower_heating_value(self):
+        return self.heat_of_comb(423.15)
 
     def adiabatic_flame_temp(self,T):
         """
@@ -96,12 +103,13 @@ class SimpleCombustor(object):
         return optimize.fsolve(f,1000)
 
 
-class CustomCombustor(object):
+class Combustor(object):
     """
-    Calculates the heat of combustion per kg of fuel. Checked ok
+    Combustor that is able to characterize the combustion of a mixture
+    of fuels
     """
-    def __init__(self,reactants,products):
-        pass
+    def __init__(self,fuels,phi,db):
+        
 
 def test_combustion():
     from burcat import Elementdb

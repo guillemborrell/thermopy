@@ -16,8 +16,10 @@ try:
     from xml.etree.ElementTree import parse
 except ImportError:
     from elementtree import parse
-from numpy import empty,array,dot,log,float64
+from numpy import empty,array,dot,log
+from pkg_resources import Requirement, resource_filename
 import doctest
+import copy
 import os
 
 # Universal gas constant R
@@ -300,6 +302,19 @@ class Mixture(object):
     def go(self,T):
         return self.extensive('go',T)
 
+    def aggregate(self):
+        newmix = list()
+        oldmix = copy.deepcopy(self.mix)
+        for e in self.mix:
+            if e not in newmix:
+                newmix.append(oldmix.pop(oldmix.index(e)))
+
+            if e in newmix:
+                newmix[newmix.index(e)] = (newmix[newmix.index(e)][0],
+                                           newmix[newmix.index(e)][1]+e[1])
+
+        self.mix = newmix
+
     def __repr__(self):
         str="<Mixture>:"
         for comp in self.mix:
@@ -386,7 +401,17 @@ class Elementdb(object):
         Create the instance and the elements at boot, otherwise be
         prepared to face huge computation times.
         """
-        database = open("BURCAT_THR.xml",'r')
+        try:
+            # try to open the local file, it does not raise an
+            # exception on a development environment
+            database = open("BURCAT_THR.xml",'r')
+        except IOError:
+            # Fallback to pkg_resources when thermopy is an installed
+            # module
+            dbname = resource_filename(
+                Requirement.parse("thermopy"),'thermopy/BURCAT_THR.xml')
+            database = open(dbname,'r')
+            
         tree = parse(database)
         self.db = tree.getroot()
 
@@ -454,7 +479,24 @@ class Elementdb(object):
         return mixture
 
 
+def test_aggregate():
+    db = Elementdb()
+    mix = db.getmixturedata([("O2 REF ELEMENT",20.9476),
+                             ("N2  REF ELEMENT",78.084),
+                             ("CO2",0.0319),
+                             ("AR REF ELEMENT",0.9365),
+                             ("O2 REF ELEMENT",20.9476)])
+    mix.aggregate()
+    assert mix["O2 REF ELEMENT"][1] == 1
+
+
 if __name__ == '__main__':
-    from doctest import testmod
-    testmod()
+    # Move all doctests to py.test
+    db = Elementdb()
+    mix = db.getmixturedata([("O2 REF ELEMENT",20.9476),
+                             ("N2  REF ELEMENT",78.084),
+                             ("CO2",0.0319),
+                             ("AR REF ELEMENT",0.9365),
+                             ("O2 REF ELEMENT",1.2)])
+    mix.aggregate()
 
