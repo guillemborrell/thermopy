@@ -10,6 +10,7 @@
 #
 # Funding by Vulcano Sadeca
 
+# TODO: Introduce the exception in all try-except clauses
 
 from __future__ import division
 try:
@@ -202,7 +203,7 @@ class Mixture(object):
 
             return elem
 
-    def append(self,component,prop):
+    def add(self,component,prop):
         self.mix.append((component,prop))
 
 
@@ -301,19 +302,6 @@ class Mixture(object):
 
     def go(self,T):
         return self.extensive('go',T)
-
-    def aggregate(self):
-        newmix = list()
-        oldmix = copy.deepcopy(self.mix)
-        for e in self.mix:
-            if e not in newmix:
-                newmix.append(oldmix.pop(oldmix.index(e)))
-
-            if e in newmix:
-                newmix[newmix.index(e)] = (newmix[newmix.index(e)][0],
-                                           newmix[newmix.index(e)][1]+e[1])
-
-        self.mix = newmix
 
     def __repr__(self):
         str="<Mixture>:"
@@ -474,20 +462,11 @@ class Elementdb(object):
         """
         mixture = Mixture()
         for comp in components:
-            mixture.append(self.getelementdata(comp[0]),comp[1])
+            mixture.add(self.getelementdata(comp[0]),comp[1])
 
         return mixture
 
 
-def test_aggregate():
-    db = Elementdb()
-    mix = db.getmixturedata([("O2 REF ELEMENT",20.9476),
-                             ("N2  REF ELEMENT",78.084),
-                             ("CO2",0.0319),
-                             ("AR REF ELEMENT",0.9365),
-                             ("O2 REF ELEMENT",20.9476)])
-    mix.aggregate()
-    assert mix["O2 REF ELEMENT"][1] == 1
 
 
 if __name__ == '__main__':
