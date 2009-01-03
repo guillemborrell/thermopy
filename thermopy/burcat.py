@@ -223,7 +223,7 @@ class Mixture(object):
         
         .. math:: 
 
-          M_m = \frac{1}{N_m}\sum_i N_i M_i
+          M_m = \\frac{1}{N_m} \\sum_i N_i M_i
         """
         if self.config == 'vol':
             Nm = 0
@@ -241,7 +241,7 @@ class Mixture(object):
         """
         Computes the density for a given mix of gases
 
-        The equivalent R for a mix is :math:`R_m = \frac{R_u}{M_n}`,
+        The equivalent R for a mix is :math:`R_m = \\frac{R_u}{M_n}`,
         where :math:`M_n` is the equivalent molar mass for the mix.
         """
         # TODO: There is a bug in this routine.  Result is not correct.
@@ -255,7 +255,7 @@ class Mixture(object):
 
         .. math::
 
-          c_p = \frac{1}{N_m M_m} \sum_i N_i M_i ext_i
+          c_p = \\frac{1}{N_m M_m} \\sum_i N_i M_i ext_i
         """
         if self.config == 'vol':
             Nm = 0

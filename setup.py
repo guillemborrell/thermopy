@@ -4,7 +4,7 @@ use_setuptools()
 from setuptools import setup, find_packages
 
 setup(name="thermopy",
-      version="0.1",
+      version="0.2",
       description="Some utilities for Thermodynamics and Thermochemistry",
       author="Guillem Borrell i Nogueras",
       author_email="guillem@torroja.dmt.upm.es",

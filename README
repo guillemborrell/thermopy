@@ -27,6 +27,8 @@ This packages needs the following extra modules to run.
 
 * Scipy >= 0.6.0
 
+* setuptools >= 0.6
+
 Development
 ===========
 
