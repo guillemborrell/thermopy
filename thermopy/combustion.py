@@ -1,8 +1,11 @@
 from __future__ import division
 from burcat import Mixture
 from scipy import optimize
+from copy import deepcopy
 
 supported = 'C H N O'.split()
+
+# TODO: Check that adiabatic flame temperature is ok
 
 def balance(fuel,am,phi):
     """
@@ -63,7 +66,7 @@ def balance_mix(fuels,phi):
         products['N2'] += dprod['N2']
         products['CO2'] += dprod['CO2']
         products['H2O'] += dprod['H2O']
-        products['O2'] += dprod['N2']
+        products['O2'] += dprod['O2']
 
     return(reactants,products)
 
@@ -165,6 +168,7 @@ class Combustor(object):
     of fuels
     """
     def __init__(self,fuels,phi,db):
+        self.fuels = deepcopy(fuels)
         self.reactants = fuels
         self.products = Mixture()
 
@@ -175,13 +179,13 @@ class Combustor(object):
 
         (dreac,dprod) = balance_mix(fuels,phi)
 
-        self.reactants.add(oxygen,rdict['O2'])
-        self.reactants.add(nitrogen,rdict['N2'])
+        self.reactants.add(oxygen,dreac['O2'])
+        self.reactants.add(nitrogen,dreac['N2'])
 
-        self.products.add(nitrogen,pdict['N2'])
-        self.products.add(carbondiox,pdict['CO2'])
-        self.products.add(water,pdict['H2O'])
-        self.products.add(oxygen,pdict['O2'])
+        self.products.add(nitrogen,dprod['N2'])
+        self.products.add(carbondiox,dprod['CO2'])
+        self.products.add(water,dprod['H2O'])
+        self.products.add(oxygen,dprod['O2'])
 
     def heat_of_comb(self,T):
         """
@@ -195,7 +199,7 @@ class Combustor(object):
         for prod in self.products:
             hprod += prod[0].ho(T)*prod[1]
 
-        return float(hreac-hprod)/self.reactants[0][0].mm
+        return float(hreac-hprod)/self.fuels.mm
 
     @property
     def lower_heating_value(self):
@@ -208,7 +212,7 @@ class Combustor(object):
         temperature remember to set the equivalence ratio to 1.
         Otherwise you will always get lower temperatures.
         """
-        dh = self.heat_of_comb(T)*self.reactants[0][0].mm
+        dh = self.heat_of_comb(T)*self.fuels.mm
         
         f = \
         lambda Tg: self.products[0][1]*self.products[0][0].cpo(Tg)+\
@@ -229,8 +233,17 @@ def test_simplecombustor():
     # Test Ta
     butane = db.getelementdata('C4H10 n-butane')
     combustor = SimpleCombustor(butane,1,db)
-    assert combustor.adiabatic_flame_temp(298.15) == 1
+    assert combustor.heat_of_comb(298.15) == 45720359.22491768
     
+def test_combustor():
+    from burcat import Elementdb
+    db = Elementdb()
+    fuels = db.getmixturedata([("CH4   RRHO",0.9168),
+                               ("C2H6",0.0686),
+                               ("C3H8",0.0070),
+                               ("C4H10 n-butane",0.0011)])
 
-if __name__ == '__main__':
-    test_simplecombustor()
+    combustor = Combustor(fuels,1,db)
+    assert combustor.heat_of_comb(423.15) == 49245710.116662093
+
+
