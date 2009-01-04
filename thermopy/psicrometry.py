@@ -41,11 +41,17 @@ class MoistAir(object):
         self.w = self.water.mm/self.gas.mm*self.qwater/self.qgas
         
     def phi(self,p,T):
+        """
+        Relative moisture given pressure and temperature.
+        """
         ya = self.qgas/(self.qgas+self.qwater)
         return self.gas.mm*ya*p*self.w/(self.water.mm*self.moist.psat(T))
 
 
     def wet_bulb_T(self,p):
+        """
+        Wet bulb temperature for a given pressure
+        """
         yw = self.qwater/(self.qgas+self.qwater)
         return self.moist.Tsat(yw*p)
 

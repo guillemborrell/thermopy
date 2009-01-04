@@ -12,7 +12,9 @@ Contents:
    :maxdepth: 2
 
    burcat.rst
+   iapws.rst
    combustion.rst
+   psicrometry.rst
 
 Indices and tables
 ==================

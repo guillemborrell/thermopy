@@ -3,19 +3,21 @@ from __future__ import division
 from units import Tu, pu, hu
 from numpy import array,sum,sqrt
 
-# Taken from
-
-# The International Association for the Properties of Water and
-# Steam. Lucerne, Switzerland. August 2007. Revised Release on the
-# IAPWS Industrial Formulation 1997 for the Thermodynamic Properties
-# of Water and Steam.
-
-## Functions implemented
-
-# Saturation line
-# h(p,T) region1, region2 and no warnings yet
 
 class Water(object):
+    """Taken from
+
+    The International Association for the Properties of Water and
+    Steam. Lucerne, Switzerland. August 2007. Revised Release on the
+    IAPWS Industrial Formulation 1997 for the Thermodynamic Properties
+    of Water and Steam.
+    
+    Functions implemented:
+    
+    Saturation line
+    h(p,T) region1, region2 and no warnings yet
+    """
+
     R=0.461526 #kJ/(kg K)
     Tc=647.096 #Triple point temperature (K)
     pc=22.064  #Triple point pressure (MPa)
@@ -129,7 +131,8 @@ class Water(object):
         Remember that temperature must be between 273.15K (triple point)
         and 647.096K (critical point)
         
-        Temperatures in K, Pressures in Pa
+        Temperatures in K, Pressures in Pa.
+        
         >>> w = Water()
         >>> w.psat(300)
         0.0035365894130130106
@@ -141,7 +144,7 @@ class Water(object):
         0.10141797792131015
         """
         T = Tu(T,f=Tunits)
-
+        
         if T < 273.15 or T > 647.096:
             return 'Error: No saturation pressure for this temperature'
         
@@ -160,7 +163,8 @@ class Water(object):
         Remember that pressure must be between 0.000611213MPa (triple
         point) and 22.064MPa (critical point)
         
-        Temperatures in K, pressures in MPa
+        Temperatures in K, pressures in MPa.
+
         >>> w = Water()
         >>> w.Tsat(0.1)
         372.75591861133762
@@ -192,7 +196,7 @@ class Water(object):
     def h(self,p,T,punits='Pa',Tunits='K',hunits='si'):
         """
         Returns specific enthalpy (J/kg) for a given pressure (Pa) and
-        Temperature (K)
+        Temperature (K).
         
         >>> w = Water()
         >>> w.h(3,300,'MPa',hunits='kJkg')
@@ -246,8 +250,10 @@ class Water(object):
 
     def T_ph(self,p,h):
         """
-        Returns the temperature (K) given the pressure (MPa) and specific
-        enthalpy (kJ/kg).  Only region 2a implemented (p<4MPa) (Reimplement)
+        Returns the temperature (K) given the pressure (MPa) and
+        specific enthalpy (kJ/kg).  Only region 2a implemented
+        (p<4MPa) (Reimplement).
+
         >>> w = Water()
         >>> w.T_ph(3,500)
         (391.79850876242563, 4.1313215739117547e+21)
