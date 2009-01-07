@@ -1,10 +1,23 @@
-.. thermopy documentation master file, created by sphinx-quickstart on
-.. Wed Dec 31 17:00:42 2008.
-.. You can adapt this file completely to your liking, but it should at least
-.. contain the root `toctree` directive.
-
 Welcome to thermopy's documentation!
 ====================================
+
+Thermopy is a python package that contains some useful functions for
+Thermodynamics and Thermochemistry.  It is in early satages of
+development but some of the modules, specially `burcat` is mature
+enough to be useful.
+
+Download
+--------
+
+* Source:
+
+  - Stable release: http://pypi.python.org/pypi/thermopy
+
+  - Git clone: http://gitorious.org/projects/thermopy
+
+* Binary packages:
+
+  - Windows installer: http://pypi.python.org/pypi/thermopy
 
 Contents:
 
@@ -15,6 +28,7 @@ Contents:
    iapws.rst
    combustion.rst
    psicrometry.rst
+   license.rst
 
 Indices and tables
 ==================
