@@ -1,10 +1,14 @@
 Welcome to thermopy's documentation!
 ====================================
 
-Thermopy is a python package that contains some useful functions for
+Thermopy is a *Python* package that contains some useful functions for
 Thermodynamics and Thermochemistry.  It is in early satages of
-development but some of the modules, specially `burcat` is mature
+development but some of the modules, specially `burcat`, are mature
 enough to be useful.
+
+The goal is to create a high quality package for Thermochemistry to
+expand the Python community in this area too. You contributions will
+be welcome.
 
 Download
 --------
@@ -29,6 +33,7 @@ Contents:
    combustion.rst
    psicrometry.rst
    license.rst
+
 
 Indices and tables
 ==================
