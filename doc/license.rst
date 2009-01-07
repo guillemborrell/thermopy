@@ -1,3 +1,6 @@
+License
+=======
+
 Copyright (c) 2009, Guillem Borrell i Nogueras
 All rights reserved.
 
