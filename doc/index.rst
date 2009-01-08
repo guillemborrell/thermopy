@@ -7,7 +7,7 @@ development but some of the modules, specially `burcat`, are mature
 enough to be useful.
 
 The goal is to create a high quality package for Thermochemistry to
-expand the Python community in this area too. You contributions will
+expand the Python community in this area too. Your contributions will
 be welcome.
 
 Download

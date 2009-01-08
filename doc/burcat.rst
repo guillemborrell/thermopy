@@ -10,7 +10,6 @@ Ideal Gas and Condensed Phase Thermochemical Database for Combustion
 with Updates from Active Thermochemical Tables* by Burcat A. and
 Ruscic B.
 
-----------------------
 
 .. automodule:: thermopy.burcat
    :members:

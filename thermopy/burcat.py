@@ -255,7 +255,7 @@ class Mixture(object):
 
         .. math::
 
-          c_p = \\frac{1}{N_m M_m} \\sum_i N_i M_i ext_i
+          ext = \\frac{1}{N_m M_m} \\sum_i N_i M_i ext_i
         """
         if self.config == 'vol':
             Nm = 0

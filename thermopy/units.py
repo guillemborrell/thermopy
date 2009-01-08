@@ -1,6 +1,30 @@
 from constants import *
 
-TUNITS = ['K','C','F']
+
+class Temperature(float):
+    def __init__(self,data):
+        if unit == 'K':
+            float.__init__(self,data)
+        elif unit == 'C':
+            float.__init__(self,C2K(data))
+        elif unit == 'F':
+            float.__init__(self,F2K(data))
+        else:
+            raise ValueError("wrong temperature unit input code")
+
+    @property
+    def C(self):
+        return K2C(self.data)
+
+    @property
+    def F(self):
+        return K2F(self.data)
+
+def test_temperature():
+    t = Temperature(100)
+    assert type(t) == 1
+    assert t.F == 1
+
 
 def Tu(T,f='K',t='K'):
     """
