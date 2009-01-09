@@ -39,6 +39,12 @@ class Temperature(float):
     >>> T2 = Temperature(0).unit('C')
     >>> T1+T2
     473.14999999999998
+
+    If you don't want to use the class' attribute you can use the
+    function `getattr` to get a value using the unit code.
+
+    >>> getattr(T,'C')
+    37.777777777777771
     """
     def __init__(self,data):
         float.__init__(self,float(data))
@@ -47,7 +53,7 @@ class Temperature(float):
     @classmethod
     def factory(cls,data):
         """
-        This factory makes that any returned value is a Temperature
+        This factory makes that any returned value is a measure
         instead of a float.
         """
         return cls(data)
@@ -110,7 +116,7 @@ class Pressure(float):
     @classmethod
     def factory(cls,data):
         """
-        This factory makes that any returned value is a Temperature
+        This factory makes that any returned value is a Measure
         instead of a float.
         """
         return cls(data)
@@ -163,159 +169,208 @@ class Pressure(float):
 
 HUNITS=['si','kJkg','kcalkg','Btulb']
 
-def hu(h,f='si',t='si'):
+class Enthalpy(float):
     """
-    Helper function to change enthalpy given units
+    Class that models an enthalpy measure with conversion utilities
 
-    >>> hu(970.7,'Btulb','kcalkg')
-    539.63867112810715
+    Supported units are
+
+    * Joule per kg (default)
+
+    * Kilojoule per kg (kJkg)
+
+    * Kilocalorie per kg (kcalkg)
+
+    * BTU per pound (Btulb)
+
+    >>> h = Enthalpy(1000)
+    >>> h.kJkg
+    1.0
+    >>> h.kcalkg
+    0.23900573613766729
+    >>> h.Btulb
+    0.42992261392949266
     """
-    if f == 'si':
-        h = h
 
-    elif f == 'kJkg':
-        h = h*kilo
+    def __init__(self,data):
+        float.__init__(self,float(data))
+        self.data = float(data)
 
-    elif f == 'kcalkg':
-        h = h*calorie*kilo
+    @classmethod
+    def factory(cls,data):
+        """
+        This factory makes that any returned value is a measure
+        instead of a float.
+        """
+        return cls(data)
 
-    elif f == 'Btulb':
-        h = h*Btu/lb
-
-    else:
+    def unit(self,units='si'):
+        if units == 'si':
+            return self.factory(self.data)
+        elif units == 'kJkg':
+            return self.factory(self.data*kilo)
+        elif units == 'kcalkg':
+            return self.factory(self.data*calorie*kilo)
+        elif units == 'Btulb':
+            return self.factory(self.data*Btu/lb)
         raise ValueError("wrong enthalpy unit input code")
 
-    if t == 'si':
-        return h
+    @property
+    def kJkg(self):
+        return self.factory(self.data/kilo)
 
-    elif t == 'kJkg':
-        return h/kilo
+    @property
+    def kcalkg(self):
+        return self.factory(self.data/kilo/calorie)
 
-    elif t == 'kcalkg':
-        return h/calorie/kilo
+    @property
+    def Btulb(self):
+        return self.factory(self.data*lb/Btu)
 
-    elif f == 'Btulb':
-        return h*lb/Btu
 
-    else:
-        raise ValueError("wrong enthalpy unit output code")
-
-LUNITS=['m','mm','in','ft']
-
-def lu(l,f='m',t='m'):
+class Length(float):
     """
-    Utility function to change length units
+    Class that models a length measure with conversion utilities
 
-    >>> lu(8,f='ft',t='mm')
-    2438.3999999999996
-    >>> lu(1.5,f='in',t='mm')
-    38.099999999999994
+    Supported units are
+
+    * meter (default)
+
+    * millimeter (mm)
+
+    * inch (inch)
+
+    * foot (ft)
+
+    >>> l = Length(1).unit('inch')
+    >>> l.mm
+    25.399999999999999
+    >>> l.ft
+    0.083333333333333343
+    >>> l
+    0.025399999999999999
     """
-    if f == 'm':
-        l = l
+    def __init__(self,data):
+        float.__init__(self,float(data))
+        self.data = float(data)
 
-    elif f == 'mm':
-        l = milli*l
+    @classmethod
+    def factory(cls,data):
+        """
+        This factory makes that any returned value is a measure
+        instead of a float.
+        """
+        return cls(data)
 
-    elif f == 'in':
-        l = l*inch
+    def unit(self,units='m'):
+        if units == 'm':
+            return self.factory(self.data)
+        elif units == 'mm':
+            return self.factory(self.data*milli)
+        elif units == 'inch':
+            return self.factory(self.data*inch)
+        elif units == 'ft':
+            return self.factory(self.data*foot)
+        else:
+            raise ValueError("wrong length unit input code")
 
-    elif f == 'ft':
-        l = l*foot
+    @property
+    def mm(self):
+        return self.factory(self.data/milli)
 
-    else:
-        raise ValueError("wrong length unit input code")
+    @property
+    def inch(self):
+        return self.factory(self.data/inch)
 
-    if t == 'm':
-        return l
-
-    elif t == 'mm':
-        return l/milli
-
-    elif t == 'in':
-        return l/inch
-
-    elif t == 'ft':
-        return l/foot
-
-    else:
-        raise ValueError("wrong length unit output code")
-
-MFUNITS=['si','kgh','lbs','lbh']
-
-def mfu(massflow,f='si',t='si'):
-    """
-    Utility function to change the massflow units.
+    @property
+    def ft(self):
+        return self.factory(self.data/foot)
     
-    >>> mfu(1.47,'lbs','si')
-    0.66678078389999995
+
+class Massflow(float):
     """
-    if f == 'si':
-        massflow = massflow
+    Class that models a mass flow measure with conversion utilities
 
-    elif f == 'kgh':
-        massflow = massflow/hour
+    Supported units are
 
-    elif f == 'lbs':
-        massflow = massflow*lb
+    * kg per second (default)
 
-    elif f == 'lbh':
-        massflow = massflow*lb/hour
+    * kg per hour (kgh)
 
-    else:
-        raise ValueError("wrong massflow unit input code")
+    * pounds per second (lbs)
 
-    if t == 'si':
-        return massflow
-
-    elif t == 'kgh':
-        return massflow*hour
-
-    elif t == 'lbs':
-        return massflow/lb
-
-    elif t == 'lbh':
-        return massflow*hour/lb
-
-    else:
-        raise ValueError("wrong massflow unit output code")
-
-MFRUNITS=['si','btu']
-
-def mfru(massflowrate,f='si',t='si'):
+    * pounds per hour (lbh)
     """
-    Utility function to change the massflowrate units.
+    def __init__(self,data):
+        float.__init__(self,float(data))
+        self.data = float(data)
+
+    @classmethod
+    def factory(cls,data):
+        """
+        This factory makes that any returned value is a measure
+        instead of a float.
+        """
+        return cls(data)
+
+    def unit(self,units='kgs'):
+        if units == 'kgs':
+            return self.factory(self.data)
+        elif units == 'kgh':
+            return self.factory(self.data/hour)
+        elif units == 'lbs':
+            return self.factory(self.data*lb)
+        elif units == 'lbh':
+            return self.factory(self.data*lb/hour)
+        else:
+            raise ValueError("wrong massflow unit input code")
+
+    @property
+    def kgh(self):
+        return self.factory(self.data*hour)
+
+    @property
+    def lbs(self):
+        return self.factory(self.data/lb)
+
+    @property
+    def lbh(self):
+        return self.factory(self.data*hour/lb)
+    
+
+class Massflowrate(float):
     """
-    if f == 'si':
-        massflowrate = massflowrate
+    Class that models a mass flow measure with conversion utilities
 
-    elif f == 'btu':
-        massflowrate = massflowrate*lb/foot**2
+    Supported units are
 
-    else:
-        raise ValueError("wrong massflow rate unit input code")
+    * :math:`kg/s\ m^2` (default)
 
-    if t == 'si':
-        return massflowrate
+    * :math:`lb/s\ ft^2` (Btu)
+    """
+    def __init__(self,data):
+        float.__init__(self,float(data))
+        self.data = float(data)
 
-    elif t == 'btu':
-        return massflowrate*foot**2/lb
+    @classmethod
+    def factory(cls,data):
+        """
+        This factory makes that any returned value is a measure
+        instead of a float.
+        """
+        return cls(data)
 
-    else:
-        raise ValueError("wrong massflow rate output code")
+    def unit(self,units='default'):
+        if units == 'default':
+            return self.factory(self.data)
+        elif units == 'Btu':
+            return self.factory(self.data*lb/foot**2)
+        else:
+            raise ValueError("wrong massflow unit input code")
 
-DENSITYU=['si']
-
-def densityu(density,f='si',t='si'):
-    if f == 'si':
-        density = density
-    else:
-        raise NotImplementedError("No other units supported yet")
-
-    if t == 'si':
-        return density
-    else:
-        raise NotImplementedError("No other units supported yet")
+    @property
+    def Btu(self):
+        return self.factory(self.data*foot**2/lb)
 
 
 def test_doctest():

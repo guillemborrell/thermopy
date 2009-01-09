@@ -32,6 +32,7 @@ Contents:
    iapws.rst
    combustion.rst
    psicrometry.rst
+   utilities.rst
    license.rst
 
 
