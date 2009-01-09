@@ -1,106 +1,165 @@
 from constants import *
 
-
 class Temperature(float):
-    def __init__(self,data):
-        if unit == 'K':
-            float.__init__(self,data)
-        elif unit == 'C':
-            float.__init__(self,C2K(data))
-        elif unit == 'F':
-            float.__init__(self,F2K(data))
-        else:
-            raise ValueError("wrong temperature unit input code")
+    """
+    Class that models a temperature measure with conversion utilities
 
+    Supported units are
+
+    * Kelvin
+
+    * Celsius
+
+    * Fahrenheit
+
+    Normal instantiation is a temperature in Kelvin
+
+    >>> T = Temperature(100)
+    >>> T
+    100.0
+
+    But you can instantiate and specify if unit is Celsius or
+    Fahrenheit
+
+    >>> T = Temperature(100).unit('F')
+    >>> T
+    310.92777777777775
+
+    Unit conversion is as easy as it gets.
+
+    >>> T.C
+    37.777777777777771
+    >>> T.F
+    99.999999999999986
+
+    You can compute with temperatures because inherits from the float
+    built-in
+
+    >>> T1 = Temperature(200)
+    >>> T2 = Temperature(0).unit('C')
+    >>> T1+T2
+    473.14999999999998
+    """
+    def __init__(self,data):
+        float.__init__(self,float(data))
+        self.data = float(data)
+
+    @classmethod
+    def factory(cls,data):
+        """
+        This factory makes that any returned value is a Temperature
+        instead of a float.
+        """
+        return cls(data)
+
+    def unit(self,units='K'):
+        if units == 'K':
+            return self.factory(self.data)
+        elif units == 'C':
+            return self.factory(C2K(self.data))
+        elif units == 'F':
+            return self.factory(F2K(self.data))
+        else:
+            raise ValueError("Wrong temperature input code")
+        
     @property
     def C(self):
-        return K2C(self.data)
+        return self.factory(K2C(self.data))
 
     @property
     def F(self):
-        return K2F(self.data)
-
-def test_temperature():
-    t = Temperature(100)
-    assert type(t) == 1
-    assert t.F == 1
+        return self.factory(K2F(self.data))
 
 
-def Tu(T,f='K',t='K'):
+class Pressure(float):
     """
-    Helper function to change temperature given units
+    Class that models a Pressure measure with conversion utilities
+
+    Suported units are
+
+    * Pascal (Pa)
+
+    * Mega Pascal (MPa)
+
+    * Bar (bar)
+
+    * Pound per square inch (psi)
+
+    * Atmosphere (atm)
+
+    * Millimeters of water column (mmwc)
+
+    * Torricelli (torr)
+
+    Normal instantiation is pressure in Pa. How much is an athmosphere?
+
+    >>> p = Pressure(1.0).unit('atm')
+    >>> p
+    101325.0
+    >>> p.torr
+    760.0
+    >>> p.mmwc
+    10285.839999999998
+    >>> p.psi
+    14.69594877551345
     """
-    if f == 'K':
-        T = T
-        
-    elif f == 'C':
-        T = C2K(T)
+    def __init__(self,data):
+        float.__init__(self,float(data))
+        self.data = float(data)
 
-    elif f == 'F':
-        T = F2K(T)
+    @classmethod
+    def factory(cls,data):
+        """
+        This factory makes that any returned value is a Temperature
+        instead of a float.
+        """
+        return cls(data)
 
-    else:
-        raise ValueError("wrong temperature unit input code")
+    def unit(self,units='Pa'):
+        if units == 'Pa':
+            return self.factory(self.data)
+        elif units == 'MPa':
+            return self.factory(mega*self.data)
+        elif units == 'bar':
+            return self.factory(self.data*bar)
+        elif units == 'psi':
+            return self.factory(self.data*psi)
+        elif units == 'atm':
+            return self.factory(self.data*atm)
+        elif units == 'mmwc':
+            return self.factory(self.data*(torr*1000/13534))
+        elif units == 'torr':
+            return self.factory(self.data*torr)
+        else:
+            raise ValueError("wrong pressure unit input code")
 
-    if t == 'K':
-        return T
+    @property
+    def MPa(self):
+        return self.factory(self.data/mega)
 
-    elif t == 'C':
-        return K2C(T)
+    @property
+    def bar(self):
+        return self.factory(self.data/bar)
 
-    elif t == 'F':
-        return K2F(T)
+    @property
+    def psi(self):
+        return self.factory(self.data/psi)
 
-    else:
-        raise ValueError("wrong temperature unit output code")
+    @property
+    def bar(self):
+        return self.factory(self.data/bar)
 
-PUNITS=['Pa','MPa','bar','psi','atm','mmwc']
+    @property
+    def atm(self):
+        return self.factory(self.data/atm)
 
-def pu(p,f='Pa',t='Pa'):
-    """
-    Helper function to change pressure given units
-    """
-    if f == 'Pa':
-        p = p
+    @property
+    def mmwc(self):
+        return self.factory(self.data/(torr*1000/13534))
 
-    elif f == 'MPa':
-        p = mega*p
-
-    elif f == 'bar':
-        p = p*bar
-
-    elif f == 'psi':
-        p = p*psi
-        
-    elif f == 'atm':
-        p = p*atm
-
-    elif f == 'mmwc':
-        p = p*(torr*1000/13534)
-    
-    else:
-        raise ValueError("wrong pressure unit input code")
-
-    if t == 'Pa':
-        return p
-
-    elif t == 'MPa':
-        return p/mega
-
-    elif t == 'bar':
-        return p/bar
-
-    elif t == 'psi':
-        return p/psi
-
-    elif t == 'atm':
-        return p/atm
-
-    elif t == 'mmwc':
-        return p/(torr*1000/13534)
-
-    else:
-        raise ValueError("wrong pressure unit output code")
+    @property
+    def torr(self):
+        return self.factory(self.data/torr)
 
 HUNITS=['si','kJkg','kcalkg','Btulb']
 
@@ -259,10 +318,8 @@ def densityu(density,f='si',t='si'):
         raise NotImplementedError("No other units supported yet")
 
 
-def test():
+def test_doctest():
     import doctest
     doctest.testmod()
 
 
-if __name__ == '__main__':
-    test()
