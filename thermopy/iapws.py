@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from __future__ import division
-from units import Tu, pu, hu
+from units import Pressure,Temperature,Enthalpy
 from numpy import array,sum,sqrt
 
 
@@ -124,7 +124,7 @@ class Water(object):
                 [24,40, 0.55414715350778E-1],
                 [24,58,-0.94369707241210E-6]],'d'),
         }
-    def psat(self,T,Tunits='K'):
+    def psat(self,T):
         """
         Returns the saturation pressure of water at a given temperature.
         
@@ -140,11 +140,9 @@ class Water(object):
         'Error: No saturation pressure for this temperature'
         >>> w.psat(700)
         'Error: No saturation pressure for this temperature'
-        >>> w.psat(100,'C')
+        >>> w.psat(100)
         0.10141797792131015
         """
-        T = Tu(T,f=Tunits)
-        
         if T < 273.15 or T > 647.096:
             return 'Error: No saturation pressure for this temperature'
         
@@ -153,10 +151,10 @@ class Water(object):
         A=v**2+n[0]*v+n[1]
         B=n[2]*v**2+n[3]*v+n[4]
         C=n[5]*v**2+n[6]*v+n[7]
-        return pu(((2*C)/(-B+sqrt(B**2-4*A*C)))**4,f='MPa',t='Pa')
+        return Pressure(((2*C)/(-B+sqrt(B**2-4*A*C)))**4).unit('MPa')
 
 
-    def Tsat(self,p,punits='Pa'):
+    def Tsat(self,p):
         """
         Returns the saturation temperature of water at a given pressure.
         
@@ -166,19 +164,17 @@ class Water(object):
         Temperatures in K, pressures in MPa.
 
         >>> w = Water()
-        >>> w.Tsat(0.1)
+        >>> w.Tsat(100000)
         372.75591861133762
-        >>> w.Tsat(1.2)
+        >>> w.Tsat(1200000)
         461.11464162130039
-        >>> w.Tsat(0.00001)
-        'Error: No saturation temperature for this pressure'
         >>> w.Tsat(100)
         'Error: No saturation temperature for this pressure'
-        >>> w.Tsat(101325,'Pa')
+        >>> w.Tsat(101325)
         373.12430000048056
         """
         
-        p = pu(p,punits,'MPa')
+        p = Pressure(p).MPa
 
         if p < 0.000611213 or p > 22.064:
             return 'Error: No saturation temperature for this pressure'
@@ -190,33 +186,30 @@ class Water(object):
         G=n[1]*beta**2+n[4]*beta+n[7]
         D=(2*G)/(-F-sqrt(F**2-4*E*G))
         
-        return 0.5*(n[9]+D-sqrt((n[9]+D)**2-4*(n[8]+n[9]*D)))
+        return Temperature(0.5*(n[9]+D-sqrt((n[9]+D)**2-4*(n[8]+n[9]*D))))
 
 
-    def h(self,p,T,punits='Pa',Tunits='K',hunits='si'):
+    def h(self,p,T):
         """
         Returns specific enthalpy (J/kg) for a given pressure (Pa) and
         Temperature (K).
         
         >>> w = Water()
-        >>> w.h(3,300,'MPa',hunits='kJkg')
+        >>> w.h(3000000,300)
         115.33127302143839
-        >>> w.h(0.0035,300,'MPa',hunits='kJkg')
+        >>> w.h(3500,300)
         2549.9114508400203
-        >>> w.h(101325,125,'Pa','C',hunits='kJkg')
+        >>> w.h(101325,125)
         2726.5519630553395
-        >>> w.h(3,300,punits='MPa',hunits='kcalkg')
-        27.564835808183172
 
         There are also error codes        
 
         Results checked against the reference.
         """
-        T = Tu(T,Tunits)
-        p = pu(p,punits,'MPa')
+        p = Pressure(p).MPa
         
         # region 1 implementation
-        if p >= self.psat(T) :
+        if p >= self.psat(T).MPa:
         # Liquid water (pressure over saturation pressure)
             pi=p/16.53
             tau=1386/T
@@ -226,9 +219,10 @@ class Water(object):
             J=raw_data[:,1]
             n=raw_data[:,2]
 
-            return hu(self.R*T*tau*sum((n*(7.1-pi)**I)*J*((tau-1.222)**(J-1))),f='kJkg',t=hunits)
+            return Enthalpy(
+                self.R*T*tau*sum((n*(7.1-pi)**I)*J*((tau-1.222)**(J-1))))
 
-        if p < self.psat(T):
+        if p < self.psat(T).MPa:
             # steam, pressure under saturation pressure
             pi=p
             tau=540/T
@@ -245,7 +239,7 @@ class Water(object):
             g0_tau=sum(n0*J0*tau**(J0-1))
             gr_tau=sum(n*pi**I*J*(tau-0.5)**(J-1))
             
-            return hu(self.R*T*tau*(g0_tau+gr_tau),f='kJkg',t=hunits)
+            return Enthalpy(self.R*T*tau*(g0_tau+gr_tau))
 
 
     def T_ph(self,p,h):
@@ -342,11 +336,10 @@ class Water(object):
         return (sum(n*p**I*(eta+1)**J),sum(n2*p**I2*(eta2-2.1)**J2))
     
 
-    def test(self):
-        import doctest
-        doctest.testmod()
+def test():
+    import doctest
+    doctest.testmod()
 
 if __name__ == '__main__':
-    w = Water()
-    w.test()
+    test()
 
