@@ -1,7 +1,5 @@
 from __future__ import division
 from iapws import Water
-from units import Tu, pu, hu
-
 
 # Water at triple point
 pt = 612
@@ -72,12 +70,13 @@ def test_wark():
     Thermodynamics, spanish translation.
     """
     from burcat import Elementdb
-    from units import pu,Tu
+    from units import Pressure,Temperature
     db = Elementdb()
     gas = db.getmixturedata([("AIR",1),("H2O",0.015)])
     ma = MoistAir(gas)
     assert ma.w == 0.0093294500500255822
-    assert ma.phi(pu(14.7,f='psi'),Tu(70,f='F')) == 0.59790008408358786
-    assert ma.wet_bulb_T(pu(14.7,f='psi')) == 286.14757997335232
+    assert ma.phi(Pressure(14.7).unit('psi'),
+                  Temperature(70).unit('F')) == 0.59790008408358786
+    assert ma.wet_bulb_T(Pressure(14.7).unit('psi')) == 286.14757997335232
     
 

@@ -135,16 +135,29 @@ class Water(object):
         
         >>> w = Water()
         >>> w.psat(300)
-        0.0035365894130130106
+        3536.5894130130105
         >>> w.psat(130)
-        'Error: No saturation pressure for this temperature'
+        Traceback (most recent call last):
+          File "/usr/lib/python2.5/doctest.py", line 1228, in __run
+            compileflags, 1) in test.globs
+          File "<doctest __main__.Water.psat[2]>", line 1, in <module>
+            w.psat(130)
+          File "iapws.py", line 153, in psat
+            'No saturation pressure for this temperature')
+        ValueError: No saturation pressure for this temperature
         >>> w.psat(700)
-        'Error: No saturation pressure for this temperature'
-        >>> w.psat(100)
-        0.10141797792131015
+        Traceback (most recent call last):
+          File "/usr/lib/python2.5/doctest.py", line 1228, in __run
+            compileflags, 1) in test.globs
+          File "<doctest __main__.Water.psat[3]>", line 1, in <module>
+             w.psat(700)
+          File "iapws.py", line 146, in psat
+            'No saturation pressure for this temperature')
+        ValueError: No saturation pressure for this temperature
         """
         if T < 273.15 or T > 647.096:
-            return 'Error: No saturation pressure for this temperature'
+            raise ValueError(
+                'No saturation pressure for this temperature')
         
         n=self.data['n']
         v=T+n[8]/(T-n[9])
@@ -169,7 +182,14 @@ class Water(object):
         >>> w.Tsat(1200000)
         461.11464162130039
         >>> w.Tsat(100)
-        'Error: No saturation temperature for this pressure'
+        Traceback (most recent call last):                                 
+          File "/usr/lib/python2.5/doctest.py", line 1228, in __run        
+            compileflags, 1) in test.globs                                 
+          File "<doctest __main__.Water.Tsat[3]>", line 1, in <module>     
+            w.Tsat(100)                                                    
+          File "iapws.py", line 193, in Tsat                               
+            raise ValueError('No saturation temperature for this pressure')
+        ValueError: No saturation temperature for this pressure
         >>> w.Tsat(101325)
         373.12430000048056
         """
@@ -177,7 +197,7 @@ class Water(object):
         p = Pressure(p).MPa
 
         if p < 0.000611213 or p > 22.064:
-            return 'Error: No saturation temperature for this pressure'
+            raise ValueError('No saturation temperature for this pressure')
 
         n=self.data['n']
         beta=p**0.25
@@ -199,8 +219,6 @@ class Water(object):
         115.33127302143839
         >>> w.h(3500,300)
         2549.9114508400203
-        >>> w.h(101325,125)
-        2726.5519630553395
 
         There are also error codes        
 
@@ -260,7 +278,7 @@ class Water(object):
         >>> w.T_ph(80,500)
         (378.10862587940176, -6.0291236598288914e+28)
         >>> w.T_ph(80,1500)
-        (611.04122940266461, -5.5726211553407323e+22)
+        (611.04122940266484, -5.5726211553407323e+22)
         """
         eta = h/2500.
         

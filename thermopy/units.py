@@ -51,7 +51,7 @@ class Temperature(float):
         self.data = float(data)
 
     @classmethod
-    def factory(cls,data):
+    def __factory(cls,data):
         """
         This factory makes that any returned value is a measure
         instead of a float.
@@ -60,21 +60,21 @@ class Temperature(float):
 
     def unit(self,units='K'):
         if units == 'K':
-            return self.factory(self.data)
+            return self.__factory(self.data)
         elif units == 'C':
-            return self.factory(C2K(self.data))
+            return self.__factory(C2K(self.data))
         elif units == 'F':
-            return self.factory(F2K(self.data))
+            return self.__factory(F2K(self.data))
         else:
             raise ValueError("Wrong temperature input code")
         
     @property
     def C(self):
-        return self.factory(K2C(self.data))
+        return self.__factory(K2C(self.data))
 
     @property
     def F(self):
-        return self.factory(K2F(self.data))
+        return self.__factory(K2F(self.data))
 
 
 class Pressure(float):
@@ -114,7 +114,7 @@ class Pressure(float):
         self.data = float(data)
 
     @classmethod
-    def factory(cls,data):
+    def __factory(cls,data):
         """
         This factory makes that any returned value is a Measure
         instead of a float.
@@ -123,49 +123,49 @@ class Pressure(float):
 
     def unit(self,units='Pa'):
         if units == 'Pa':
-            return self.factory(self.data)
+            return self.__factory(self.data)
         elif units == 'MPa':
-            return self.factory(mega*self.data)
+            return self.__factory(mega*self.data)
         elif units == 'bar':
-            return self.factory(self.data*bar)
+            return self.__factory(self.data*bar)
         elif units == 'psi':
-            return self.factory(self.data*psi)
+            return self.__factory(self.data*psi)
         elif units == 'atm':
-            return self.factory(self.data*atm)
+            return self.__factory(self.data*atm)
         elif units == 'mmwc':
-            return self.factory(self.data*(torr*1000/13534))
+            return self.__factory(self.data*(torr*1000/13534))
         elif units == 'torr':
-            return self.factory(self.data*torr)
+            return self.__factory(self.data*torr)
         else:
             raise ValueError("wrong pressure unit input code")
 
     @property
     def MPa(self):
-        return self.factory(self.data/mega)
+        return self.__factory(self.data/mega)
 
     @property
     def bar(self):
-        return self.factory(self.data/bar)
+        return self.__factory(self.data/bar)
 
     @property
     def psi(self):
-        return self.factory(self.data/psi)
+        return self.__factory(self.data/psi)
 
     @property
     def bar(self):
-        return self.factory(self.data/bar)
+        return self.__factory(self.data/bar)
 
     @property
     def atm(self):
-        return self.factory(self.data/atm)
+        return self.__factory(self.data/atm)
 
     @property
     def mmwc(self):
-        return self.factory(self.data/(torr*1000/13534))
+        return self.__factory(self.data/(torr*1000/13534))
 
     @property
     def torr(self):
-        return self.factory(self.data/torr)
+        return self.__factory(self.data/torr)
 
 HUNITS=['si','kJkg','kcalkg','Btulb']
 
@@ -197,7 +197,7 @@ class Enthalpy(float):
         self.data = float(data)
 
     @classmethod
-    def factory(cls,data):
+    def __factory(cls,data):
         """
         This factory makes that any returned value is a measure
         instead of a float.
@@ -206,26 +206,26 @@ class Enthalpy(float):
 
     def unit(self,units='si'):
         if units == 'si':
-            return self.factory(self.data)
+            return self.__factory(self.data)
         elif units == 'kJkg':
-            return self.factory(self.data*kilo)
+            return self.__factory(self.data*kilo)
         elif units == 'kcalkg':
-            return self.factory(self.data*calorie*kilo)
+            return self.__factory(self.data*calorie*kilo)
         elif units == 'Btulb':
-            return self.factory(self.data*Btu/lb)
+            return self.__factory(self.data*Btu/lb)
         raise ValueError("wrong enthalpy unit input code")
 
     @property
     def kJkg(self):
-        return self.factory(self.data/kilo)
+        return self.__factory(self.data/kilo)
 
     @property
     def kcalkg(self):
-        return self.factory(self.data/kilo/calorie)
+        return self.__factory(self.data/kilo/calorie)
 
     @property
     def Btulb(self):
-        return self.factory(self.data*lb/Btu)
+        return self.__factory(self.data*lb/Btu)
 
 
 class Length(float):
@@ -255,7 +255,7 @@ class Length(float):
         self.data = float(data)
 
     @classmethod
-    def factory(cls,data):
+    def __factory(cls,data):
         """
         This factory makes that any returned value is a measure
         instead of a float.
@@ -264,27 +264,27 @@ class Length(float):
 
     def unit(self,units='m'):
         if units == 'm':
-            return self.factory(self.data)
+            return self.__factory(self.data)
         elif units == 'mm':
-            return self.factory(self.data*milli)
+            return self.__factory(self.data*milli)
         elif units == 'inch':
-            return self.factory(self.data*inch)
+            return self.__factory(self.data*inch)
         elif units == 'ft':
-            return self.factory(self.data*foot)
+            return self.__factory(self.data*foot)
         else:
             raise ValueError("wrong length unit input code")
 
     @property
     def mm(self):
-        return self.factory(self.data/milli)
+        return self.__factory(self.data/milli)
 
     @property
     def inch(self):
-        return self.factory(self.data/inch)
+        return self.__factory(self.data/inch)
 
     @property
     def ft(self):
-        return self.factory(self.data/foot)
+        return self.__factory(self.data/foot)
     
 
 class Massflow(float):
@@ -306,7 +306,7 @@ class Massflow(float):
         self.data = float(data)
 
     @classmethod
-    def factory(cls,data):
+    def __factory(cls,data):
         """
         This factory makes that any returned value is a measure
         instead of a float.
@@ -315,27 +315,27 @@ class Massflow(float):
 
     def unit(self,units='kgs'):
         if units == 'kgs':
-            return self.factory(self.data)
+            return self.__factory(self.data)
         elif units == 'kgh':
-            return self.factory(self.data/hour)
+            return self.__factory(self.data/hour)
         elif units == 'lbs':
-            return self.factory(self.data*lb)
+            return self.__factory(self.data*lb)
         elif units == 'lbh':
-            return self.factory(self.data*lb/hour)
+            return self.__factory(self.data*lb/hour)
         else:
             raise ValueError("wrong massflow unit input code")
 
     @property
     def kgh(self):
-        return self.factory(self.data*hour)
+        return self.__factory(self.data*hour)
 
     @property
     def lbs(self):
-        return self.factory(self.data/lb)
+        return self.__factory(self.data/lb)
 
     @property
     def lbh(self):
-        return self.factory(self.data*hour/lb)
+        return self.__factory(self.data*hour/lb)
     
 
 class Massflowrate(float):
@@ -344,16 +344,16 @@ class Massflowrate(float):
 
     Supported units are
 
-    * :math:`kg/s\ m^2` (default)
+    * :math:`\\frac{kg}{s\ m^2}` (default)
 
-    * :math:`lb/s\ ft^2` (Btu)
+    * :math:`\\frac{lb}{s\ ft^2}` (Btu)
     """
     def __init__(self,data):
         float.__init__(self,float(data))
         self.data = float(data)
 
     @classmethod
-    def factory(cls,data):
+    def __factory(cls,data):
         """
         This factory makes that any returned value is a measure
         instead of a float.
@@ -362,15 +362,15 @@ class Massflowrate(float):
 
     def unit(self,units='default'):
         if units == 'default':
-            return self.factory(self.data)
+            return self.__factory(self.data)
         elif units == 'Btu':
-            return self.factory(self.data*lb/foot**2)
+            return self.__factory(self.data*lb/foot**2)
         else:
             raise ValueError("wrong massflow unit input code")
 
     @property
     def Btu(self):
-        return self.factory(self.data*foot**2/lb)
+        return self.__factory(self.data*foot**2/lb)
 
 
 def test_doctest():

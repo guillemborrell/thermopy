@@ -20,7 +20,7 @@ moment only these mesures are supported
 * Mass flow rate
 
 :mod:`thermopy.units`
----------------------
+.....................
 
 .. automodule:: thermopy.units
    :members:
