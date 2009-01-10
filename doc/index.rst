@@ -11,7 +11,7 @@ expand the Python community in this area too. Your contributions will
 be welcome.
 
 Download
---------
+========
 
 * Source:
 
@@ -23,6 +23,9 @@ Download
 
   - Windows installer: http://pypi.python.org/pypi/thermopy
 
+API
+===
+
 Contents:
 
 .. toctree::
@@ -33,7 +36,9 @@ Contents:
    combustion.rst
    psicrometry.rst
    utilities.rst
-   license.rst
+
+
+.. include:: license.rst
 
 
 Indices and tables

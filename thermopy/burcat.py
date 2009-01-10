@@ -19,6 +19,7 @@ except ImportError:
     from elementtree import parse
 from numpy import empty,array,dot,log
 from pkg_resources import Requirement, resource_filename
+from units import Enthalpy
 import doctest
 import copy
 import os
@@ -102,7 +103,7 @@ class Element(object):
         """
         Computes the total enthalpy in J/kg
         """
-        return self.cp_(T)*T
+        return Enthalpy(self.cp_(T)*T)
         
     def so(self,T):
         """
@@ -147,10 +148,10 @@ class Mixture(object):
 
     >>> db = Elementdb()
     >>> mix = db.getmixturedata([("O2 REF ELEMENT",20.9476),\
-    ("N2  REF ELEMENT",78.084),\
-    ("CO2",0.0319),\
-    ("AR REF ELEMENT",0.9365),\
-    ])
+("N2  REF ELEMENT",78.084),\
+("CO2",0.0319),\
+("AR REF ELEMENT",0.9365),\
+])
     >>> for e in mix: print e
     (<element> O2 REF ELEMENT, 20.947600000000001)
     (<element> N2  REF ELEMENT, 78.084000000000003)
@@ -295,7 +296,7 @@ class Mixture(object):
         return self.extensive('ho',T)
 
     def h(self,T):
-        return self.cp_(T)*T
+        return Enthalpy(self.cp_(T)*T)
 
     def so(self,T):
         return self.extensive('so',T)
