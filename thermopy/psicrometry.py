@@ -53,14 +53,10 @@ class MoistAir(object):
         yw = self.qwater/(self.qgas+self.qwater)
         return self.moist.Tsat(yw*p)
 
-    def h(self,p,T):
-        raise NotImplementedError
-
     def __repr__(self):
         return "<Moist Gas>:\n  Gas:\n"+self.gas.__repr__()
 
-
-    def __unicode__(self):
+    def __str__(self):
         return u"<Moist Gas>:\n  Gas:\n"+self.gas.__unicode__()
 
 
