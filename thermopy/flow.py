@@ -12,7 +12,7 @@ class Flow(Mixture):
 
     :massflow:
 
-      Massflow, float of Massflow
+      Massflow, type float or Massflow
 
     :p:
 
@@ -42,7 +42,7 @@ class Flow(Mixture):
     @property
     def Ht(self):
         """
-        Specific enthalpy flux
+        Specific total enthalpy flux
         """
         return self.massflow*self.h(self.T)
 

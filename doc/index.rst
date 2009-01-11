@@ -35,6 +35,7 @@ Contents:
    iapws.rst
    combustion.rst
    psicrometry.rst
+   installation.rst
    utilities.rst
 
 
