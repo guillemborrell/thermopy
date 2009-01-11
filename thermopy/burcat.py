@@ -41,6 +41,8 @@ class Element(object):
     reactions.
 
     >>> db = Elementdb()
+    Loading database. This may take a while...
+    Done
     >>> weird = db.getelementdata("C8H6O2")
     >>> print weird.elements
     [('C', 8), ('H', 6), ('O', 2)]
@@ -147,6 +149,8 @@ class Mixture(object):
     tuple containing the element and the amount.
 
     >>> db = Elementdb()
+    Loading database. This may take a while...
+    Done
     >>> mix = db.getmixturedata([("O2 REF ELEMENT",20.9476),\
 ("N2  REF ELEMENT",78.084),\
 ("CO2",0.0319),\
@@ -333,6 +337,8 @@ class Elementdb(object):
     for combustion.
 
     >>> db = Elementdb()
+    Loading database. This may take a while...
+    Done
     >>> oxygen = db.getelementdata("O2 REF ELEMENT")
     >>> print oxygen
     <element> O2 REF ELEMENT
@@ -368,10 +374,10 @@ class Elementdb(object):
     Element class for any mixture.
 
     >>> mix = db.getmixturedata([("O2 REF ELEMENT",20.9476),\
-    ("N2  REF ELEMENT",78.084),\
-    ("CO2",0.0319),\
-    ("AR REF ELEMENT",0.9365),\
-    ])
+("N2  REF ELEMENT",78.084),\
+("CO2",0.0319),\
+("AR REF ELEMENT",0.9365),\
+])
     >>> print mix
     <Mixture>:
         O2 REF ELEMENT at 20.9476
@@ -401,8 +407,10 @@ class Elementdb(object):
                 Requirement.parse("thermopy"),'thermopy/BURCAT_THR.xml')
             database = open(dbname,'r')
             
+        print 'Loading database. This may take a while...'
         tree = parse(database)
         self.db = tree.getroot()
+        print 'Done'
 
     def search(self,formula):
         """
@@ -468,15 +476,11 @@ class Elementdb(object):
         return mixture
 
 
+def test_doctest():
+    import doctest
+    doctest.testmod()
 
 
 if __name__ == '__main__':
-    # Move all doctests to py.test
-    db = Elementdb()
-    mix = db.getmixturedata([("O2 REF ELEMENT",20.9476),
-                             ("N2  REF ELEMENT",78.084),
-                             ("CO2",0.0319),
-                             ("AR REF ELEMENT",0.9365),
-                             ("O2 REF ELEMENT",1.2)])
-    mix.aggregate()
+    test_doctest()
 
