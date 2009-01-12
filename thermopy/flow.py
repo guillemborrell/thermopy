@@ -50,6 +50,15 @@ class Flow(Mixture):
         raise NotImplementedError
 
 
+    def __repr__(self):
+        str="<Flow>:"
+        for comp in self.mix:
+            str +="\n    %s at %s"%(comp[0].formula,comp[1])
+        
+        str +="\n    massflow: %f"%(self.massflow)
+        return str
+
+
 def test_flow():
     from burcat import Elementdb
     db = Elementdb()
