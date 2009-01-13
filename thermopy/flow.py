@@ -37,14 +37,14 @@ class Flow(Mixture):
         """
         Specific total enthalpy
         """
-        return self.h(self.T)
+        return self.cp_(self.T)*self.T
 
     @property
     def Ht(self):
         """
         Specific total enthalpy flux
         """
-        return self.massflow*self.h(self.T)
+        return self.massflow*self.cp_(self.T)*self.T
 
     def mix(self,other):
         raise NotImplementedError
@@ -56,6 +56,8 @@ class Flow(Mixture):
             str +="\n    %s at %s"%(comp[0].formula,comp[1])
         
         str +="\n    massflow: %f"%(self.massflow)
+        str +="\n    T: %f"%(self.T)
+        str +="\n    p: %f"%(self.p)
         return str
 
 
@@ -71,6 +73,12 @@ def test_flow():
     assert getattr(f,'mm') == 0.028965116031000007
     assert getattr(f,'ht') == 301448.09982434794
     assert getattr(f,'Ht') == 301448.09982434794
+
+    air = db.getelementdata('AIR')
+    airflow = Flow(air,Massflow(1),101325,Temperature(1781).unit('F'))
+    assert getattr(airflow,'mm') == 0.02896518
+    assert getattr(airflow,'ht') == 1466097.6987368816
+    assert getattr(airflow,'Ht') == 1466097.6987368816
 
 
 class WaterFlow(Water):
