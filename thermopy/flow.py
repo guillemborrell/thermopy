@@ -100,7 +100,7 @@ class WaterFlow(Water):
     def __init__(self,massflow,p,T):
         self.massflow = Massflow(massflow)
         self.p = Pressure(p)
-        self.T = Pressure(T)
+        self.T = Temperature(T)
 
     @property
     def ht(self):
