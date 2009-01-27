@@ -216,9 +216,9 @@ class Water(object):
         
         >>> w = Water()
         >>> w.h(3000000,300)
-        115.33127302143839
+        115331.27302143839
         >>> w.h(3500,300)
-        2549.9114508400203
+        2549911.4508400201
 
         There are also error codes        
 
@@ -238,12 +238,12 @@ class Water(object):
             n=raw_data[:,2]
 
             return Enthalpy(
-                self.R*T*tau*sum((n*(7.1-pi)**I)*J*((tau-1.222)**(J-1))))
+                self.R*T*tau*sum((n*(7.1-pi)**I)*J*((tau-1.222)**(J-1)))).unit('kJkg')
 
         if p < self.psat(T).MPa:
             # steam, pressure under saturation pressure
             pi=p
-            tau=540/T
+            tau=540/T 
             
             raw_data0=self.data['pT_datar20']
             J0=raw_data0[:,0]
@@ -257,7 +257,8 @@ class Water(object):
             g0_tau=sum(n0*J0*tau**(J0-1))
             gr_tau=sum(n*pi**I*J*(tau-0.5)**(J-1))
             
-            return Enthalpy(self.R*T*tau*(g0_tau+gr_tau))
+            return Enthalpy(self.R*T*tau*(g0_tau+gr_tau)).unit(
+                'kJkg')
 
 
     def T_ph(self,p,h):
@@ -278,7 +279,7 @@ class Water(object):
         >>> w.T_ph(80,500)
         (378.10862587940176, -6.0291236598288914e+28)
         >>> w.T_ph(80,1500)
-        (611.04122940266484, -5.5726211553407323e+22)
+        (611.04122940266461, -5.5726211553407323e+22)
         """
         eta = h/2500.
         

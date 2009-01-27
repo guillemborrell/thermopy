@@ -118,5 +118,7 @@ class WaterFlow(Water):
 
 def test_waterflow():
     wf = WaterFlow(Massflow(1),101325,315)
-    assert getattr(wf,'ht') == 175.35463315187687
-    assert getattr(wf,'Ht') == 175.35463315187687
+    assert getattr(wf,'ht') == 175354.63315187686
+    assert getattr(wf,'Ht') == 175354.63315187686
+    wf = WaterFlow(Massflow(1),101325,316)
+    assert getattr(wf,'ht') == 179533.21477424177
