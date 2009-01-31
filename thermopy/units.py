@@ -67,6 +67,10 @@ class Temperature(float):
             return self.__factory(F2K(self.data))
         else:
             raise ValueError("Wrong temperature input code")
+
+    @property
+    def K(self):
+        return self.__factory(self.data)
         
     @property
     def C(self):
@@ -139,6 +143,11 @@ class Pressure(float):
         else:
             raise ValueError("wrong pressure unit input code")
 
+
+    @property
+    def Pa(self):
+        return self.__factory(self.data)
+
     @property
     def MPa(self):
         return self.__factory(self.data/mega)
@@ -152,10 +161,6 @@ class Pressure(float):
         return self.__factory(self.data/psi)
 
     @property
-    def bar(self):
-        return self.__factory(self.data/bar)
-
-    @property
     def atm(self):
         return self.__factory(self.data/atm)
 
@@ -167,7 +172,7 @@ class Pressure(float):
     def torr(self):
         return self.__factory(self.data/torr)
 
-HUNITS=['si','kJkg','kcalkg','Btulb']
+HUNITS=['Jkg','kJkg','kcalkg','Btulb']
 
 class Enthalpy(float):
     """
@@ -175,7 +180,7 @@ class Enthalpy(float):
 
     Supported units are
 
-    * Joule per kg (default)
+    * Joule per kg (Jkg)
 
     * Kilojoule per kg (kJkg)
 
@@ -204,8 +209,8 @@ class Enthalpy(float):
         """
         return cls(data)
 
-    def unit(self,units='si'):
-        if units == 'si':
+    def unit(self,units='Jkg'):
+        if units == 'Jkg':
             return self.__factory(self.data)
         elif units == 'kJkg':
             return self.__factory(self.data*kilo)
@@ -214,6 +219,10 @@ class Enthalpy(float):
         elif units == 'Btulb':
             return self.__factory(self.data*Btu/lb)
         raise ValueError("wrong enthalpy unit input code")
+
+    @property
+    def Jkg(self):
+        return self.__factory(self.data)
 
     @property
     def kJkg(self):
@@ -234,7 +243,7 @@ class Length(float):
 
     Supported units are
 
-    * meter (default)
+    * meter (m)
 
     * millimeter (mm)
 
@@ -275,6 +284,10 @@ class Length(float):
             raise ValueError("wrong length unit input code")
 
     @property
+    def m(self):
+        return self.__factory(self.data)
+
+    @property
     def mm(self):
         return self.__factory(self.data/milli)
 
@@ -293,7 +306,7 @@ class Massflow(float):
 
     Supported units are
 
-    * kg per second (default)
+    * kg per second (kgs)
 
     * kg per hour (kgh)
 
@@ -326,6 +339,10 @@ class Massflow(float):
             raise ValueError("wrong massflow unit input code")
 
     @property
+    def kgs(self):
+        return self.__factory(self.data)
+
+    @property
     def kgh(self):
         return self.__factory(self.data*hour)
 
@@ -344,7 +361,7 @@ class Massflowrate(float):
 
     Supported units are
 
-    * :math:`\\frac{kg}{s\ m^2}` (default)
+    * :math:`\\frac{kg}{s\ m^2}` (si)
 
     * :math:`\\frac{lb}{s\ ft^2}` (Btu)
     """
@@ -360,13 +377,17 @@ class Massflowrate(float):
         """
         return cls(data)
 
-    def unit(self,units='default'):
-        if units == 'default':
+    def unit(self,units='si'):
+        if units == 'si':
             return self.__factory(self.data)
         elif units == 'Btu':
             return self.__factory(self.data*lb/foot**2)
         else:
             raise ValueError("wrong massflow unit input code")
+
+    @property
+    def si(self):
+        return self.__factory(self.data)
 
     @property
     def Btu(self):
