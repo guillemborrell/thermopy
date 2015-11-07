@@ -1,9 +1,0 @@
-include README
-include LICENSE
-include AUTHORS
-include TODO
-
-include ez_setup.py
-include bdist_wininst.bat
-
-recursive-include thermopy *.xml
