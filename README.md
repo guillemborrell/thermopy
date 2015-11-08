@@ -38,6 +38,20 @@ Handy tools:
 
 See the documentation for further details and examples.
 
+## Testing
+
+Inside thermopy directory execude:
+```
+python3 thermopy/setup.py test
+```
+
+## Installing
+
+Once the tests ran fine install it:
+```
+python3 thermopy/setup.py install
+```
+
 
 -----BEGIN PGP SIGNED MESSAGE-----
 
