@@ -46,8 +46,8 @@ See the documentation for further details and examples.
 
 setup(name="thermopy3",
       version=thermopy.__version__,
-      description='Python package for thermodynamic calculations and units'
-                  'conversion',
+      description='Python package for thermodynamic calculations and units '
+                  'conversion.',
       long_description = my_long_description,
       author="Felipe M. Vieira",
       author_email="fmv1992@gmail.com",
@@ -55,10 +55,9 @@ setup(name="thermopy3",
       license="GPL",
       packages=find_packages(),
       include_package_data=True,
-      package_data={
-          'database': ['burcat_thr.xml', 'nasa9polynomials.xml']},
       data_files=[('documentation', ['documentation/thermopy050_documentation.pdf',
-                                     'documentation/thermopy050_overview.pdf'])],
+                                     'documentation/thermopy050_overview.pdf']),
+                  ('database', ['burcat_thr.xml', 'nasa9polynomials.xml'])],
       install_requires=['scipy>=0.6.0', 'numpy>=1.2.1'],
       test_suite='nose.collector',
       tests_require=['nose'],
