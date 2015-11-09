@@ -20,6 +20,7 @@ import re
 import xml.etree.ElementTree as ET
 import numpy as np
 from .constants import ideal_gas_constant
+import os
 _R = ideal_gas_constant[0]
 
 
@@ -176,8 +177,9 @@ class Database(object):
     """
 
     def __init__(self):
-        self._nasa9 = ET.parse(
-           'thermopy/databases/nasa9polynomials.xml')
+        self._nasa9 = ET.parse(str(os.path.dirname(
+                                   os.path.dirname(__file__)) + "/databases/" +
+                                   'nasa9polynomials.xml'))
         self._root = self._nasa9.getroot()
 
     def _search_database(self, x):
