@@ -54,7 +54,7 @@ python3 thermopy/setup.py install
 
 ## Changelog:
 
-v0.5.0:
+v0.5.1:
 
 	- Fix error with relative import of xml databases
 
