@@ -50,6 +50,7 @@ python3 thermopy/setup.py test
 Once the tests ran fine install it:
 ```
 python3 thermopy/setup.py install
+<<<<<<< HEAD
 ```
 
 ## Cryptographic signatures:
@@ -146,3 +147,6 @@ v0.5.0:
 	
 	- Ported from python2.7 to python3.4
 	
+=======
+```
+>>>>>>> da395fc0d7d78e0e32f8756d335f3585152817e5
