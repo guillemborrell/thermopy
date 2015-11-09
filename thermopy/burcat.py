@@ -6,7 +6,7 @@ Created on Sun Aug 23 21:21:22 2015
             monteiro
 
 """
-
+import os
 from xml.etree.ElementTree import parse
 from numpy import empty, array, dot, log
 import numpy as np
@@ -149,7 +149,8 @@ class Database(object):
         Create the instance and the elements at boot, otherwise be
         prepared to face huge computation times.
         """
-        self.db = parse("thermopy/databases/burcat_thr.xml").getroot()
+        self.db = parse(str(os.path.dirname(os.path.dirname(__file__)) +
+                        '/databases/burcat_thr.xml')).getroot()
 
     def list_compound(self, cas_or_formula):
         """
