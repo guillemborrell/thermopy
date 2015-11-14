@@ -54,6 +54,12 @@ python3 thermopy/setup.py install
 
 ## Changelog:
 
+v0.5.2:
+
+    - Changed the names from thermopy to thermopy3 because the former was already in use in pypi.
+    
+    - IAPWS is now on SI and (molar basis) instead of its native kJ, kg units.
+
 v0.5.1:
 
 	- Fix error with relative import of xml databases

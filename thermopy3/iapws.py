@@ -5,9 +5,6 @@ Created on Tue Aug 18 10:03:51 2015
 @author: monteiro
 
 """
-#order of variables: alfabetic; ex :foo(a,b,c)
-#capitalizing and formatting: same as IAPWS-IF97
-#a_b: a given b
 
 from .units import Pressure, Temperature, Enthalpy
 from numpy import array, sum, sqrt, log

@@ -1,5 +1,5 @@
 from setuptools import setup, find_packages
-import thermopy
+import thermopy3
 
 my_long_description = str(
 """
@@ -45,13 +45,13 @@ See the documentation for further details and examples.
 
 
 setup(name="thermopy3",
-      version=thermopy.__version__,
+      version=thermopy3.__version__,
       description='Python package for thermodynamic calculations and units '
                   'conversion.',
       long_description = my_long_description,
       author="Felipe M. Vieira",
       author_email="fmv1992@gmail.com",
-      url="github: https://github.com/fmv1992/thermopy",
+      url="github: https://github.com/fmv1992/thermopy3",
       license="GPL",
       packages=find_packages(),
       include_package_data=True,
