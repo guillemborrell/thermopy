@@ -1,5 +1,6 @@
 # thermopy3
-Python library for thermodynamics and other handy tools.
+Python library for thermodynamics and other handy tools. The library was not extensively tested
+with python2.
 
 
 Thermodynamics (all these properties as function of temperature for thousands of compounds):
