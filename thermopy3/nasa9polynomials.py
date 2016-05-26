@@ -19,7 +19,7 @@ benzene.enthalpy(600) - benzene.enthalpy(500)
 import re
 import xml.etree.ElementTree as ET
 import numpy as np
-from .constants import ideal_gas_constant
+from constants import ideal_gas_constant
 import os
 _R = ideal_gas_constant[0]
 

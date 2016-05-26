@@ -5,7 +5,7 @@ Created on Tue Aug 18 09:54:35 2015
 @author: monteiro
 
 """
-from . import constants
+import constants
 
 class Temperature(float):
 

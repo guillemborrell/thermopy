@@ -6,9 +6,9 @@ Created on Tue Aug 18 10:03:51 2015
 
 """
 
-from .units import Pressure, Temperature, Enthalpy
+from units import Pressure, Temperature, Enthalpy
 from numpy import array, sum, sqrt, log
-from .constants import ideal_gas_constant, ideal_gas_constant_massic_basis
+from constants import ideal_gas_constant, ideal_gas_constant_massic_basis
 import scipy.optimize
 
 
