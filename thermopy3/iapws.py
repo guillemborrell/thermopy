@@ -6,9 +6,9 @@ Created on Tue Aug 18 10:03:51 2015
 
 """
 
-from units import Pressure, Temperature, Enthalpy
+from thermopy3.units import Pressure, Temperature, Enthalpy
 from numpy import array, sum, sqrt, log
-from constants import ideal_gas_constant, ideal_gas_constant_massic_basis
+from thermopy3.constants import ideal_gas_constant, ideal_gas_constant_massic_basis
 import scipy.optimize
 
 
@@ -390,7 +390,7 @@ class Water(object):
         tau = self.Tc / self.T
         # from equations 28 and p given as input,
         # calculate rho to be used in PHI
-        
+
         def obj(x):
             return ( self.p - 1000 * x * self.R * self.T * (x / self.rhoc) * \
                     ( n1 / (x / self.rhoc) + sum(

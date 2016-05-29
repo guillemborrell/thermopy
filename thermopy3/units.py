@@ -5,7 +5,7 @@ Created on Tue Aug 18 09:54:35 2015
 @author: monteiro
 
 """
-import constants
+import thermopy3.constants as constants
 
 class Temperature(float):
 

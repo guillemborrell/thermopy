@@ -10,8 +10,8 @@ import os
 from xml.etree.ElementTree import parse
 from numpy import empty, array, dot, log
 import numpy as np
-import units
-from constants import ideal_gas_constant
+import thermopy3.units as units
+from thermopy3.constants import ideal_gas_constant
 _R = ideal_gas_constant[0]
 
 

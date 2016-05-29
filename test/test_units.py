@@ -4,7 +4,7 @@ Created on Tue Aug 18 08:38:33 2015
 
 @author: monteiro
 """
-from ..thermopy3.units import Pressure, Temperature
+from thermopy3.units import Pressure, Temperature
 
 
 def test_units():

@@ -6,8 +6,8 @@ Created on Tue Aug 18 09:29:56 2015
 """
 import numpy as np
 import scipy.optimize
-from ..thermopy3.iapws import Water
-from ..thermopy3.units import Pressure, Temperature
+from thermopy3.iapws import Water
+from thermopy3.units import Pressure, Temperature
 
 def test_iapws():
     """
