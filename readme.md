@@ -41,7 +41,7 @@ See the documentation for further details and examples.
 
 ## Testing
 
-Inside thermopy directory execude:
+Inside thermopy directory execute:
 ```
 python3 thermopy/setup.py test
 ```
