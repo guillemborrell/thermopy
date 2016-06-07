@@ -20,11 +20,12 @@ def test_enthalpy_massic_tests():
     database = burcat.Database()
 
     #
-    # REFERENCE: INCROPERA , ISBN 13 978-0470-50197-9
+    # REFERENCE: INCROPERA, ISBN 13 978-0470-50197-9
     #
     # Hydrogen from 600 to 700 K
     hydrogen = database.set_compound('h2 ref element')
-    delta_h_burcat = hydrogen.enthalpy_massic(700)-hydrogen.enthalpy_massic(600)
+    delta_h_burcat = (hydrogen.enthalpy_massic(700)
+                      - hydrogen.enthalpy_massic(600))
     delta_h_literature = 14.55 * 100 * 1e3  # from 600 to 700 K
     re = abs(delta_h_burcat - delta_h_literature) / delta_h_burcat
     assert re < RE
@@ -43,14 +44,14 @@ def test_enthalpy_massic_tests():
     # Water from 500 to 1000 K
     water = database.set_compound('H2O')
     delta_h_burcat = water.enthalpy_massic(1000) - water.enthalpy_massic(500)
-    re = abs(delta_h_burcat -
-    ((Water(1e3, 1000, massic_basis=True).enthalpy() - Water(1e3, 500,
-                                                   massic_basis=True).enthalpy()) * 1e3)
-    ) / delta_h_burcat
+    re = abs(delta_h_burcat
+             - ((Water(1e3, 1000, massic_basis=True).enthalpy()
+                 - Water(1e3, 500, massic_basis=True).enthalpy()) * 1e3)
+             ) / delta_h_burcat
     assert re < RE
 
     #
-    # REFERENCE: PERRY , Chemical Engineers Handbook McGraw-Hill 8thEd 2008;
+    # REFERENCE: PERRY, Chemical Engineers Handbook McGraw-Hill 8thEd 2008;
     #            DOI: 10.1036/0071422943
     #
     # NO from 200 to 1450 K; table 2-155
@@ -58,12 +59,12 @@ def test_enthalpy_massic_tests():
     delta_h_burcat = no.enthalpy(1450) - no.enthalpy(400)
     #Cp  form:        C 0 p = C1 + C2T + C3T 2 + C4T 3 + C5T 4
     T = 1450
-    Tb = array([T, T ** 2, T ** 3 , T ** 4 , T ** 5 ], 'd')
+    Tb = array([T, T ** 2, T ** 3, T ** 4, T ** 5], 'd')
     coefs = array([34980 / 1, -35.32 / 2, 0.07729 / 3,
                    -5.7357*1e-5 / 4, 0.0014526*1e-10 / 5],
                   dtype='d')
     T = 200
-    Ta = array([T, T ** 2, T ** 3 , T ** 4 , T ** 5 ], 'd')
+    Ta = array([T, T ** 2, T ** 3, T ** 4, T ** 5], 'd')
     delta_h_literature = dot((Tb - Ta), coefs) / 1e3
     # Looks like there is a mistake on PERRY's table. The temperature range is
     # also strange since 100 - 1500 K are used only for noble gases (except
@@ -76,11 +77,11 @@ def test_enthalpy_massic_tests():
     ar = database.set_compound('ar ref element')
     delta_h_burcat = ar.enthalpy(1100) - ar.enthalpy(300)
     T = 1100
-    Tb = array([T, T ** 2, T ** 3 , T ** 4 , T ** 5 ], 'd')
+    Tb = array([T, T ** 2, T ** 3, T ** 4, T ** 5], 'd')
     coefs = array([20786 / 1, 0 / 2, 0 / 3, 0*1e-5 / 4, 0*1e-10 / 5],
                   dtype='d')
     T = 300
-    Ta = array([T, T ** 2, T ** 3 , T ** 4 , T ** 5 ], 'd')
+    Ta = array([T, T ** 2, T ** 3, T ** 4, T ** 5], 'd')
     delta_h_literature = dot((Tb - Ta), coefs) / 1e3
     re = abs(delta_h_burcat - delta_h_literature) / delta_h_burcat
     assert re < RE
@@ -90,11 +91,12 @@ def test_enthalpy_massic_tests():
     delta_h_burcat = h2.enthalpy(250) - h2.enthalpy(200)
     #Cp  form:        C 0 p = C1 + C2T + C3T 2 + C4T 3 + C5T 4
     T = 250
-    Tb = array([T, T ** 2, T ** 3 , T ** 4 , T ** 5 ], 'd')
-    coefs = array([64979 / 1, -788.17 / 2, 5.8287 / 3, -1845.9*1e-5 / 4, 216400*1e-10 / 5],
+    Tb = array([T, T ** 2, T ** 3, T ** 4, T ** 5], 'd')
+    coefs = array([64979 / 1, -788.17 / 2, 5.8287 / 3, -1845.9*1e-5 / 4,
+                   216400*1e-10 / 5],
                   dtype='d')
     T = 200
-    Ta = array([T, T ** 2, T ** 3 , T ** 4 , T ** 5 ], 'd')
+    Ta = array([T, T ** 2, T ** 3, T ** 4, T ** 5], 'd')
     delta_h_literature = dot((Tb - Ta), coefs) / 1e3
     re = abs(delta_h_burcat - delta_h_literature) / delta_h_burcat
     assert re < RE
