@@ -39,18 +39,18 @@ Handy tools:
 
 See the documentation for further details and examples.
 
+## Installing
+Make sure you have both `numpy` and `scipy` installed.
+
+Then install it:
+```
+python3 thermopy/setup.py install
+```
 ## Testing
 
 Inside thermopy directory execute:
 ```
 python3 thermopy/setup.py test
-```
-
-## Installing
-
-Once the tests ran fine install it:
-```
-python3 thermopy/setup.py install
 ```
 
 ## Changelog:
@@ -63,10 +63,22 @@ v0.5.2:
 
 v0.5.1:
 
-	- Fix error with relative import of xml databases
+	- Fix error with relative import of xml databases.
 
 v0.5.0:
 
-	- First release from v0.4.0
+	- First release from v0.4.0.
 	
-	- Ported from python2.7 to python3.4
+	- Ported from python2.7 to python3.4.
+
+## TODO
+
+	- Update documentation to use the package's new name (thermopy3).
+
+	- Do more testing. It looks like in some cases there are some import errors
+	  (see 'EXAMPLE 02: Hydrazine ’messing around’ example.' in documentation). 
+
+	- Make the PDFs 'copy and pastable'.
+
+    - Implement units for every output so output is not a number but a dimension (e.g. 1 J/kg instead of 1).
+
