@@ -2,6 +2,9 @@
 Thermochem
 ==========
 
+IMPORTANT: This package is no longer mantained. It has been forked
+here: https://github.com/fmv1992/thermopy3
+
 Thermochem is a package with some useful modules for Thermodynamics
 and Thermochemistry. The following tools are provided:
 
