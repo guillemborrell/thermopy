@@ -1,30 +1,79 @@
-from ez_setup import use_setuptools
-use_setuptools()
-
 from setuptools import setup, find_packages
-import thermopy
+import thermopy3
 
-setup(name="thermopy",
-      version=thermopy.__version__,
-      description="Some utilities for Thermodynamics and Thermochemistry",
-      author="Guillem Borrell i Nogueras",
-      author_email="guillem@torroja.dmt.upm.es",
-      url="http://packages.python.org/thermopy",
-      packages = find_packages(),
-      include_package_data = True,
-      install_requires = ['scipy>=0.6.0','numpy>=1.2.1'],
-      zip_safe = False,
+my_long_description = str(
+"""
+Python library for thermodynamics and other handy tools.
+
+
+Thermodynamics (all these properties as function of temperature for thousands of compounds):
+
+	- Specific heat capacity
+
+	- Enthalpy
+
+	- Entropy
+
+
+Temperature independent data:
+
+	- Molecular weight
+
+	- Enthalpy of formation
+
+
+and much more.
+
+For water pressure is also an input (higher accuracy).
+
+Modelling of chemical reactions is also present. Main features:
+
+	- Equilibrium constant as a function of temperature
+
+	- Heat of reaction as a function of temperature
+
+
+Handy tools:
+
+	- Units conversion module
+
+	- Hundreds of physical constants
+
+
+See the documentation for further details and examples.
+""")
+
+
+setup(name="thermopy3",
+      version=thermopy3.__version__,
+      description='Python package for thermodynamic calculations and units '
+                  'conversion.',
+      long_description = my_long_description,
+      author="Felipe M. Vieira",
+      author_email="fmv1992@gmail.com",
+      url="github: https://github.com/fmv1992/thermopy3",
+      license="GPL",
+      packages=find_packages(),
+      include_package_data=True,
+      data_files=[('documentation', ['documentation/thermopy051_documentation.pdf',
+                                     'documentation/thermopy051_overview.pdf']),
+                  ('databases', ['databases/burcat_thr.xml', 'databases/nasa9polynomials.xml'])],
+      install_requires=['scipy>=0.6.0', 'numpy>=1.2.1'],
+      test_suite='nose.collector',
+      tests_require=['nose'],
+      zip_safe=False,
+      keywords='thermodynamics, properties estimation',
+      # full listing on https://pypi.python.org/pypi?%3Aaction=list_classifiers
       classifiers=[
-        'Development Status :: 3 - Alpha',
-        'Environment :: Console',
-        'Intended Audience :: Science/Research',
-        'License :: OSI Approved :: BSD License',
-        'Natural Language :: English',
-        'Natural Language :: Spanish',
-        'Operating System :: OS Independent',
-        'Programming Language :: Python :: 2.5',
-        'Topic :: Scientific/Engineering :: Chemistry',
-        'Topic :: Scientific/Engineering :: Physics',
-        'Topic :: Software Development :: Libraries :: Python Modules',
-        ],
+          'Development Status :: 3 - Alpha',
+          'Environment :: Console',
+          'Intended Audience :: Science/Research',
+          'License :: OSI Approved :: GNU General Public License v3 or later'
+          ' (GPLv3+)',
+          'Operating System :: OS Independent',
+          'Programming Language :: Python :: 3.4',
+          'Topic :: Scientific/Engineering :: Chemistry',
+          'Topic :: Scientific/Engineering :: Physics',
+          'Topic :: Software Development :: Libraries :: Python Modules'
+      ]
       )
