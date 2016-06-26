@@ -1,7 +1,13 @@
-# thermopy3
+## Note:
+
+This repo just received https://github.com/fmv1992/thermopy3. There is an
+ongoing process to join the old thermopy (python2) with thermopy (python3).
+Soon there will be only thermopy supporting python3.
+
+# thermopy / thermopy3 (see note above)
+
 Python library for thermodynamics and other handy tools. The library was not extensively tested
 with python2.
-
 
 Thermodynamics (all these properties as function of temperature for thousands of compounds):
 
