@@ -4,8 +4,8 @@ Created on Sun Aug 23 17:34:44 2015
 
 @author: monteiro
 """
-from thermopy3 import burcat
-from thermopy3.iapws import Water
+from thermopy import burcat
+from thermopy.iapws import Water
 from numpy import array, dot
 
 
