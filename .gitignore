@@ -1,2 +1,10 @@
 *__pycache__
 __not_for_packaging
+docs/
+~$*
+*~
+__pycache__/
+__not_for_packaging/
+*~
+__not_for_packaging*
+*personal*

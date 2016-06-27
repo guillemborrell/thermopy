@@ -61,6 +61,10 @@ python3 thermopy/setup.py test
 
 ## Changelog:
 
+v0.5.3:
+	
+	- Merged with original thermopy and discarding the 'thermopy3' name
+
 v0.5.2:
 
     - Changed the names from thermopy to thermopy3 because the former was already in use in pypi.
@@ -79,7 +83,11 @@ v0.5.0:
 
 ## TODO
 
-	- Update documentation to use the package's new name (thermopy3).
+	- Uniformize code (imports and the like) and improve compliance with PEP8.
+
+	- Update docstrings to conform to PEP 257.
+
+	- Update documentation to use the package's name after merge: 'thermopy'.
 
 	- Do more testing. It looks like in some cases there are some import errors
 	  (see 'EXAMPLE 02: Hydrazine ’messing around’ example.' in documentation). 

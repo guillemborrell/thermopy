@@ -19,13 +19,42 @@ benzene.enthalpy(600) - benzene.enthalpy(500)
 import re
 import xml.etree.ElementTree as ET
 import numpy as np
-from constants import ideal_gas_constant
+from thermopy.constants import ideal_gas_constant
 import os
 _R = ideal_gas_constant[0]
 
 
 class Compound(object):
-    """The compound set by Database.set_compound(Element).
+    
+    """
+    Chemical compound.
+    
+    It is usuall set by Database.set_compound(xml_compound).
+    
+    Attributes:
+        canonical_smiles (str): Canonical SMILES (Simplified molecular-input line-entry system) of the compound.
+        cas_number (str): CAS (Chemical Abstract Service) number of the compound.
+        comment (str): Comment found in the xml database. Usually references.
+        condensed (bool): True if the compound is condensed, False if not.
+        xml_compounds (list): List containing tuples of two entries. The first is the xml_compound and the second is the proportion of the xml_compound in the molecule. Both values are strings.
+        enthalpy_of_formation (float): Enthalpy of formation of the compound.
+        inchikey (str): InChI (International Chemical Identifier) key for the compound.
+        inp_name (str): ?
+        iupac_name (str): IUPAC (International Union of Pure and Applied Chemistry) name of the compound.
+        molecular_weight (float): Molecular weight of the compound.
+        reference (str): Reference for the compound. See ? for details.
+    
+    Methods:
+        ? one line methods
+        
+    """
+
+
+
+
+
+
+    """The compound set by Database.set_compound(xml_compound).
     Has the functionspresent in the nasa report and some
     other which can be used with the given information.\n
     Nasa 9 functions:\n
@@ -35,34 +64,43 @@ class Compound(object):
     Extended functions:\n
     - gibbs_energy(T) = H - T * S"""
 
-    def __init__(self, Element):
-        self._element = Element
-        self.inp_name = Element.attrib['inp_file_name']
-        self.inchikey = Element.find('identification').find('InChIKey').text
+    def __init__(self, xml_compound):
+        """
+        
+        
+        """
+        self._xml_compound = xml_compound
+        self.inp_name = xml_compound.attrib['inp_file_name']
+        self.inchikey = xml_compound.find('identification').find('InChIKey').text
         self.canonical_smiles =                                               \
-            Element.find('identification').find('canonical_smiles').text
+            xml_compound.find('identification').find('canonical_smiles').text
         self.cas_number =                                                     \
-            Element.find('identification').find('cas_number').text
+            xml_compound.find('identification').find('cas_number').text
         self.iupac_name =                                                     \
-            Element.find('identification').find('IUPAC_name').text
-        self.comment = Element.find('comment').text
-        self.reference = Element.find('reference').text
-        self.elements = self._get_elements(Element.find('elements'))
-        self.condensed = bool(Element.find('condensed').text == 'True')
-        self.molecular_weight = float(Element.find('molecular_weight').text)
-        self.enthalpy_of_formation = float(Element.find('hf298.15').text)
+            xml_compound.find('identification').find('IUPAC_name').text
+        self.comment = xml_compound.find('comment').text
+        self.reference = xml_compound.find('reference').text
+        self.xml_compounds = self._get_xml_compounds(xml_compound.find('xml_compounds'))
+        self.condensed = bool(xml_compound.find('condensed').text == 'True')
+        self.molecular_weight = float(xml_compound.find('molecular_weight').text)
+        self.enthalpy_of_formation = float(xml_compound.find('hf298.15').text)
 
-    def _get_elements(self, Element):
-        """Helper method that returns a list of tuples
-        of the type: (Element, nr_atoms)"""
-        elements_list = []
-        for one_element in Element:
-            elements_list.append(one_element.items()[0])
-        return(elements_list)
+    def _get_xml_compounds(self, xml_compound):
+        """
+        Helper method that returns a list of tuples containing the xml_compounds and their proportion in the chemical compound.
+        
+        Args:
+            xml_compound
+        
+        """
+        xml_compounds_list = []
+        for one_xml_compound in xml_compound:
+            xml_compounds_list.append(one_xml_compound.items()[0])
+        return(xml_compounds_list)
 
     def _evaluate_temperature_interval(self, T):
         """Helper method to ouput temperature interval"""
-        for (i, Trange) in enumerate(self._element.findall('T_range')):
+        for (i, Trange) in enumerate(self._xml_compound.findall('T_range')):
             if float(Trange.attrib['Tlow']) <= T <=                           \
                float(Trange.attrib['Thigh']):
                 return i
@@ -74,7 +112,7 @@ class Compound(object):
         """Molar heat capacity at constant pressure at
         temperature T for standard state.\nUnits: J/mol K"""
         coefficients = np.empty(9, dtype=np.float32)
-        for (i, coef) in enumerate(self._element.findall('T_range')[self._evaluate_temperature_interval(T)]):
+        for (i, coef) in enumerate(self._xml_compound.findall('T_range')[self._evaluate_temperature_interval(T)]):
             coefficients[i] = np.array(coef.text, dtype=np.float32)
         exponents = np.array([-2, -1, 0, 1, 2, 3, 4], dtype=np.signedinteger)
         return np.sum(
@@ -86,7 +124,7 @@ class Compound(object):
         """Molar enthalpy at constant pressure at temperature
         T for standard state.\nUnits: J/mol"""
         coefficients = np.empty(9, dtype=np.float32)
-        for (i, coef) in enumerate(self._element.findall('T_range')[self._evaluate_temperature_interval(T)]):
+        for (i, coef) in enumerate(self._xml_compound.findall('T_range')[self._evaluate_temperature_interval(T)]):
             coefficients[i] = np.array(coef.text, dtype=np.float32)
         exponents = np.array([-2, -1, 0, 1, 2, 3, 4, -1],
                              dtype=np.signedinteger)
@@ -103,7 +141,7 @@ class Compound(object):
         """Molar entropy at constant pressure at temperature
         T for standard state.\nUnits: J/mol K"""
         coefficients = np.empty(9, dtype=np.float32)
-        for (i, coef) in enumerate(self._element.findall('T_range')[self._evaluate_temperature_interval(T)]):
+        for (i, coef) in enumerate(self._xml_compound.findall('T_range')[self._evaluate_temperature_interval(T)]):
             coefficients[i] = np.array(coef.text, dtype=np.float32)
         exponents = np.array([-2, -1, 0, 1, 2, 3, 4, 0, 0],
                              dtype=np.signedinteger)
