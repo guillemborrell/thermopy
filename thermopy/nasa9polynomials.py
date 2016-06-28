@@ -23,14 +23,15 @@ from thermopy.constants import ideal_gas_constant
 import os
 _R = ideal_gas_constant[0]
 
-
 class Compound(object):
-    
-    """
-    Chemical compound.
-    
-    It is usuall set by Database.set_compound(xml_compound).
-    
+
+    u"""
+    Chemical compound present in the NASA 9 term polynomials database.
+
+    It is usually set by nasa9polyniomials.Database.set_compound(xml_compound).
+
+    It has all the thermodynamic functions listed in ?ref? as methods which take temperature as their sole argument. Those were expanded to include gibbs_energy that could be defined by the given functions.
+
     Attributes:
         canonical_smiles (str): Canonical SMILES (Simplified molecular-input line-entry system) of the compound.
         cas_number (str): CAS (Chemical Abstract Service) number of the compound.
@@ -39,59 +40,55 @@ class Compound(object):
         xml_compounds (list): List containing tuples of two entries. The first is the xml_compound and the second is the proportion of the xml_compound in the molecule. Both values are strings.
         enthalpy_of_formation (float): Enthalpy of formation of the compound.
         inchikey (str): InChI (International Chemical Identifier) key for the compound.
-        inp_name (str): ?
+        inp_name (str): Name as per the original 'inp' file.
         iupac_name (str): IUPAC (International Union of Pure and Applied Chemistry) name of the compound.
         molecular_weight (float): Molecular weight of the compound.
         reference (str): Reference for the compound. See ? for details.
-    
+
     Methods:
-        ? one line methods
-        
+        enthalpy ():
+        entropy ():
+        gibbs_energy ():
+        heat_capacity ():
+
     """
 
-
-
-
-
-
-    """The compound set by Database.set_compound(xml_compound).
-    Has the functionspresent in the nasa report and some
-    other which can be used with the given information.\n
-    Nasa 9 functions:\n
-    - heat_capacity(T)\n
-    - enthalpy(T)
-    - entropy(T)
-    Extended functions:\n
-    - gibbs_energy(T) = H - T * S"""
-
     def __init__(self, xml_compound):
-        """
-        
-        
+        u"""
+        Instantiate a Compound object from xlm info.
+
+        Args:
+            xml_compound: xml tree containing the relevant fields to characterize the attributes and boundaries of temperature for which calculations are valid.
+
         """
         self._xml_compound = xml_compound
         self.inp_name = xml_compound.attrib['inp_file_name']
-        self.inchikey = xml_compound.find('identification').find('InChIKey').text
-        self.canonical_smiles =                                               \
-            xml_compound.find('identification').find('canonical_smiles').text
-        self.cas_number =                                                     \
-            xml_compound.find('identification').find('cas_number').text
-        self.iupac_name =                                                     \
-            xml_compound.find('identification').find('IUPAC_name').text
+        self.inchikey = xml_compound.find('identification').find(
+            'InChIKey').text
+        self.canonical_smiles = xml_compound.find(
+            'identification').find('canonical_smiles').text
+        self.cas_number = xml_compound.find('identification').find(
+            'cas_number').text
+        self.iupac_name = xml_compound.find('identification').find(
+            'IUPAC_name').text
         self.comment = xml_compound.find('comment').text
         self.reference = xml_compound.find('reference').text
-        self.xml_compounds = self._get_xml_compounds(xml_compound.find('xml_compounds'))
-        self.condensed = bool(xml_compound.find('condensed').text == 'True')
-        self.molecular_weight = float(xml_compound.find('molecular_weight').text)
-        self.enthalpy_of_formation = float(xml_compound.find('hf298.15').text)
+        self.xml_compounds = self._get_xml_compounds(xml_compound.find(
+            'xml_compounds'))
+        self.condensed = bool(
+            xml_compound.find('condensed').text == 'True')
+        self.molecular_weight = float(
+            xml_compound.find('molecular_weight').text)
+        self.enthalpy_of_formation = float(
+            xml_compound.find('hf298.15').text)
 
     def _get_xml_compounds(self, xml_compound):
-        """
-        Helper method that returns a list of tuples containing the xml_compounds and their proportion in the chemical compound.
-        
+        u"""
+        Helper method that returns a list of tuples containing the elements and their proportion in the chemical compound.
+
         Args:
             xml_compound
-        
+
         """
         xml_compounds_list = []
         for one_xml_compound in xml_compound:
@@ -99,18 +96,37 @@ class Compound(object):
         return(xml_compounds_list)
 
     def _evaluate_temperature_interval(self, T):
-        """Helper method to ouput temperature interval"""
+        u"""
+        Helper method to ouput temperature interval order.
+
+        Args:
+            T (float): temperature.
+
+        Returns:
+            int: The order of the temperature range (0th, 1st, 2nd, etc). Some compounds have more than one temperature range with different corrisponding coefficients. Therefore the temperature range has to be specified.
+
+        """
         for (i, Trange) in enumerate(self._xml_compound.findall('T_range')):
-            if float(Trange.attrib['Tlow']) <= T <=                           \
-               float(Trange.attrib['Thigh']):
+            if (float(Trange.attrib['Tlow']) <= T <= float(
+                    Trange.attrib['Thigh'])):
                 return i
-        raise Exception('Temperature out of range for ' + self.iupac_name +
-                        '/' + self.inp_name +
-                        ' with ' + str(T) + ' K')
+        raise Exception('Temperature out of range for '
+                        + self.iupac_name + '/' + self.inp_name
+                        + ' with ' + str(T) + ' K')
 
     def heat_capacity(self, T):
-        """Molar heat capacity at constant pressure at
-        temperature T for standard state.\nUnits: J/mol K"""
+        u"""
+        Calculate molar heat capacity at constant pressure for standard state.
+
+        Args:
+            T (float): temperature.
+
+        Returns:
+            numpy_float: The molar heat capacity for the compound for a given temperature.
+
+        Units: J/mol K.
+
+        """
         coefficients = np.empty(9, dtype=np.float32)
         for (i, coef) in enumerate(self._xml_compound.findall('T_range')[self._evaluate_temperature_interval(T)]):
             coefficients[i] = np.array(coef.text, dtype=np.float32)
