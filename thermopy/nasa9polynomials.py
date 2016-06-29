@@ -1,11 +1,4 @@
-# -*- coding: utf-8 -*-
 """
-Created on Wed Sep 23 10:00:28 2015
-
-@author: monteiro
-
-Description:
-
 Reads the nasa9polynomials database and returns objects. Input should be of the
 type:
 benzene = nasa9.get_compound('name_to_search')
@@ -16,6 +9,7 @@ Note that the nasa9polynomials are functions of temperature only.
 Then usage should be simple:
 benzene.enthalpy(600) - benzene.enthalpy(500)
 """
+
 import re
 import xml.etree.ElementTree as ET
 import numpy as np
@@ -24,7 +18,6 @@ import os
 _R = ideal_gas_constant[0]
 
 class Compound(object):
-
     u"""
     Chemical compound present in the NASA 9 term polynomials database.
 
@@ -44,12 +37,6 @@ class Compound(object):
         iupac_name (str): IUPAC (International Union of Pure and Applied Chemistry) name of the compound.
         molecular_weight (float): Molecular weight of the compound.
         reference (str): Reference for the compound. See ? for details.
-
-    Methods:
-        enthalpy ():
-        entropy ():
-        gibbs_energy ():
-        heat_capacity ():
 
     """
 
@@ -124,8 +111,6 @@ class Compound(object):
         Returns:
             numpy_float: The molar heat capacity for the compound for a given temperature.
 
-        Units: J/mol K.
-
         """
         coefficients = np.empty(9, dtype=np.float32)
         for (i, coef) in enumerate(self._xml_compound.findall('T_range')[self._evaluate_temperature_interval(T)]):
@@ -137,8 +122,16 @@ class Compound(object):
                coefficients[0:7]), dtype=np.float32) * _R
 
     def enthalpy(self, T):
-        """Molar enthalpy at constant pressure at temperature
-        T for standard state.\nUnits: J/mol"""
+        u"""
+        Calculate molar enthalpy at constant pressure for the compound for a given temperature.
+        
+        Args:
+            T (float): temperature.
+
+        Returns:
+            numpy_float: The molar enthalpy for the compound for a given temperature.
+            
+        """
         coefficients = np.empty(9, dtype=np.float32)
         for (i, coef) in enumerate(self._xml_compound.findall('T_range')[self._evaluate_temperature_interval(T)]):
             coefficients[i] = np.array(coef.text, dtype=np.float32)
@@ -154,8 +147,16 @@ class Compound(object):
                other_factors), dtype=np.float32) * _R * T
 
     def entropy(self, T):
-        """Molar entropy at constant pressure at temperature
-        T for standard state.\nUnits: J/mol K"""
+        u"""
+        Calculate molar entropy at constant pressure for the compound for a given temperature.
+        
+        Args:
+            T (float): temperature.
+
+        Returns:
+            numpy_float: The molar entropy for the compound for a given temperature.
+            
+        """
         coefficients = np.empty(9, dtype=np.float32)
         for (i, coef) in enumerate(self._xml_compound.findall('T_range')[self._evaluate_temperature_interval(T)]):
             coefficients[i] = np.array(coef.text, dtype=np.float32)
@@ -172,8 +173,16 @@ class Compound(object):
                other_factors), dtype=np.float32) * _R
 
     def gibbs_energy(self, T):
-        """Molar Gibbs energy at constant pressure at temperature
-        T for standard state.\nUnits: J/mol"""
+        u"""
+        Calculate molar Gibbs energy at constant pressure for the compound for a given temperature.
+        
+        Args:
+            T (float): temperature.
+
+        Returns:
+            numpy_float: The molar entropy for the compound for a given temperature.
+            
+        """
         return self.enthalpy(T) - T * self.entropy(T)
 
     def __str__(self):
@@ -185,61 +194,73 @@ class Compound(object):
             return str(self.inp_name)
 
 
-class Compound_ideal_gas(Compound):
-    """Subclass of Compounds which have an extended set of functions
-    such as internal energy and constant volume heat capacity."""
+class CompoundIdealGas(Compound):
+    u"""
+    Chemical compound as an ideal gas present in the NASA 9 term polynomials database.
+    
+    Subclasses Compound.
+    
+    
+    Ideal gases have an extended set of functions such as internal energy and constant volume heat capacity. All of these properties are derived from definitions on thermodynamics.
+    
+    """
     def __init__(self, Element):
         Compound.__init__(self, Element)
 
     def heat_capacity_constant_v(self, T):
-            """This function is not explicitly given by the nasa 9
-            polynomials. From thermodynamic relations one can infer:\n
-            C_v = C_p - R\nMolar heat capacity at constant volune
-            at temperature T for standard state.\nUnits: J/mol K"""
-            return self.heat_capacity(T) - _R
+        u"""
+        Calculate molar heat capacity at constant volume for standard state.
+
+        Args:
+            T (float): temperature.
+
+        Returns:
+            numpy_float: The molar heat capacity for the compound for a given temperature.
+
+        """
+        return self.heat_capacity(T) - _R
 
     def internal_energy(self, T):
-        """This function is not explicitly given by the nasa 9
-        polynomials. From thermodynamic relations one can
-        infer for an ideal gas:\n
-        U = H - R * T\nUnits: J/mol"""
+        u"""
+        Calculate molar internal energy at constant pressure for standard state.
+
+        Args:
+            T (float): temperature.
+
+        Returns:
+            numpy_float: The molar internal energy for the compound for a given temperature.
+
+        """
         return self.enthalpy(T) - _R * T
 
 class Database(object):
-    """
-    Nasa 9 polynomials database (see NASA/TP—2002-211556).
-    The preferred method for identifying compounds is via InChIKey.
-    Other methods are: cas number, usual name and iupac name.
+    u"""
+    Nasa 9 term polynomials database (see NASA/TP—2002-211556).
+    
+    The preferred method for identifying compounds is via InChIKey. Other methods are: cas number, usual name and iupac name.
 
     Example:
-    import nasa9polynomials as nasa9
-
-    db = nasa9.Database()
-
-    benzene = db.set_compound('benzene')
-
-    oxygen = db.set_compound('MYMOFIZGZYHOMD-UHFFFAOYSA-N')
-
-    benzene.condensed
-    False
-
-    benzene.enthalpy_of_formation
-    82880.0
-
-    oxygen.heat_capacity(1000)
-    34.882379221984863
+    
     """
 
     def __init__(self):
+        u"""Initializes the database."""
         xmlPath = os.path.join(os.path.dirname(__file__),
             os.pardir, 'databases', 'nasa9polynomials.xml')
         self._nasa9 = ET.parse(os.path.abspath(xmlPath))
         self._root = self._nasa9.getroot()
 
     def _search_database(self, x):
-        """Helper function to search database.
-        Retuns a list of tuples with 3 terms:\n
-        (inp file name,\tiupac name,\tET.Element)"""
+        u"""
+        Helper function to search database.
+        
+        Args:
+            x ():
+                
+        Returns:
+            tuple: (inp file name, iupac name, ET.Element)
+            
+        """
         result_list = []
         inchikey_re = re.compile('[A-Z]{14}\-[A-Z]{10}\-[A-Z]')
         cas_re = re.compile('[0-9]{2,7}\-[0-9][0-9]\-[0-9]')
@@ -285,9 +306,14 @@ class Database(object):
                      y) for y in result_list]
 
     def list_compound(self, x):
-        """For interactive searching of compounds.
-        Input can be a cas string, InChIKey or usual name.\n
-        Preference is given to exact searches. So for example:\n\n
+        u"""
+        List the compounds find gor a given input.
+        It is intended to be used in interactive mode.
+        
+        
+        Input can be a cas string, InChIKey or usual name. Preference is given to exact searches.
+        For example:
+        ??
         db.list_compound('h2o')  returns
         [('H2O', 'oxidane')]\n
         db.list_compound('h2o(')  returns
@@ -295,6 +321,7 @@ class Database(object):
         On the other hand:\n
         db.list_compound('iron') returns 26 entries all
         of the iupac names containing 'iron'
+        ??
         """
         result_list = []
         for i in self._search_database(x):
@@ -302,7 +329,13 @@ class Database(object):
         return result_list
 
     def set_compound(self, x):
-        """Sets the compound if there is one entry specified on the database.
+        u"""
+        Set the compound if there is one entry specified on the database.
+        
+        It is important to notice that due to the nature of the work of this database, compounds are gases unless explicitly stated otherwise.
+        
+        Example:
+            ??
         For example looking for liquid water one would specify 'h2o(l)' and for
         steam 'h2o'. Suppose you want FeS(cr) then it would be better to search
         first:\n\n
@@ -315,6 +348,8 @@ class Database(object):
          ('FeS2(cr)', 'N/A')]
 
         fes = db.set_compound('FeS(b)')
+            ??
+        
         """
         result = self._search_database(x)
         if len(result) != 1:  # could not set component: give error messages
@@ -331,15 +366,13 @@ class Database(object):
 
 
 class Reaction(object):
-    """Models a reaction from the nasa9polynomials.
-    Available functions are:\n
-    - enthalpy_difference(T)
-    - entropy_difference(T)
-    - gibbs_energy_difference(T)
-    - equilibrium_constant(T)
+    u"""
+    Model of a chemical reaction.
+    
     """
     def __init__(self, T, reactants, products,
                  reactants_coefficients, product_coefficients):
+        u""""""
         self.T = T
         self._reactants = reactants
         self._products = products
@@ -351,8 +384,17 @@ class Reaction(object):
             raise Exception('Number of reactants or products is different'
                             'from the number of coefficients given')
 
-    def enthalpy_difference(self, T=None):
-        """Enthalpy of the reaction.\nUnits: J/mol"""
+    def enthalpy_reaction(self, T=None):
+        u"""
+        Calculate the enthalpy of the reaction at the standard state.
+
+        Args:
+            T (float): temperature.
+
+        Returns:
+            numpy_float: The enthalpy of the reaction for a given temperature.
+
+        """
         if T is not None:
             self.T = T
         deltah = 0
@@ -365,7 +407,16 @@ class Reaction(object):
         return deltah
 
     def entropy_difference(self, T=None):
-        """Enthalpy of the reaction.\nUnits: J/mol K"""
+        u"""
+        Calculate the entropy of the reaction at the standard state.
+
+        Args:
+            T (float): temperature.
+
+        Returns:
+            numpy_float: The entropy of the reaction for a given temperature.
+
+        """
         if T is not None:
             self.T = T
         deltas = 0
@@ -378,7 +429,16 @@ class Reaction(object):
         return deltas
 
     def gibbs_energy_difference(self, T=None):
-        """Gibbs energy of the reaction.\nUnits: J/mol"""
+        u"""
+        Calculate the Gibbs energy of the reaction at the standard state.
+
+        Args:
+            T (float): temperature.
+
+        Returns:
+            numpy_float: The Gibbs energy of the reaction for a given temperature.
+
+        """
         if T is not None:
             self.T = T
         deltag = 0
@@ -391,15 +451,25 @@ class Reaction(object):
         return deltag
 
     def equilibrium_constant(self, T=None):
-        """Enthalpy of the reaction:\n
-        K = exp(- deltaG / (R T))
-        \nUnits: (dimensionless)"""
+        u"""
+        Calculate the equilibrium constant of the reaction at the standard state.
+        
+        Definition: K = exp(- deltaG / (R T))
+
+        Args:
+            T (float): temperature.
+
+        Returns:
+            numpy_float: The Gibbs energy of the reaction for a given temperature.
+        
+        """
         if T is not None:
             self.T = T
         return np.exp(-1 * self.gibbs_energy_difference(self.T)
                       / (_R * self.T))
 
     def __repr__(self):
+        u"""Define how a reaction should be print."""
         r = ''
         for (reag, coef) in zip(self._reactants, self._rcoefs):
             r = r + '+' + str(coef) + ' ' + reag.inp_name + ' '
