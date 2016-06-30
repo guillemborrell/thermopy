@@ -1,13 +1,45 @@
-"""
-Reads the nasa9polynomials database and returns objects. Input should be of the
-type:
+u"""
+Enable the NASA 9 term polynomials to create chemical compound objects.
+
+This module allows the user to use the nasa 9 term polynomials (abbreviated as NASA 9) to model chemical compounds and reactions. Is worth noting that all the output is stripped of any phyisical unit, that is, results are returned as numpy floats. Therefore to end any form of ambiguity we reinstate that all the results are in SI units using a molar base. It is up to the user to beware of any physical unit conversion.
+
+Reads the nasa9polynomials database and returns objects. Input should be of the type:
+
 benzene = nasa9.get_compound('name_to_search')
+
 name_to_search prefereably should be an InChIKey identifier.
-Other possibilities are canonical smiles, cas_number or a simple name (C6H6).
+Other possibilities are canonical smiles, cas_number or a simple name
+(C6H6).
 Note that the nasa9polynomials are functions of temperature only.
 
-Then usage should be simple:
-benzene.enthalpy(600) - benzene.enthalpy(500)
+Example:
+    >>> from thermopy import nasa9polynomials as nasa9
+    >>> db = nasa9.Database()
+    >>> caf2 = db.set_compound('caf2')
+    >>> print(caf2.inchikey)
+    WUKWITHWXAAZEY-UHFFFAOYSA-L
+    >>> print(caf2.enthalpy_of_formation)
+    -790828.409
+    >>> print(caf2.heat_capacity(300))
+    51.2707324499
+    >>> print(caf2.molecular_weight)
+    0.0780748064
+    >>> water = db.set_compound('h2o(l)')
+    >>> print(water.entropy(300))
+    69.633703
+    >>> print(water.elements)
+    [('H', '2'), ('O', '1')]
+    
+
+Classes:
+    Compound: chemical compound present in the NASA 9 term polynomials database. 
+    CompoundIdealGas: Chemical compound as an ideal gas present in the NASA 9 term polynomials database. It inherits from Compound.
+    Reaction: model of a chemical reaction
+    
+References:
+    [1] Bonnie J. McBride, Michael J. Zehe, and Sanford Gordon. NASA Glenn Coefficients for Calculating Thermodynamic Properties of Individual Species. September 2002.
+    
+    
 """
 
 import re
@@ -17,13 +49,14 @@ from thermopy.constants import ideal_gas_constant
 import os
 _R = ideal_gas_constant[0]
 
+
 class Compound(object):
     u"""
     Chemical compound present in the NASA 9 term polynomials database.
 
     It is usually set by nasa9polyniomials.Database.set_compound(xml_compound).
 
-    It has all the thermodynamic functions listed in ?ref? as methods which take temperature as their sole argument. Those were expanded to include gibbs_energy that could be defined by the given functions.
+    It has all the thermodynamic functions listed in [1] as methods which take temperature as their sole argument. Those were expanded to include gibbs_energy that could be defined by the given functions.
 
     Attributes:
         canonical_smiles (str): Canonical SMILES (Simplified molecular-input line-entry system) of the compound.
@@ -36,7 +69,7 @@ class Compound(object):
         inp_name (str): Name as per the original 'inp' file.
         iupac_name (str): IUPAC (International Union of Pure and Applied Chemistry) name of the compound.
         molecular_weight (float): Molecular weight of the compound.
-        reference (str): Reference for the compound. See ? for details.
+        reference (str): Reference for the compound. See [1] for details.
 
     """
 
@@ -60,8 +93,8 @@ class Compound(object):
             'IUPAC_name').text
         self.comment = xml_compound.find('comment').text
         self.reference = xml_compound.find('reference').text
-        self.xml_compounds = self._get_xml_compounds(xml_compound.find(
-            'xml_compounds'))
+        self.elements = self._get_xml_compounds(xml_compound.find(
+            'elements'))
         self.condensed = bool(
             xml_compound.find('condensed').text == 'True')
         self.molecular_weight = float(
@@ -113,13 +146,14 @@ class Compound(object):
 
         """
         coefficients = np.empty(9, dtype=np.float32)
-        for (i, coef) in enumerate(self._xml_compound.findall('T_range')[self._evaluate_temperature_interval(T)]):
+        for (i, coef) in enumerate(self._xml_compound.findall(
+                'T_range')[self._evaluate_temperature_interval(T)]):
             coefficients[i] = np.array(coef.text, dtype=np.float32)
         exponents = np.array([-2, -1, 0, 1, 2, 3, 4], dtype=np.signedinteger)
         return np.sum(
-               np.multiply(
-               np.power(T, exponents, dtype=np.float32),
-               coefficients[0:7]), dtype=np.float32) * _R
+                   np.multiply(
+                       np.power(T, exponents, dtype=np.float32),
+                       coefficients[0:7]), dtype=np.float32) * _R
 
     def enthalpy(self, T):
         u"""
@@ -133,18 +167,19 @@ class Compound(object):
             
         """
         coefficients = np.empty(9, dtype=np.float32)
-        for (i, coef) in enumerate(self._xml_compound.findall('T_range')[self._evaluate_temperature_interval(T)]):
+        for (i, coef) in enumerate(self._xml_compound.findall(
+                'T_range')[self._evaluate_temperature_interval(T)]):
             coefficients[i] = np.array(coef.text, dtype=np.float32)
         exponents = np.array([-2, -1, 0, 1, 2, 3, 4, -1],
                              dtype=np.signedinteger)
         other_factors = np.array([-1, np.log(T), 1, 0.5, 1/3, 0.25, 0.2, 1],
                                  dtype=np.float32)
         return np.sum(
-               np.multiply(
-               np.multiply(
-               np.power(T, exponents, dtype=np.float32),
-               coefficients[0:8]),
-               other_factors), dtype=np.float32) * _R * T
+                   np.multiply(
+                       np.multiply(
+                           np.power(T, exponents, dtype=np.float32),
+                           coefficients[0:8]),
+                       other_factors), dtype=np.float32) * _R * T
 
     def entropy(self, T):
         u"""
@@ -158,7 +193,8 @@ class Compound(object):
             
         """
         coefficients = np.empty(9, dtype=np.float32)
-        for (i, coef) in enumerate(self._xml_compound.findall('T_range')[self._evaluate_temperature_interval(T)]):
+        for (i, coef) in enumerate(self._xml_compound.findall(
+                'T_range')[self._evaluate_temperature_interval(T)]):
             coefficients[i] = np.array(coef.text, dtype=np.float32)
         exponents = np.array([-2, -1, 0, 1, 2, 3, 4, 0, 0],
                              dtype=np.signedinteger)
@@ -166,11 +202,11 @@ class Compound(object):
                                   0, 1],
                                  dtype=np.float32)
         return np.sum(
-               np.multiply(
-               np.multiply(
-               np.power(T, exponents, dtype=np.float32),
-               coefficients[:]),
-               other_factors), dtype=np.float32) * _R
+                   np.multiply(
+                       np.multiply(
+                           np.power(T, exponents, dtype=np.float32),
+                           coefficients[:]),
+                       other_factors), dtype=np.float32) * _R
 
     def gibbs_energy(self, T):
         u"""
@@ -196,10 +232,9 @@ class Compound(object):
 
 class CompoundIdealGas(Compound):
     u"""
-    Chemical compound as an ideal gas present in the NASA 9 term polynomials database.
+    Chemical compound as an ideal gas present in the NASA9 database.
     
-    Subclasses Compound.
-    
+    Subclasses Compound. It adds two extra methods which come from the thermodynamics of Ideal Gases.
     
     Ideal gases have an extended set of functions such as internal energy and constant volume heat capacity. All of these properties are derived from definitions on thermodynamics.
     
@@ -240,13 +275,16 @@ class Database(object):
     The preferred method for identifying compounds is via InChIKey. Other methods are: cas number, usual name and iupac name.
 
     Example:
+        >>> from thermopy import nasa9polynomials as nasa9
+        >>> db = nasa9.Database()
     
     """
 
     def __init__(self):
         u"""Initializes the database."""
-        xmlPath = os.path.join(os.path.dirname(__file__),
-            os.pardir, 'databases', 'nasa9polynomials.xml')
+        xmlPath = os.path.join(
+            os.path.dirname(__file__), os.pardir, 'databases',
+            'nasa9polynomials.xml')
         self._nasa9 = ET.parse(os.path.abspath(xmlPath))
         self._root = self._nasa9.getroot()
 
@@ -283,9 +321,9 @@ class Database(object):
             # tries exact match first
             for specie in self._root:
                 iupac_name = specie.find('identification').find('IUPAC_name')
-                if x.lower() ==                                               \
-                   specie.find('identification').find('IUPAC_name').text.lower() or \
-                   x.lower() == specie.attrib['inp_file_name'].lower():
+                if (x.lower() == specie.find('identification').find(
+                            'IUPAC_name').text.lower() or
+                        x.lower() == specie.attrib['inp_file_name'].lower()):
                     result_list.append(specie)
             if len(result_list) == 1:
                 pass
@@ -293,11 +331,11 @@ class Database(object):
                 result_list = []
                 # if not found tries loose match
                 for specie in self._root:
-                    iupac_name = specie.find('identification').find('IUPAC_name')
-                    augmented_namespace = specie.attrib['inp_file_name'] +    \
-                                          ' ' +                               \
-                                          specie.find('comment').text + ' ' + \
-                                          iupac_name.text
+                    iupac_name = specie.find('identification').find(
+                        'IUPAC_name')
+                    augmented_namespace = (specie.attrib['inp_file_name']
+                                           + ' ' + specie.find('comment').text
+                                           + ' ' + iupac_name.text)
                     if x.lower() in augmented_namespace.lower():
                         result_list.append(specie)
         for specie in result_list:
@@ -312,16 +350,19 @@ class Database(object):
         
         
         Input can be a cas string, InChIKey or usual name. Preference is given to exact searches.
-        For example:
-        ??
-        db.list_compound('h2o')  returns
-        [('H2O', 'oxidane')]\n
-        db.list_compound('h2o(')  returns
-        [('H2O(cr)', 'oxidane'), ('H2O(L)', 'oxidane')]\n
-        On the other hand:\n
-        db.list_compound('iron') returns 26 entries all
-        of the iupac names containing 'iron'
-        ??
+        
+        Example:
+            >>> from thermopy import nasa9polynomials as nasa9
+            >>> db = nasa9.Database()
+            >>> for i in db.list_compound('fes'):
+            ...     print(i)
+            ('FeS(a)', 'sulfanylideneiron')
+            ('FeS(b)', 'sulfanylideneiron')
+            ('FeS(c)', 'sulfanylideneiron')
+            ('FeS(L)', 'sulfanylideneiron')
+            ('FeSO4(cr)', 'iron(2+);sulfate')
+            ('FeS2(cr)', 'N/A')
+            
         """
         result_list = []
         for i in self._search_database(x):
@@ -335,34 +376,47 @@ class Database(object):
         It is important to notice that due to the nature of the work of this database, compounds are gases unless explicitly stated otherwise.
         
         Example:
-            ??
-        For example looking for liquid water one would specify 'h2o(l)' and for
-        steam 'h2o'. Suppose you want FeS(cr) then it would be better to search
-        first:\n\n
-        db.list_compound('fes')
-        [('FeS(a)', 'sulfanylideneiron'),
-         ('FeS(b)', 'sulfanylideneiron'),
-         ('FeS(c)', 'sulfanylideneiron'),
-         ('FeS(L)', 'sulfanylideneiron'),
-         ('FeSO4(cr)', 'iron(2+);sulfate'),
-         ('FeS2(cr)', 'N/A')]
-
-        fes = db.set_compound('FeS(b)')
-            ??
-        
+            Someone is looking for the element gallium but is not certain how to instantiate it. One would first list the compounds:
+            >>> from thermopy import nasa9polynomials as nasa9
+            >>> db = nasa9.Database()
+            >>> for i in db.list_compound('gallium'):
+            ...     print(i)
+            ... 
+            ('Ga', 'gallium')
+            ('Ga+', 'gallium')
+            ('GaBr', 'bromogallium')
+            ('GaBr2', 'dibromogallium')
+            ('GaCl', 'chlorogallium')
+            ('GaCl2', 'gallium;dichloride')
+            ('GaF2', 'difluorogallium')
+            ('GaI2', 'diiodogallium')
+            ('GaO', 'oxogallium')
+            ('GaOH', 'gallium;hydroxide')
+            ('Ga2Cl4', 'gallium;gallium;tetrachloride')
+            ('Ga2O', 'gallium;oxygen(2-)')
+            ('Ga(cr)', 'gallium')
+            ('Ga(L)', 'gallium')
+            ('Ga2O3(cr)', 'digallium;oxygen(2-)')
+            ('Ga2O3(L)', 'digallium;oxygen(2-)')
+            
+            Finally defining his compound:
+            >>> gallium = db.set_compound('Ga')
+            >>> gallium.inp_name
+            'Ga'
+            
         """
         result = self._search_database(x)
         if len(result) != 1:  # could not set component: give error messages
             if len(result) == 0:
                 raise Exception('No compound found.')
             else:
-                raise Exception('The compound \'' + str(x) +
-                                '\' you are trying to set is not unique: ' +
-                                result[0][0], result[1][0])
+                raise Exception('The compound \'' + str(x) + '\' you are '
+                                'trying to set is not unique: ' + result[0][0],
+                                result[1][0])
         if result[0][2].find('condensed') == 'True':
             return Compound(result[0][2])
         else:  # if it is an ideal gas
-            return Compound_ideal_gas(result[0][2])
+            return CompoundIdealGas(result[0][2])
 
 
 class Reaction(object):
@@ -379,8 +433,8 @@ class Reaction(object):
         self._rcoefs = [abs(z) for z in reactants_coefficients]
         self._pcoefs = [abs(z) for z in product_coefficients]
         # error checking
-        if len(self._reactants) != len(self._rcoefs) or                       \
-           len(self._products) != len(self._pcoefs):
+        if (len(self._reactants) != len(self._rcoefs) or
+                len(self._products) != len(self._pcoefs)):
             raise Exception('Number of reactants or products is different'
                             'from the number of coefficients given')
 
@@ -399,11 +453,9 @@ class Reaction(object):
             self.T = T
         deltah = 0
         for (coefficient, compound) in zip(self._rcoefs, self._reactants):
-            deltah = deltah - coefficient *                               \
-                compound.enthalpy(self.T)
+            deltah = deltah - coefficient * compound.enthalpy(self.T)
         for (coefficient, compound) in zip(self._rcoefs, self._products):
-            deltah = deltah + coefficient *                               \
-                compound.enthalpy(self.T)
+            deltah = deltah + coefficient * compound.enthalpy(self.T)
         return deltah
 
     def entropy_difference(self, T=None):
@@ -421,11 +473,9 @@ class Reaction(object):
             self.T = T
         deltas = 0
         for (coefficient, compound) in zip(self._rcoefs, self._reactants):
-            deltas = deltas - coefficient *                               \
-                compound.entropy(self.T)
+            deltas = deltas - coefficient * compound.entropy(self.T)
         for (coefficient, compound) in zip(self._rcoefs, self._products):
-            deltas = deltas + coefficient *                               \
-                compound.entropy(self.T)
+            deltas = deltas + coefficient * compound.entropy(self.T)
         return deltas
 
     def gibbs_energy_difference(self, T=None):
@@ -443,11 +493,9 @@ class Reaction(object):
             self.T = T
         deltag = 0
         for (coefficient, compound) in zip(self._rcoefs, self._reactants):
-            deltag = deltag - coefficient *                               \
-                compound.gibbs_energy(self.T)
+            deltag = deltag - coefficient * compound.gibbs_energy(self.T)
         for (coefficient, compound) in zip(self._rcoefs, self._products):
-            deltag = deltag + coefficient *                               \
-                compound.gibbs_energy(self.T)
+            deltag = deltag + coefficient * compound.gibbs_energy(self.T)
         return deltag
 
     def equilibrium_constant(self, T=None):
@@ -465,8 +513,8 @@ class Reaction(object):
         """
         if T is not None:
             self.T = T
-        return np.exp(-1 * self.gibbs_energy_difference(self.T)
-                      / (_R * self.T))
+        return np.exp(-1 * self.gibbs_energy_difference(self.T) / (
+            _R * self.T))
 
     def __repr__(self):
         u"""Define how a reaction should be print."""
