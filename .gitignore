@@ -1,3 +1,11 @@
 *__pycache__
 __not_for_packaging
-thermopy.egg-info/
+docs/
+~$*
+*~
+__pycache__/
+__not_for_packaging/
+*~
+__not_for_packaging*
+*personal*
+.eggs/

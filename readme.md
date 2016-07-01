@@ -61,9 +61,17 @@ python3 thermopy/setup.py test
 
 ## Changelog:
 
-v0.5.3:
+v0.5.3 (ongoing):
 	
-	- Merged with original thermopy and discarding the 'thermopy3' name
+	- Merged with original thermopy and discarded the 'thermopy3' name.
+
+	- Added meaningful docstrings to every package, module, class, method and function.
+
+	- Uniformized docstrings to comply with google docstrings style.
+
+	- Improved compliance with PEP 257 and PEP 8.
+
+	- Migrated documentation to sphinx (pdf will no longer be available).
 
 v0.5.2:
 
@@ -83,12 +91,9 @@ v0.5.0:
 
 ## TODO
 
-	- Update documentation to use the package's name after merge: 'thermopy'.
+	- Transform IAPWS module into molar basis to be consistent with burcat and nasa9polynomials.
 
-	- Do more testing. It looks like in some cases there are some import errors
-	  (see 'EXAMPLE 02: Hydrazine ’messing around’ example.' in documentation). 
-
-	- Make the PDFs 'copy and pastable'.
+	- Increase the testing coverage.
 
     - Implement units for every output so output is not a number but a dimension (e.g. 1 J/kg instead of 1).
 
