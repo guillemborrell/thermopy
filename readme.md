@@ -83,6 +83,8 @@ v0.5.0:
 
 ## TODO
 
+	- Put examples again in docstrings; need to update.
+
 	- Uniformize code (imports and the like) and improve compliance with PEP8.
 
 	- Update docstrings to conform to PEP 257.
