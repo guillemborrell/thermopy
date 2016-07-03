@@ -83,6 +83,14 @@ v0.5.0:
 
 ## TODO
 
+	- Fix the setting of a compound when it is ambiguous:
+		>>> csbr = db.set_compound('LYQFWZFBNBDLEO-UHFFFAOYSA-M')
+		Traceback (most recent call last):
+		  File "<stdin>", line 1, in <module>
+		  File "/home/monteiro/cloud/cloud_work/fmv1992_github/thermopy/thermopy/nasa9polynomials.py", line 501, in set_compound
+			('Ga2O', 'gallium;oxygen(2-)')
+		Exception: ("The compound 'LYQFWZFBNBDLEO-UHFFFAOYSA-M' you are trying to set is not unique: CsBr", 'CsBr(cr)')
+
 	- Put examples again in docstrings; need to update.
 
 	- Uniformize code (imports and the like) and improve compliance with PEP8.
