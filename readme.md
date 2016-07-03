@@ -93,6 +93,27 @@ v0.5.0:
 
 	- Transform IAPWS module into molar basis to be consistent with burcat and nasa9polynomials.
 
+	- Fix the setting of a compound when it is ambiguous:
+		>>> csbr = db.set_compound('LYQFWZFBNBDLEO-UHFFFAOYSA-M')
+		Traceback (most recent call last):
+		  File "<stdin>", line 1, in <module>
+		  File "/home/monteiro/cloud/cloud_work/fmv1992_github/thermopy/thermopy/nasa9polynomials.py", line 501, in set_compound
+			('Ga2O', 'gallium;oxygen(2-)')
+		Exception: ("The compound 'LYQFWZFBNBDLEO-UHFFFAOYSA-M' you are trying to set is not unique: CsBr", 'CsBr(cr)')
+
+	- Put examples again in docstrings; need to update.
+
+	- Uniformize code (imports and the like) and improve compliance with PEP8.
+
+	- Update docstrings to conform to PEP 257.
+
+	- Update documentation to use the package's name after merge: 'thermopy'.
+
+	- Do more testing. It looks like in some cases there are some import errors
+	  (see 'EXAMPLE 02: Hydrazine ’messing around’ example.' in documentation). 
+
+	- Make the PDFs 'copy and pastable'.
+
 	- Increase the testing coverage.
 
     - Implement units for every output so output is not a number but a dimension (e.g. 1 J/kg instead of 1).

@@ -1,14 +1,18 @@
-# -*- coding: utf-8 -*-
 """
-Created on Sun Aug 23 21:21:22 2015
+Burcat module is intended to give access to the Burcat's Database [1].
 
-@author:    Guillem Borrell i Nogueras; Funding by Vulcano Sadeca
-            monteiro
+This database contains coefficients for thousands of chemicals to be used in polynomial form. Therefore it allows the user to calculate different thermodynamic properties for various compounds. Some of these properties are:
+    1. Specific heat capacity at constant pressure
+    2. Enthalpy
+    3. Entropy
+    4. Gibbs energy
+all of them as functions of temperature for a given compound.
 
+Intended audience from [1]:
+The database is used by scientists, educators, engineers and students at all levels, dealing primarily with combustion and air pollution, jet engines, rocket propulsion, fireworks, but also by researchers involved in upper atmosphere kinetics, astrophysics, abrasion metallurgy, etc.
 """
 import os
 from xml.etree.ElementTree import parse
-from numpy import empty, array, dot, log
 import numpy as np
 import thermopy.units as units
 from thermopy.constants import ideal_gas_constant
@@ -16,16 +20,37 @@ _R = ideal_gas_constant[0]
 
 
 class Compound(object):
+    
     """
-    This is a helper class.  It is intended to be created via an
-    Elementdb object but you can use it by your own. Take a look at
-    Elementdb class.
-
+    Create chemical compounds.
+    
+    It is intended to be created via an Elementdb object but you can use it by your own. Take a look at Elementdb class.
+    
+    Attributes:
+        :param cas: (?type?): CAS number of the compound.
+        description (??): ?
+        formula (??): ?
+        aggr_state (??): ?
+        mm (??): molar mass of the compound.
+        h_formation (): heat of formation.
+        
     Units are in SI on a molar basis.
+    
     """
+    
     def __init__(self, cas, description, reference, formula, elements,
                  aggr_state, T_limit_low, T_limit_high, calc_quality,
                  mm, low_coefs, high_coefs, h_formation):
+        """
+        Create a chemical compound usually from the set_compound method.
+        
+        Args:
+            cas (type):
+            description ():
+            reference ():
+        
+        
+        """
         self.cas = cas
         self.description = description
         self._reference = reference
@@ -50,11 +75,11 @@ class Compound(object):
         """
         Calculates the specific heat capacity in J/(mol K).
         """
-        Ta = array([1, T, T ** 2, T ** 3, T ** 4], dtype='d')
+        Ta = np.array([1, T, T ** 2, T ** 3, T ** 4], dtype='d')
         if T >= self._T_limit_low and T <= 1000:
-            return dot(self._low_coefs[:5], Ta) * _R
+            return np.dot(self._low_coefs[:5], Ta) * _R
         elif T > 1000 and T <= self._T_limit_high:
-            return dot(self._high_coefs[:5], Ta) * _R
+            return np.dot(self._high_coefs[:5], Ta) * _R
         else:
             raise ValueError("Temperature out of range")
 
@@ -69,11 +94,11 @@ class Compound(object):
         """
         Computes the sensible enthalpy in J/mol.
         """
-        Ta = array([1, T / 2, T ** 2 / 3, T ** 3 / 4, T ** 4 / 5, 1 / T], 'd')
+        Ta = np.array([1, T / 2, T ** 2 / 3, T ** 3 / 4, T ** 4 / 5, 1 / T], 'd')
         if T >= self._T_limit_low and T <= 1000:
-            partial = dot(self._low_coefs[:6], Ta) * _R * T
+            partial = np.dot(self._low_coefs[:6], Ta) * _R * T
         elif T > 1000 and T <= self._T_limit_high:
-            partial = dot(self._high_coefs[:6], Ta) * _R * T
+            partial = np.dot(self._high_coefs[:6], Ta) * _R * T
         else:
             raise ValueError("Temperature out of range")
 
@@ -83,11 +108,11 @@ class Compound(object):
         """
         Computes the sensible enthalpy in J/kg.
         """
-        Ta = array([1, T / 2, T ** 2 / 3, T ** 3 / 4, T ** 4 / 5, 1 / T], 'd')
+        Ta = np.array([1, T / 2, T ** 2 / 3, T ** 3 / 4, T ** 4 / 5, 1 / T], 'd')
         if T >= self._T_limit_low and T <= 1000:
-            partial = dot(self._low_coefs[:6], Ta) * _R * T / self.mm
+            partial = np.dot(self._low_coefs[:6], Ta) * _R * T / self.mm
         elif T > 1000 and T <= self._T_limit_high:
-            partial = dot(self._high_coefs[:6], Ta) * _R * T / self.mm
+            partial = np.dot(self._high_coefs[:6], Ta) * _R * T / self.mm
         else:
             raise ValueError("Temperature out of range")
 
@@ -107,12 +132,12 @@ class Compound(object):
         """
         Computes enthropy in J/mol K.
         """
-        Ta = array([log(T), T, T ** 2 / 2, T ** 3 / 3, T ** 4 / 4, 0, 1], 'd')
+        Ta = np.array([np.log(T), T, T ** 2 / 2, T ** 3 / 3, T ** 4 / 4, 0, 1], 'd')
         # right
         if T >= self._T_limit_low and T <= 1000:
-            return dot(self._low_coefs, Ta) * _R
+            return np.dot(self._low_coefs, Ta) * _R
         elif T > 1000 and T <= self._T_limit_high:
-            return dot(self._high_coefs, Ta) * _R
+            return np.dot(self._high_coefs, Ta) * _R
         else:
             raise ValueError("Temperature out of range")
 
@@ -231,8 +256,8 @@ class Database(object):
                                         calc_quality = None
                                     mm = float(each_phase.find('molecular_weight').text) / 1e3
                                     coefs = each_phase.find('coefficients')
-                                    high_coefs = empty((7),dtype='d')
-                                    low_coefs = empty((7),dtype='d')
+                                    high_coefs = np.empty((7),dtype='d')
+                                    low_coefs = np.empty((7),dtype='d')
                                     range_1000_to_Tmax = coefs.find('range_1000_to_Tmax')         \
                                                                                 .findall('coef')
                                     for (index,a_term) in enumerate(range_1000_to_Tmax):
