@@ -10,3 +10,4 @@ __not_for_packaging*
 *personal*
 .eggs/
 .cache/
+.pylintrc
