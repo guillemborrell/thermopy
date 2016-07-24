@@ -1,5 +1,4 @@
-from __future__ import absolute_import
-"""
+u"""
 Collection of physical constants and conversion factors.
 
 Most constants are in SI units, so you can do
@@ -10,20 +9,11 @@ The list is not meant to be comprehensive, but just a convenient list for
 everyday use.
 """
 
-"""
-BasSw 2006
-physical constants: imported from CODATA
-unit conversion: see e.g. NIST special publication 811
-Use at own risk: double-check values before calculating your Mars
-orbit-insertion burn.
-Some constants exist in a few variants, which are marked with suffixes.
-The ones without any suffix should be the most common one.
-"""
-
+from __future__ import absolute_import
 import math as _math
-#physical constants
+# physical constants
 # physical constants:
-#    (value, unit, precision)
+# (value, unit, precision)
 cu_x_unit = (1.0020771e-13, 'm', 2.9e-20)
 atomic_unit_of_time = (2.418884326505e-17, 's', 1.6e-28)
 neutronproton_mass_ratio = (1.0013784187, '', 5.8e-10)
@@ -479,7 +469,7 @@ kWh = kilo * hour
 # Wh = watt_hour
 
 # power in watt
-#hp = horsepower = 550 * foot * pound * g
+# hp = horsepower = 550 * foot * pound * g
 
 # force in newton
 dyn = dyne = 1e-5

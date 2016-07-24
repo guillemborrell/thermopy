@@ -1,31 +1,38 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Tue Aug 18 10:03:51 2015
+u"""
+Calculates water and steam properties.
 
-@author: monteiro
+Classes:
 
+    Water: water object.
+
+References: [1] The International Association for the Properties of Water and
+Steam. Revised Release on the IAPWS Industrial Formulation 1997 for the
+Thermodynamic Properties of Water and Steam. August 2007.
 """
 
 from thermopy.units import Pressure, Temperature, Enthalpy
 from numpy import array, sum, sqrt, log
-from thermopy.constants import ideal_gas_constant, ideal_gas_constant_massic_basis
+from thermopy.constants import ideal_gas_constant,                            \
+    ideal_gas_constant_massic_basis
 import scipy.optimize
 
 
 class Water(object):
     """
-    Taken from The International Association for the Properties
-    of Water and Steam. Lucerne, Switzerland. August 2007. Revised
-    Release on the     IAPWS Industrial Formulation 1997 for the
-    Thermodynamic Properties     of Water and Steam.
-    Reference document: IAPWS-IF97.
+    Taken from The International Association for the Properties of Water and
+    Steam. Lucerne, Switzerland. August 2007. Revised Release on the IAPWS
+    Industrial Formulation 1997 for the Thermodynamic Properties of Water and
+    Steam. Reference document: IAPWS-IF97.
 
     All units in SI and default
     is molar basis."""
+
     def __init__(self, p, T, massic_basis=False):
+        u"""Initializes a Water object."""
+
         self.p = Pressure(p)
         self.T = Temperature(T)
-        #check if water is specified by IAPWS-IF97 for these values
+        # check if water is specified by IAPWS-IF97 for these values
         if self.T < Temperature(273.15) or self.T > Temperature(2273.15):
             raise ValueError('Temperature ' + str(T) +
                              ' out of range (273.15 - 2273.15K)')
@@ -38,11 +45,10 @@ class Water(object):
         # adjust R to mass or molar basis
         if massic_basis is True:
             self.R = ideal_gas_constant_massic_basis[0]  # kJ/(kg K);
-                                      # specific gas constant of ordinary water
         elif massic_basis is False:
             self.R = ideal_gas_constant[0]
 
-    #constants
+    # constants
     # ideal gas constant was already instantiated
     Tc = 647.096    # Critical point temperature (K)
     pc = Pressure(22.064).unit('MPa')     # Critical point pressure (MPa)
@@ -53,7 +59,7 @@ class Water(object):
 
     def temperature_saturation(self, p=None):
         """Yields Tsat given a pressure p."""
-        #module deals with pressure in MPa
+        # module deals with pressure in MPa
         if p is None:
             p = self.p.MPa
         else:
@@ -62,7 +68,7 @@ class Water(object):
         if p < Pressure(611.213).unit('Pa').MPa or p > self.pc:
             raise ValueError('Pressure out of range.')
 
-        #table 34
+        # table 34
         ni = array([1167.0521452767,
                     -724213.16703206,
                     -17.073846940092,
@@ -76,13 +82,13 @@ class Water(object):
 
         beta = p ** 0.25
 
-        E = 1     * beta ** 2 + ni[2] * beta + ni[5]
+        E = 1 * beta ** 2 + ni[2] * beta + ni[5]
         F = ni[0] * beta ** 2 + ni[3] * beta + ni[6]
         G = ni[1] * beta ** 2 + ni[4] * beta + ni[7]
         D = 2 * G / (-F - (F**2 - 4 * E * G)**0.5)
 
         return Temperature((ni[9] + D - ((ni[9] + D) ** 2 - 4 *
-                           (ni[8] + ni[9] * D)) ** 0.5) * 0.5)
+                                         (ni[8] + ni[9] * D)) ** 0.5) * 0.5)
 
     def pressure_saturation(self, T=None):
         """Yields Psat given a temperature T"""
@@ -94,7 +100,7 @@ class Water(object):
         if T < 273.15 or T > self.Tc:
             raise ValueError('Temperature out of range.')
 
-        #table 34
+        # table 34
         ni = array([1167.0521452767,
                     -724213.16703206,
                     -17.073846940092,
@@ -107,10 +113,10 @@ class Water(object):
                     650.17534844798], dtype='d')
 
         v = T + ni[8] / (T - ni[9])
-        A = 1     * v ** 2 + ni[0] * v + ni[1]
+        A = 1 * v ** 2 + ni[0] * v + ni[1]
         B = ni[2] * v ** 2 + ni[3] * v + ni[4]
         C = ni[5] * v ** 2 + ni[6] * v + ni[7]
-        return Pressure((2 * C / (-B + (B ** 2 - 4 * A * C) ** 0.5 )) ** 4
+        return Pressure((2 * C / (-B + (B ** 2 - 4 * A * C) ** 0.5)) ** 4
                         ).unit('MPa')
 
     def _is_in_region(self):
@@ -118,7 +124,7 @@ class Water(object):
         The usefulness of these regions are to divide the physical properties
         of water into different sets of coefficients and equations."""
 
-        #for the 2 - 3 boundary line
+        # for the 2 - 3 boundary line
         ni = array([348.05185628969,
                     -1.1671859879975,
                     0.0010192970039326,
@@ -133,17 +139,17 @@ class Water(object):
             return 1
         # regular cases
         if self.T >= Temperature(273.15) and self.T <= Temperature(623.15):
-                if self.T < self.temperature_saturation(self.p):
-                    return 1
-                else:
-                    return 2
+            if self.T < self.temperature_saturation(self.p):
+                return 1
+            else:
+                return 2
         elif self.T > Temperature(623.15) and self.T <= Temperature(1073.15):
             if self.p > pressure23:
                 return 3
             else:
                 return 2
         elif self.T >= Temperature(1073.15) and self.T <= Temperature(2273.15):
-                return 5
+            return 5
         else:
             raise Exception('Cannot assign region to the parameters p = ' +
                             str(self.p) + 'T = ' + str(self.T) + 'given.')
@@ -151,7 +157,7 @@ class Water(object):
     def _basic_equation1(self, value='gamma'):
         """Returns basic equation 1 and its derivatives, ex: 'gamma',
         'gamma_tau', 'gamma_tau_pi', etc."""
-        #region1
+        # region1
         Ii = array([0, 0, 0, 0, 0, 0, 0, 0, 1,
                     1, 1, 1, 1, 1, 2, 2, 2, 2,
                     2, 3, 3, 3, 4, 4, 4, 5, 8,
@@ -199,30 +205,30 @@ class Water(object):
         tau = Temperature(1386) / self.T
 
         if value == 'gamma':
-            return sum( ni * ( (7.1 - pi) ** Ii ) *
-                      ( (tau - 1.222) ** Ji ) )
+            return sum(ni * ((7.1 - pi) ** Ii) *
+                       ((tau - 1.222) ** Ji))
         elif value == 'gamma_tau':
-            return sum( ni * ( (7.1 - pi) ** Ii ) * Ji *
-                        ( (tau - 1.222) ** (Ji-1) ) )
+            return sum(ni * ((7.1 - pi) ** Ii) * Ji *
+                       ((tau - 1.222) ** (Ji-1)))
         elif value == 'gamma_tau_tau':
-            return sum( ni * ((7.1 - pi) ** Ii) * Ji * (Ji - 1) *
-                        ((tau - 1.222) ** (Ji - 2)))
+            return sum(ni * ((7.1 - pi) ** Ii) * Ji * (Ji - 1) *
+                       ((tau - 1.222) ** (Ji - 2)))
         elif value == 'gamma_pi':
-            return -1 * sum( ni * Ii * ((7.1 - pi) ** (Ii - 1)) *
-                             (tau - 1.222) ** Ji )
+            return -1 * sum(ni * Ii * ((7.1 - pi) ** (Ii - 1)) *
+                            (tau - 1.222) ** Ji)
         elif value == 'gamma_pi_pi':
-            return sum( ni * Ii * (Ii - 1) * (7.1 - pi) ** (Ii - 2) *
-                        (tau - 1.222) ** Ji)
+            return sum(ni * Ii * (Ii - 1) * (7.1 - pi) ** (Ii - 2) *
+                       (tau - 1.222) ** Ji)
         elif value == 'gamma_pi_tau' or value == 'gamma_tau_pi':
-            return -1 * sum( ni * Ii * (7.1 - pi) ** (Ii - 1) *
-                             Ji * (tau - 1.222) ** (Ji - 1))
+            return -1 * sum(ni * Ii * (7.1 - pi) ** (Ii - 1) *
+                            Ji * (tau - 1.222) ** (Ji - 1))
         else:
             raise Exception('Function not assigned in _basic_equation1()')
 
     def _basic_equation2(self, value='gamma'):
         """Returns equation 1 and its derivatives, ex: 'gamma', 'gamma_tau',
         'gamma_tau_pi', etc."""
-        #region2; ideal part
+        # region2; ideal part
         J0 = array([0, 1, -5, -4, -3, -2, -1,
                     2, 3], dtype='d')
         n0 = array([-9.6927686500217,
@@ -234,7 +240,7 @@ class Water(object):
                     -4.383951131945,
                     -0.28408632460772,
                     0.021268463753307], dtype='d')
-        #region2; real part
+        # region2; real part
         Ii = array([1, 1, 1, 1, 1, 2, 2, 2, 2,
                     2, 3, 3, 3, 3, 3, 4, 4, 4,
                     5, 6, 6, 6, 7, 7, 7, 8, 8,
@@ -293,31 +299,31 @@ class Water(object):
 
         pi = self.p / Pressure(1).unit('MPa')
         tau = 540 / self.T
-        #arrays
+        # arrays
         if value == 'gamma':
             return (self._basic_equation2('gamma_0') +
                     self._basic_equation2('gamma_r'))
         elif value == 'gamma_0':
             return log(pi) + sum(n0 * (tau ** J0))
         elif value == 'gamma_r':
-            return sum( ni * (pi ** Ii) * (tau - 0.5) ** Ji)
+            return sum(ni * (pi ** Ii) * (tau - 0.5) ** Ji)
         elif value == 'gamma_0_pi':
             return 1/pi
         elif value == 'gamme_0_pi_pi':
             return -1/(pi ** 2)
         elif value == 'gamma_0_tau':
-            return 0 + sum( n0 * J0 * (tau ** (J0 - 1) ) )
+            return 0 + sum(n0 * J0 * (tau ** (J0 - 1)))
         elif value == 'gamma_0_tau_tau':
-            return 0 + sum (n0 * J0 * (J0 - 1) * tau ** (J0 - 2))
+            return 0 + sum(n0 * J0 * (J0 - 1) * tau ** (J0 - 2))
         elif value == 'gamma_0_pi_tau' or value == 'gamma_0_tau_pi':
             return 0
         elif value == 'gamma_r_pi':
-            return sum( ni * Ii * (pi ** (Ii - 1)) * ((tau - 0.5) ** Ji) )
+            return sum(ni * Ii * (pi ** (Ii - 1)) * ((tau - 0.5) ** Ji))
         elif value == 'gamma_r_tau':
-            return sum( ni * (pi ** Ii) * Ji * (tau - 0.5) ** (Ji - 1))
+            return sum(ni * (pi ** Ii) * Ji * (tau - 0.5) ** (Ji - 1))
         elif value == 'gamma_r_pi_pi':
-            return sum( ni * Ii * (Ii - 1) * (pi ** (Ii - 2))
-                       (tau - 0.5) ** Ji )
+            return sum(ni * Ii * (Ii - 1) * (pi ** (Ii - 2))
+                       (tau - 0.5) ** Ji)
         elif value == 'gamma_r_tau_tau':
             return sum(ni * (pi ** Ii) * Ji * (Ji - 1) * (tau - 0.5) **
                        (Ji - 2))
@@ -328,19 +334,19 @@ class Water(object):
         """Returns equation 3 and its derivatives, ex: 'gamma',
         'gamma_tau', 'gamma_tau_pi', etc."""
         # do not forget that the first term is not used
-        Ii = array([-1 , 0, 0, 0, 0, 0, 0, 0,
+        Ii = array([-1, 0, 0, 0, 0, 0, 0, 0,
                     1, 1, 1, 1, 2, 2, 2, 2, 2,
                     2, 3, 3, 3, 3, 3, 4, 4, 4,
                     4, 5, 5, 5, 6, 6, 6, 7, 8,
                     9, 9, 10, 10, 11], dtype='d')
         # do not forget that the first term is not used
-        Ji = array([-1 , 0, 1, 2, 7, 10, 12,
+        Ji = array([-1, 0, 1, 2, 7, 10, 12,
                     23, 2, 6, 15, 17, 0, 2, 6,
                     7, 22, 26, 0, 2, 4, 16,
                     26, 0, 2, 4, 26, 1, 3, 26,
                     0, 2, 26, 2, 26, 2, 26, 0,
                     1, 26], dtype='d')
-        ni =    array([1.0658070028513,
+        ni = array([1.0658070028513,
                     -15.732845290239,
                     20.944396974307,
                     -7.6867707878716,
@@ -392,9 +398,9 @@ class Water(object):
         # calculate rho to be used in PHI
 
         def obj(x):
-            return ( self.p - 1000 * x * self.R * self.T * (x / self.rhoc) * \
-                    ( n1 / (x / self.rhoc) + sum(
-                    ni * Ii * (x / self.rhoc) ** (Ii - 1) * tau ** Ji) ) )
+            return (self.p - 1000 * x * self.R * self.T * (x / self.rhoc) *
+                    (n1 / (x / self.rhoc) + sum(
+                        ni * Ii * (x / self.rhoc) ** (Ii - 1) * tau ** Ji)))
         for i in range(1, 580, 1):
             a = i
             b = a + 1
@@ -404,7 +410,7 @@ class Water(object):
         delta = rho / self.rhoc
 
         # returns PHI and found rho as tuple (PHI, rho)
-        if   value == 'PHI':
+        if value == 'PHI':
             return (n1 * log(delta) + sum(ni * delta ** Ii * tau ** Ji),
                     rho)
         elif value == 'PHI_delta':
@@ -412,30 +418,30 @@ class Water(object):
                     rho)
         elif value == 'PHI_delta_delta':
             return (-n1 / (delta ** 2) + sum(ni * Ii * (Ii - 1) * delta **
-                                            (Ii - 2) * tau ** Ji),
+                                             (Ii - 2) * tau ** Ji),
                     rho)
         elif value == 'PHI_tau':
             return (sum(ni * delta ** Ii * Ji * tau ** (Ji - 1)),
                     rho)
         elif value == 'PHI_tau_tau':
-            return (sum( ni * delta ** Ii * Ji * (Ji - 1) * tau ** (Ji -2)),
+            return (sum(ni * delta ** Ii * Ji * (Ji - 1) * tau ** (Ji - 2)),
                     rho)
         elif value == 'PHI_delta_tau' or value == 'PHI_tau_delta':
             return (sum(ni * Ii * delta ** (Ii - 1) * Ji * tau ** (Ji - 1)),
                     rho)
 
-    #there is no region 4; region 4 is the saturation line of water/vapor
+    # there is no region 4; region 4 is the saturation line of water/vapor
 
-    def _basic_equation5(self, value = 'gamma'):
+    def _basic_equation5(self, value='gamma'):
         """Returns equation 1 and its derivatives, ex: 'gamma',
         'gamma_tau', 'gamma_tau_pi', etc."""
         J0 = array([0, 1, -3, -2, -1, 2], dtype='d')
         n0 = array([-13.179983674201,
-                      6.8540841634434,
-                      -0.024805148933466,
-                      0.36901534980333,
-                      -3.1161318213925,
-                      -0.32961626538917], dtype='d')
+                    6.8540841634434,
+                    -0.024805148933466,
+                    0.36901534980333,
+                    -3.1161318213925,
+                    -0.32961626538917], dtype='d')
         Ii = array([1, 1, 1, 2, 2, 3], dtype='d')
         Ji = array([1, 2, 3, 3, 9, 7], dtype='d')
         ni = array([0.0015736404855259,
@@ -447,7 +453,7 @@ class Water(object):
         pi = self.p / Pressure(1).unit('MPa')
         tau = Temperature(1000) / self.T
 
-        if   value == 'gamma':
+        if value == 'gamma':
             return (self._basic_equation5('gamma_0')
                     + self._basic_equation5('gamma_r'))
         elif value == 'gamma_0':
@@ -486,7 +492,7 @@ class Water(object):
         else:
             T = Temperature(T)
 
-        if   self._is_in_region() == 1:
+        if self._is_in_region() == 1:
             return self._basic_equation1('gamma') * self.R * T
         elif self._is_in_region() == 2:
             return self._basic_equation2('gamma') * self.R * T
@@ -508,15 +514,15 @@ class Water(object):
         else:
             T = Temperature(T)
 
-        if   self._is_in_region() == 1:
+        if self._is_in_region() == 1:
             pi = self.p / Pressure(16.53).unit('MPa')
             return (self._basic_equation1('gamma_pi') * self.R * self.T * pi
                     / self.p * 1e3)  # because of kJ in R
         elif self._is_in_region() == 2:
             pi = self.p / Pressure(1).unit('MPa')
-            return ( pi * (self._basic_equation2('gamma_0_pi') +
-                         self._basic_equation2('gamma_r_pi')) * self.R
-                   * self.T / self.p * 1e3)
+            return (pi * (self._basic_equation2('gamma_0_pi') +
+                          self._basic_equation2('gamma_r_pi')) * self.R
+                    * self.T / self.p * 1e3)
         elif self._is_in_region() == 3:
             return None
         elif self._is_in_region() == 4:
@@ -537,7 +543,7 @@ class Water(object):
         else:
             T = Temperature(T)
 
-        if   self._is_in_region() == 1:
+        if self._is_in_region() == 1:
             pi = self.p / Pressure(16.53).unit('MPa')
             tau = Temperature(1386) / self.T
             return (tau * self._basic_equation1('gamma_tau') - pi *
@@ -547,7 +553,7 @@ class Water(object):
             pi = self.p / Pressure(1).unit('MPa')
             tau = 540 / self.T
             return (tau * (self._basic_equation2('gamma_0_tau') +
-                    self._basic_equation2('gamma_r_tau')) - pi *
+                           self._basic_equation2('gamma_r_tau')) - pi *
                     (self._basic_equation2('gamma_0_pi') +
                      self._basic_equation2('gamma_r_pi'))) * self.R * self.T
         elif self._is_in_region() == 3:
@@ -570,7 +576,7 @@ class Water(object):
         else:
             T = Temperature(T)
 
-        if   self._is_in_region() == 1:
+        if self._is_in_region() == 1:
             pi = self.p / Pressure(16.53).unit('MPa')
             tau = Temperature(1386) / self.T
             return (tau * self._basic_equation1('gamma_tau') -
@@ -579,9 +585,9 @@ class Water(object):
             pi = self.p / Pressure(1).unit('MPa')
             tau = 540 / self.T
             return ((tau * (self._basic_equation2('gamma_0_tau') +
-                    self._basic_equation2('gamma_r_tau')) -
-                    (self._basic_equation2('gamma_0') +
-                     self._basic_equation2('gamma_r'))) * self.R)
+                            self._basic_equation2('gamma_r_tau')) -
+                     (self._basic_equation2('gamma_0') +
+                      self._basic_equation2('gamma_r'))) * self.R)
         elif self._is_in_region() == 3:
             pass
         elif self._is_in_region() == 4:
@@ -602,7 +608,7 @@ class Water(object):
         else:
             T = Temperature(T)
 
-        if   self._is_in_region() == 1:
+        if self._is_in_region() == 1:
             return Enthalpy(self._basic_equation1('gamma_tau')
                             * 1386 * self.R)
 
@@ -617,7 +623,7 @@ class Water(object):
             delta = reg3_solved[1] / self.rhoc
             tau = self.Tc / self.T
             return Enthalpy((tau * self._basic_equation3('PHI_tau')[0]
-                             + delta * reg3_solved[0] ) * self.R * self.T)
+                             + delta * reg3_solved[0]) * self.R * self.T)
 
         elif self._is_in_region() == 4:
             return None
@@ -626,7 +632,7 @@ class Water(object):
             pi = self.p / Pressure(1).unit('MPa')
             tau = Temperature(1000) / self.T
             return (tau * (self._basic_equation5('gamma_0_tau') +
-                          self._basic_equation5('gamma_r_tau')) * self.R *
+                           self._basic_equation5('gamma_r_tau')) * self.R *
                     self.T)
 
     def heat_capacity(self, p=None, T=None):
@@ -640,7 +646,7 @@ class Water(object):
         else:
             T = Temperature(T)
 
-        if   self._is_in_region() == 1:
+        if self._is_in_region() == 1:
             tau = 1386 / T
             return (-1 * tau * tau * self.R *
                     self._basic_equation1('gamma_tau_tau'))
@@ -651,9 +657,10 @@ class Water(object):
             tau = self.Tc / self.T
             return (- tau ** 2 / self._basic_equation3('PHI_tau_tau') +
                     (delta * self._basic_equation3('PHI_delta') -
-                    delta * tau * self._basic_equation3('PHI_tau_delta'))
-                    ** 2 / ( 2 * delta  * self._basic_equation3('PHI_delta') +
-                    delta ** 2 * self._basic_equation3('PHI_delta_delta'))
+                     delta * tau * self._basic_equation3('PHI_tau_delta'))
+                    ** 2 / (2 * delta * self._basic_equation3('PHI_delta') +
+                            delta ** 2 * self._basic_equation3(
+                                'PHI_delta_delta'))
                     ) * self.R
         elif self._is_in_region() == 4:
             pass
@@ -673,12 +680,12 @@ class Water(object):
         else:
             T = Temperature(T)
 
-        if   self._is_in_region() == 1:
+        if self._is_in_region() == 1:
             pi = self.p / Pressure(16.53).unit('MPa')
             tau = Temperature(1386) / self.T
             return (- (tau ** 2) * self._basic_equation1('gamma_tau_tau') +
                     ((self._basic_equation1('gamma_pi') - tau *
-                    self._basic_equation1('gamma_pi_tau')) ** 2) /
+                      self._basic_equation1('gamma_pi_tau')) ** 2) /
                     self._basic_equation1('gamma_pi_pi')) * self.R
         elif self._is_in_region() == 2:
             pass
@@ -702,17 +709,17 @@ class Water(object):
         else:
             T = Temperature(T)
 
-        if   self._is_in_region() == 1:
+        if self._is_in_region() == 1:
             pi = self.p / Pressure(16.53).unit('MPa')
             tau = Temperature(1386) / self.T
             inside_frac = (((self._basic_equation1('gamma_pi') - tau *
-                            self._basic_equation1('gamma_tau_pi')) ** 2) /
-                            ((tau ** 2) *
+                             self._basic_equation1('gamma_tau_pi')) ** 2) /
+                           ((tau ** 2) *
                             self._basic_equation1('gamma_tau_tau')
                             ))
             return sqrt(((self._basic_equation1('gamma_pi') ** 2) / (
-                          inside_frac  - self._basic_equation1('gamma_pi_pi'))
-                          ) * self.R * self.T * 1000)
+                          inside_frac - self._basic_equation1('gamma_pi_pi'))
+                         ) * self.R * self.T * 1000)
 
         elif self._is_in_region() == 2:
             pass

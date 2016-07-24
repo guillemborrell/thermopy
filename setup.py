@@ -6,7 +6,8 @@ my_long_description = str(
 Python library for thermodynamics and other handy tools.
 
 
-Thermodynamics (all these properties as function of temperature for thousands of compounds):
+Thermodynamics (all these properties as function of temperature for thousands
+of compounds):
 
 	- Specific heat capacity
 
@@ -55,9 +56,8 @@ setup(name="thermopy",
       license="GPL",
       packages=find_packages(),
       include_package_data=True,
-      data_files=[('documentation', ['documentation/thermopy051_documentation.pdf',
-                                     'documentation/thermopy051_overview.pdf']),
-                  ('databases', ['databases/burcat_thr.xml', 'databases/nasa9polynomials.xml'])],
+      data_files=[('databases', ['databases/burcat_thr.xml',
+                                 'databases/nasa9polynomials.xml'])],
       install_requires=['scipy>=0.6.0', 'numpy>=1.2.1'],
       test_suite='nose.collector',
       tests_require=['nose'],
