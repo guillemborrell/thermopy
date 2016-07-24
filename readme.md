@@ -61,6 +61,16 @@ python3 thermopy/setup.py test
 
 ## Changelog:
 
+v0.5.4:
+
+    - Merge complete.
+
+    - Documentation now using sphinx instead of pdf files.
+
+    - Code compliance and readability improved.
+
+    - Code and logic uniformized.
+
 v0.5.3 (ongoing):
 	
 	- Merged with original thermopy and discarded the 'thermopy3' name.

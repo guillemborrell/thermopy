@@ -8,8 +8,10 @@ numpy floats. *Therefore to end any form of ambiguity we reinstate that all the
 results are in SI units using molar basis*. It is up to the user to beware of
 any physical unit conversion concerning his problem.
 
-Classes: Compound: chemical compound present in the NASA9 term polynomials
-database.
+Classes:
+
+    Compound: chemical compound present in the NASA9 term polynomials
+    database.
 
     CompoundIdealGas: chemical compound as an ideal gas present in the NASA9
     term polynomials database. It inherits from Compound.
@@ -70,28 +72,35 @@ class Compound(object):
     temperature as their sole argument. Those were expanded to include
     gibbs_energy that could be defined by the given functions.
 
-    Attributes: canonical_smiles (str): Canonical SMILES (Simplified
-    molecular-input line-entry system) of the compound.  cas_number (str): CAS
-    (Chemical Abstract Service) number of the compound.  comment (str): Comment
-    found in the xml database. Usually references.  condensed (bool): True if
-    the compound is condensed, False if not.  xml_compounds (list): List
-    containing tuples of two entries. The first is the xml_compound and the
-    second is the proportion of the xml_compound in the molecule. Both values
-    are strings.  enthalpy_of_formation (float): Enthalpy of formation of the
-    compound.  inchikey (str): InChI (International Chemical Identifier) key
-    for the compound.  inp_name (str): Name as per the original 'inp' file.
+    Attributes:
+        canonical_smiles (str): Canonical SMILES
+            (Simplified molecular-input line-entry system) of the compound.
+        cas_number (str): CAS (Chemical Abstract Service) number of the
+            compound.
+        comment (str): Comment found in the xml database. Usually references.
+        condensed (bool): True if the compound is condensed, False if not.
+        xml_compounds (list): List containing tuples of two entries. The first
+            is the xml_compound and the second is the proportion of the
+            xml_compound in the molecule. Both values are strings.
+        enthalpy_of_formation (float): Enthalpy of formation of the compound.
+        inchikey (str): InChI (International Chemical Identifier) key
+            for the compound.
+        inp_name (str): Name as per the original 'inp' file.
         iupac_name (str): IUPAC (International Union of Pure and Applied
-        Chemistry) name of the compound.  molecular_weight (float): Molecular
-        weight of the compound.  reference (str): Reference for the compound.
-        See [1] for details.
+            Chemistry) name of the compound.
+        molecular_weight (float): Molecular
+            weight of the compound.
+        reference (str): Reference for the compound. See [1] for details.
 
-    Methods: enthalpy: calculates the enthalpy for a Compound object.  entropy:
-    calculates the entropy for a Compound object.  gibbs_energy: calculates the
-    Gibbs energy for a Compound object.  heat_capacity: calculates the heat
-    capacity for a Compound object.
+    Methods:
+        enthalpy:calculates the enthalpy for a Compound object.
+        entropy: calculates the entropy for a Compound object.
+        gibbs_energy: calculates the Gibbs energy for a Compound object.
+        heat_capacity: calculates the heat capacity for a Compound object.
 
-    Subclasses: CompoundIdealGas: chemical compound as an ideal gas present in
-    the NASA9 term polynomials database. It inherits from Compound.
+    Subclasses:
+        CompoundIdealGas: chemical compound as an ideal gas present in
+        the NASA9 term polynomials database. It inherits from Compound.
 
     Examples:
         >>> import thermopy
@@ -107,7 +116,8 @@ class Compound(object):
         u"""
         Instantiate a Compound object from xml info.
 
-        Arguments: xml_compound: xml tree containing the relevant fields to
+        Arguments:
+            xml_compound: xml tree containing the relevant fields to
         characterize the attributes and boundaries of temperature for which
         calculations are valid.
 
@@ -138,10 +148,12 @@ class Compound(object):
         Return a list of tuples containing the elements and their
         proportion in the chemical compound.
 
-        Arguments: xml_compound (list): list of Element Tree objects containing
+        Arguments:
+            xml_compound (list): list of Element Tree objects containing
         elements.
 
-        Returns: list: list of tuples. Tuples are of the form (str, int) where
+        Returns:
+            list: list of tuples. Tuples are of the form (str, int) where
         str is the symbol of the element and int is its proportion in the
         molecule.
 
@@ -159,9 +171,11 @@ class Compound(object):
 
         Helper method to ouput temperature interval order.
 
-        Arguments: T (float): temperature.
+        Arguments:
+            T (float): temperature.
 
-        Returns: int: The order of the temperature range (0th, 1st, 2nd, etc).
+        Returns:
+            int: The order of the temperature range (0th, 1st, 2nd, etc).
         Some compounds have more than one temperature range with different
         corrisponding coefficients. Therefore the temperature range has to be
         specified.
@@ -186,9 +200,11 @@ class Compound(object):
         Calculate molar heat capacity at constant pressure for standard
         state.
 
-        Arguments: T (float): temperature.
+        Arguments:
+            T (float): temperature.
 
-        Returns: numpy_float: The molar heat capacity for the compound for a
+        Returns:
+            numpy_float: The molar heat capacity for the compound for a
         given temperature.
 
         Examples:
@@ -215,17 +231,20 @@ class Compound(object):
         Calculate molar enthalpy at constant pressure for the compound for
         a given temperature.
 
-        Arguments: T (float): temperature.
+        Arguments:
+            T (float): temperature.
 
-        Returns: numpy_float: The molar enthalpy for the compound for a given
-        temperature.
+        Returns:
+            numpy_float: The molar enthalpy for the compound for a given
+            temperature.
 
         Examples:
             >>> import thermopy
             >>> from thermopy import nasa9polynomials as nasa9
             >>> db = nasa9.Database()
             >>> magnesium_hydroxide = db.set_compound('Mg(OH)2(cr)')
-            >>> print(magnesium_hydroxide, '-', magnesium_hydroxide.enthalpy(500))  # J/mol
+            >>> print(magnesium_hydroxide, '-',
+            >>> magnesium_hydroxide.enthalpy(500))  # J/mol
             Mg(OH)2(cr) - -906097.801815
 
         """
@@ -249,10 +268,12 @@ class Compound(object):
         Calculate molar entropy at constant pressure for the compound for
         a given temperature.
 
-        Arguments: T (float): temperature.
+        Arguments:
+            T (float): temperature.
 
-        Returns: numpy_float: The molar entropy for the compound for a given
-        temperature.
+        Returns:
+            numpy_float: The molar entropy for the compound for a given
+            temperature.
 
         Examples:
             >>> import thermopy
@@ -283,10 +304,12 @@ class Compound(object):
         Calculate molar Gibbs energy at constant pressure for the compound
         for a given temperature.
 
-        Arguments: T (float): temperature.
+        Arguments:
+            T (float): temperature.
 
-        Returns: numpy_float: The molar entropy for the compound for a given
-        temperature.
+        Returns:
+            numpy_float: The molar entropy for the compound for a given
+            temperature.
 
         Examples:
             >>> import thermopy
@@ -329,9 +352,11 @@ class CompoundIdealGas(Compound):
 
     Inherits from Compound.
 
-    Methods: heat_capacity_constant_v: calculates the heat capacity at a
-    constant volume for a CompoundIdealGas object.  internal_energy: calculates
-    the internal energy for a CompoundIdealGas object.
+    Methods:
+        heat_capacity_constant_v: calculates the heat capacity at a
+        constant volume for a CompoundIdealGas object.
+        internal_energy: calculates
+        the internal energy for a CompoundIdealGas object.
 
     Examples:
         >>> # Instantiating a Compound whose condensed attributed is False
@@ -341,14 +366,17 @@ class CompoundIdealGas(Compound):
         >>> db = nasa9.Database()
         >>> co2 = db.set_compound('CO2')
         >>> print(co2, type(co2))
-        carbon dioxide: CO2 <class 'thermopy.nasa9polynomials.CompoundIdealGas'>
+        carbon dioxide: CO2 <class
+        'thermopy.nasa9polynomials.CompoundIdealGas'>
 
     """
+
     def __init__(self, xml_compound):
         u"""
         Initialize an ideal gas Compound.
 
-        Arguments: xml_compound: xml tree containing the relevant fields to
+        Arguments:
+            xml_compound: xml tree containing the relevant fields to
         characterize the attributes and boundaries of temperature for which
         calculations are valid.
 
@@ -360,10 +388,12 @@ class CompoundIdealGas(Compound):
         Calculate molar heat capacity at constant volume for standard
         state.
 
-        Arguments: T (float): temperature.
+        Arguments:
+            T (float): temperature.
 
-        Returns: numpy_float: The molar heat capacity for the compound for a
-        given temperature.
+        Returns:
+            numpy_float: The molar heat capacity for the compound for a
+            given temperature.
 
         Examples:
             >>> import thermopy
@@ -387,10 +417,12 @@ class CompoundIdealGas(Compound):
         Calculate molar internal energy at constant pressure for standard
         state.
 
-        Arguments: T (float): temperature.
+        Arguments:
+            T (float): temperature.
 
-        Returns: numpy_float: The molar internal energy for the compound for a
-        given temperature.
+        Returns:
+            numpy_float: The molar internal energy for the compound for a
+            given temperature.
 
         Examples:
             >>> import thermopy
@@ -402,6 +434,7 @@ class CompoundIdealGas(Compound):
 
         """
         return self.enthalpy(T) - _R * T
+
 
 class Database(object):
     u"""
@@ -545,9 +578,8 @@ class Database(object):
             x (str): identifier for compound being searched.
 
         Returns:
-            Compound??fix to thermopy.nasa9polynomials.Compound: returns a
-            Compound objected if the phase is condensed. Returns a
-            CompoundIdealGas otherwise.
+            Compound: returns a Compound object if the phase is condensed.
+            Returns a CompoundIdealGas otherwise.
 
         Example:
             >>> # Someone is looking for the element gallium but is not certain
@@ -630,7 +662,8 @@ class Reaction(object):
         >>> prods = (sodium_hydroxide, hydrogen)
         >>> reacts_coefs = (2, 2)
         >>> prods_coefs = (2, 1)
-        >>> reaction1 = nasa9.Reaction(300, reacts, prods, reacts_coefs, prods_coefs)
+        >>> reaction1 = nasa9.Reaction(300, reacts, prods, reacts_coefs,
+        >>> prods_coefs)
         >>> print(reaction1)
         <reaction> +2 Na(cr) +2 H2O(L)  -> +2 NaOH(a) +1 H2
         >>> print(reaction1.entropy_reaction())
@@ -642,6 +675,7 @@ class Reaction(object):
         The Reaction class does not check for imbalances of the reaction (yet).
 
     """
+
     def __init__(self, T, reactants, products,
                  reactants_coefficients, product_coefficients):
         u"""
@@ -651,7 +685,8 @@ class Reaction(object):
             T (float): temperature of the reaction.
             reactants (tuple): tuple of the reactants as Compounds.
             products (tuple): tuple of the products as Compounds.
-            reactants_coefficients (tuple): tuple of the reactants coefficients.
+            reactants_coefficients (tuple): tuple of the reactants
+                coefficients.
             product_coefficients (tuple): tuple of the products coefficients.
 
         Examples:
@@ -659,7 +694,8 @@ class Reaction(object):
             >>> from thermopy import nasa9polynomials as nasa9
             >>> db = nasa9.Database()
             >>> co = db.set_compound('carbon monoxide')
-            >>> molybdenium_oxide = db.set_compound('MoO2(cr)')  # to set it a solid
+            >>> molybdenium_oxide = db.set_compound('MoO2(cr)')  # to set it a
+            >>> solid
             >>> co2 = db.set_compound('co2')
             >>> molybdenium = db.set_compound('Mo(cr)')  # to set it a solid
             >>> reagents = (co, molybdenium_oxide)
@@ -723,7 +759,8 @@ class Reaction(object):
             ...     prodcuts_stoichometry
             ...     )
             >>> print(reaction1, reaction1.enthalpy_reaction())
-            <reaction> +1 HNO3 +1 NaOH(a)  -> +1 NaNO3(a) +1 H2O(L)  -193773.133358
+            <reaction> +1 HNO3 +1 NaOH(a)  -> +1 NaNO3(a) +1 H2O(L)
+            -193773.133358
 
         """
         if T is not None:
@@ -766,7 +803,8 @@ class Reaction(object):
             ...     prodcuts_stoichometry
             ...     )
             >>> print(reaction1, reaction1.entropy_reaction())
-            <reaction> +1 HNO3 +1 NaOH(a)  -> +1 NaNO3(a) +1 H2O(L)  -145.797754143
+            <reaction> +1 HNO3 +1 NaOH(a)  -> +1 NaNO3(a) +1 H2O(L)
+            -145.797754143
 
         """
         if T is not None:
@@ -822,7 +860,8 @@ class Reaction(object):
 
     def equilibrium_constant(self, T=None):
         u"""
-        Calculate the equilibrium constant of the reaction at the standard state.
+        Calculate the equilibrium constant of the reaction at the standard
+        state.
 
         Definition: K = exp(- deltaG / (R T))
 

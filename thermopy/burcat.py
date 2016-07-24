@@ -1,16 +1,21 @@
 """
 Burcat module is intended to give access to the Burcat's Database [1].
 
-This database contains coefficients for thousands of chemicals to be used in polynomial form. Therefore it allows the user to calculate different thermodynamic properties for various compounds. Some of these properties are:
-    1. Specific heat capacity at constant pressure
-    2. Enthalpy
-    3. Entropy
-    4. Gibbs energy
-all of them as functions of temperature for a given compound.
+This database contains coefficients for thousands of chemicals to be used in
+polynomial form. Therefore it allows the user to calculate different
+thermodynamic properties for various compounds. Some of these properties are: 1.
+Specific heat capacity at constant pressure 2. Enthalpy 3. Entropy 4. Gibbs
+energy all of them as functions of temperature for a given compound.
 
-Intended audience from [1]:
-The database is used by scientists, educators, engineers and students at all levels, dealing primarily with combustion and air pollution, jet engines, rocket propulsion, fireworks, but also by researchers involved in upper atmosphere kinetics, astrophysics, abrasion metallurgy, etc.
+Intended audience from [1]: The database is used by scientists, educators,
+engineers and students at all levels, dealing primarily with combustion and air
+pollution, jet engines, rocket propulsion, fireworks, but also by researchers
+involved in upper atmosphere kinetics, astrophysics, abrasion metallurgy, etc.
+
+This file is deprecated and shall not be maintained. Use the nasa9polynomials
+instead.
 """
+
 import os
 from xml.etree.ElementTree import parse
 import numpy as np
@@ -20,12 +25,12 @@ _R = ideal_gas_constant[0]
 
 
 class Compound(object):
-    
-    """
+    u"""
     Create chemical compounds.
-    
-    It is intended to be created via an Elementdb object but you can use it by your own. Take a look at Elementdb class.
-    
+
+    It is intended to be created via an Elementdb object but you can use it by
+    your own. Take a look at Elementdb class.
+
     Attributes:
         :param cas: (?type?): CAS number of the compound.
         description (??): ?
@@ -33,23 +38,22 @@ class Compound(object):
         aggr_state (??): ?
         mm (??): molar mass of the compound.
         h_formation (): heat of formation.
-        
+
     Units are in SI on a molar basis.
-    
     """
-    
+
     def __init__(self, cas, description, reference, formula, elements,
                  aggr_state, T_limit_low, T_limit_high, calc_quality,
                  mm, low_coefs, high_coefs, h_formation):
         """
         Create a chemical compound usually from the set_compound method.
-        
+
         Args:
             cas (type):
             description ():
             reference ():
-        
-        
+
+
         """
         self.cas = cas
         self.description = description
@@ -94,7 +98,8 @@ class Compound(object):
         """
         Computes the sensible enthalpy in J/mol.
         """
-        Ta = np.array([1, T / 2, T ** 2 / 3, T ** 3 / 4, T ** 4 / 5, 1 / T], 'd')
+        Ta = np.array([1, T / 2, T ** 2 / 3, T ** 3 / 4, T ** 4 / 5, 1 / T],
+                      'd')
         if T >= self._T_limit_low and T <= 1000:
             partial = np.dot(self._low_coefs[:6], Ta) * _R * T
         elif T > 1000 and T <= self._T_limit_high:
@@ -108,7 +113,8 @@ class Compound(object):
         """
         Computes the sensible enthalpy in J/kg.
         """
-        Ta = np.array([1, T / 2, T ** 2 / 3, T ** 3 / 4, T ** 4 / 5, 1 / T], 'd')
+        Ta = np.array([1, T / 2, T ** 2 / 3, T ** 3 / 4, T ** 4 / 5, 1 / T],
+                      'd')
         if T >= self._T_limit_low and T <= 1000:
             partial = np.dot(self._low_coefs[:6], Ta) * _R * T / self.mm
         elif T > 1000 and T <= self._T_limit_high:
@@ -121,9 +127,9 @@ class Compound(object):
     def enthalpy_engineering(self, T):
         """
         Computes the total enthalpy in J/mol: h = h_formation +
-        integral cp(T) dT.\nUseful for heating reacting systems such as:\n
+        integral cp(T) dT.\nUseful for heating reacting systems such as:
         MgO + Cl2 -> MgCl2 + 0.5 O2
-        \nfrom Tref to 500 K.\ndeltaH total = (sum (h_form product) -
+        from Tref to 500 K.\ndeltaH total = (sum (h_form product) -
         sum (h_form react)) + sum ( enthalpy(500) * prod)_each_product
         """
         return self.h_formation + self.enthalpy(T)
@@ -132,7 +138,8 @@ class Compound(object):
         """
         Computes enthropy in J/mol K.
         """
-        Ta = np.array([np.log(T), T, T ** 2 / 2, T ** 3 / 3, T ** 4 / 4, 0, 1], 'd')
+        Ta = np.array([np.log(T), T, T ** 2 / 2, T ** 3 / 3, T ** 4 / 4, 0, 1],
+                      'd')
         # right
         if T >= self._T_limit_low and T <= 1000:
             return np.dot(self._low_coefs, Ta) * _R
@@ -182,7 +189,7 @@ class Database(object):
         Takes a string or a CAS number as input and output all
         matching results. Helpful for interactive use of the database.
         """
-        #determines if it is cas or not
+        # determines if it is cas or not
         for char in cas_or_formula:
             if char.isalpha() is True:
                 formula = cas_or_formula
@@ -214,7 +221,6 @@ class Database(object):
                     pass
             return matches
 
-
     def set_compound(self, formula):
         """
         Returns an Element instance given the name of the element.
@@ -230,46 +236,69 @@ class Database(object):
                             if formula == each_formula.text.upper():
                                 cas = str(specie.get('CAS'))
                                 try:
-                                    specie.find('formula_name_structure')                         \
-                                                                  .find('formula_name_structure_1')
+                                    specie.find('formula_name_structure').find(
+                                        'formula_name_structure_1')
                                     description = str(
-                                    specie.find('formula_name_structure')                         \
-                                                            .find('formula_name_structure_1').text)
+                                        specie.find(
+                                            'formula_name_structure').find(
+                                                'formula_name_structure_1'
+                                            ).text)
                                 except:
                                     description = None
                                 try:
                                     specie.find('formula_name_structure_1')
-                                    reference = str(specie.find('formula_name_structure_1').text)
+                                    reference = str(specie.find(
+                                        'formula_name_structure_1').text)
                                 except:
                                     reference = None
                                     elements = []
                                     for elem in each_phase.find('elements'):
                                         elements.append((elem.get('name'),
-                                                         int(elem.get('num_of_atoms'))))
-                                    aggr_state = str(each_phase.find('phase').text)
-                                    T_limit_low =  float(each_phase.find('temp_limit').get('low'))
-                                    T_limit_high = float(each_phase.find('temp_limit').get('high'))
+                                                         int(elem.get(
+                                                             'num_of_atoms'))))
+                                    aggr_state = str(each_phase.find(
+                                        'phase').text)
+                                    T_limit_low = float(each_phase.find(
+                                        'temp_limit').get('low'))
+                                    T_limit_high = float(each_phase.find(
+                                        'temp_limit').get('high'))
                                     try:
                                         each_phase.find('calc_quality').text
-                                        calc_quality = str(each_phase.find('calc_quality').text)
+                                        calc_quality = str(each_phase.find(
+                                            'calc_quality').text)
                                     except:
                                         calc_quality = None
-                                    mm = float(each_phase.find('molecular_weight').text) / 1e3
+                                    mm = float(each_phase.find(
+                                        'molecular_weight').text) / 1e3
                                     coefs = each_phase.find('coefficients')
-                                    high_coefs = np.empty((7),dtype='d')
-                                    low_coefs = np.empty((7),dtype='d')
-                                    range_1000_to_Tmax = coefs.find('range_1000_to_Tmax')         \
-                                                                                .findall('coef')
-                                    for (index,a_term) in enumerate(range_1000_to_Tmax):
+                                    high_coefs = np.empty((7), dtype='d')
+                                    low_coefs = np.empty((7), dtype='d')
+                                    range_1000_to_Tmax = coefs.find(
+                                        'range_1000_to_Tmax').findall('coef')
+                                    for (index, a_term) in enumerate(
+                                            range_1000_to_Tmax):
                                         high_coefs[index] = a_term.text
-                                    range_Tmin_to_1000 = coefs.find('range_Tmin_to_1000')         \
-                                                                                .findall('coef')
-                                    for (index,a_term) in enumerate(range_Tmin_to_1000):
+                                    range_Tmin_to_1000 = coefs.find(
+                                        'range_Tmin_to_1000').findall('coef')
+                                    for (index, a_term) in enumerate(
+                                            range_Tmin_to_1000):
                                         low_coefs[index] = a_term.text
-                                    h_formation = float(coefs.find('hf298_div_r').text) * _R
-                                    return Compound(cas, description, reference, formula, elements,
-                                                   aggr_state, T_limit_low, T_limit_high, calc_quality,
-                                                   mm, low_coefs, high_coefs, h_formation)
+                                    h_formation = float(
+                                        coefs.find('hf298_div_r').text) * _R
+                                    return Compound(
+                                        cas,
+                                        description,
+                                        reference,
+                                        formula,
+                                        elements,
+                                        aggr_state,
+                                        T_limit_low,
+                                        T_limit_high,
+                                        calc_quality,
+                                        mm,
+                                        low_coefs,
+                                        high_coefs,
+                                        h_formation)
                     except:
                         pass
             except:
@@ -328,9 +357,11 @@ class Reaction(Database):
             self.T = T
         delta_h = 0
         for (coefficient, compound) in zip(self._rcoefs, self.reagents):
-            delta_h = delta_h - coefficient * compound.enthalpy_engineering(self.T)
+            delta_h = delta_h - coefficient * compound.enthalpy_engineering(
+                self.T)
         for (coefficient, compound) in zip(self._pcoefs, self.products):
-            delta_h = delta_h + coefficient * compound.enthalpy_engineering(self.T)
+            delta_h = delta_h + coefficient * compound.enthalpy_engineering(
+                self.T)
         return delta_h
 
     def _delta_gibbs_energy(self, T=None):

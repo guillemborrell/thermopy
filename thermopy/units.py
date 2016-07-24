@@ -1,14 +1,27 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Tue Aug 18 09:54:35 2015
+u"""
+Units conversion module.
 
-@author: monteiro
+Classes:
+
+    Temperature: temperature object.
+
+    Pressure: pressure object.
+
+    Enthalpy: enthalpy object.
+
+    Length: length object.
+
+    Massflow: mass flow object.
+
+    Massflowrate: massflowrate object.
+
+    Energy: energy object.
 
 """
 import thermopy.constants as constants
 
-class Temperature(float):
 
+class Temperature(float):
     """
     Class that models a temperature measure with conversion utilities
 
@@ -56,6 +69,7 @@ class Temperature(float):
     """
 
     def __init__(self, data):
+        u"""Initialize temperature object."""
         self.data = float(data)
 
     @classmethod
@@ -67,6 +81,7 @@ class Temperature(float):
         return cls(data)
 
     def unit(self, units='K'):
+        u"""Set unit for temperature."""
         if units == 'K':
             return self.__factory(self.data)
         elif units == 'C':
@@ -78,10 +93,12 @@ class Temperature(float):
 
     @property
     def C(self):
+        u"""Property of Celsius temperature unit."""
         return self.__factory(constants.K2C(self.data))
 
     @property
     def F(self):
+        u"""Property of Fahrenheit temperature unit."""
         return self.__factory(constants.K2F(self.data))
 
 
@@ -120,6 +137,7 @@ class Pressure(float):
     """
 
     def __init__(self, data):
+        u"""Initialize pressure object."""
         self.data = float(data)
 
     @classmethod
@@ -131,6 +149,7 @@ class Pressure(float):
         return cls(data)
 
     def unit(self, units='Pa'):
+        u"""Set unit for pressure."""
         if units == 'Pa':
             return self.__factory(self.data)
         elif units == 'MPa':
@@ -150,33 +169,38 @@ class Pressure(float):
 
     @property
     def MPa(self):
+        u"""Property of MPa pressure unit."""
         return self.__factory(self.data / constants.mega)
 
     @property
     def bar(self):
+        u"""Property of bar pressure unit."""
         return self.__factory(self.data / constants.bar)
 
     @property
     def psi(self):
+        u"""Property of psi pressure unit."""
         return self.__factory(self.data / constants.psi)
 
     @property
     def atm(self):
+        u"""Property of atm pressure unit."""
         return self.__factory(self.data / constants.atm)
 
     @property
     def mmwc(self):
+        u"""Property of mmwc pressure unit."""
         return self.__factory(self.data / (constants.torr * 1000 / 13534))
 
     @property
     def torr(self):
+        u"""Property of torr pressure unit."""
         return self.__factory(self.data / constants.torr)
 
-#HUNITS = ['si', 'kJkg', 'kcalkg', 'Btulb']
+# HUNITS = ['si', 'kJkg', 'kcalkg', 'Btulb']
 
 
 class Enthalpy(float):
-
     """
     Class that models an enthalpy measure with conversion utilities
 
@@ -200,6 +224,7 @@ class Enthalpy(float):
     """
 
     def __init__(self, data):
+        u"""Initialize enthalpy object."""
         self.data = float(data)
 
     @classmethod
@@ -211,6 +236,7 @@ class Enthalpy(float):
         return cls(data)
 
     def unit(self, units='si'):
+        u"""Set unit for Enthalpy."""
         if units == 'si':
             return self.__factory(self.data)
         elif units == 'kJkg':
@@ -224,14 +250,17 @@ class Enthalpy(float):
 
     @property
     def kJkg(self):
+        u"""Property of KJkg pressure unit."""
         return self.__factory(self.data / constants.kilo)
 
     @property
     def kcalkg(self):
+        u"""Property of kcalkg pressure unit."""
         return self.__factory(self.data / constants.kilo / constants.calorie)
 
     @property
     def Btulb(self):
+        u"""Property of Btulb pressure unit."""
         return self.__factory(self.data * constants.lb / constants.Btu)
 
 
@@ -260,6 +289,7 @@ class Length(float):
     """
 
     def __init__(self, data):
+        u"""Initialize length object."""
         self.data = float(data)
 
     @classmethod
@@ -271,6 +301,7 @@ class Length(float):
         return cls(data)
 
     def unit(self, units='m'):
+        u"""Set unit for length."""
         if units == 'm':
             return self.__factory(self.data)
         elif units == 'mm':
@@ -284,19 +315,21 @@ class Length(float):
 
     @property
     def mm(self):
+        u"""Property of mm unit."""
         return self.__factory(self.data / constants.milli)
 
     @property
     def inch(self):
+        u"""Property of inch unit."""
         return self.__factory(self.data / constants.inch)
 
     @property
     def ft(self):
+        u"""Property of feet unit."""
         return self.__factory(self.data / constants.foot)
 
 
 class Massflow(float):
-
     """
     Class that models a mass flow measure with conversion utilities
 
@@ -312,6 +345,7 @@ class Massflow(float):
     """
 
     def __init__(self, data):
+        u"""Initialize massflow object."""
         self.data = float(data)
 
     @classmethod
@@ -323,6 +357,7 @@ class Massflow(float):
         return cls(data)
 
     def unit(self, units='kgs'):
+        u"""Set unit for massflow."""
         if units == 'kgs':
             return self.__factory(self.data)
         elif units == 'kgh':
@@ -336,19 +371,21 @@ class Massflow(float):
 
     @property
     def kgh(self):
+        u"""Property of kgh unit."""
         return self.__factory(self.data * constants.hour)
 
     @property
     def lbs(self):
+        u"""Property of lbs unit."""
         return self.__factory(self.data / constants.lb)
 
     @property
     def lbh(self):
+        u"""Property of lbh unit."""
         return self.__factory(self.data * constants.hour / constants.lb)
 
 
 class Massflowrate(float):
-
     """
     Class that models a mass flow measure with conversion utilities
 
@@ -360,6 +397,7 @@ class Massflowrate(float):
     """
 
     def __init__(self, data):
+        u"""Initialize massflowrate object."""
         self.data = float(data)
 
     @classmethod
@@ -371,6 +409,7 @@ class Massflowrate(float):
         return cls(data)
 
     def unit(self, units='default'):
+        u"""Set unit for massflowrate."""
         if units == 'default':
             return self.__factory(self.data)
         elif units == 'Btu':
@@ -381,12 +420,14 @@ class Massflowrate(float):
 
     @property
     def Btu(self):
+        u"""Property of Btu unit."""
         return self.__factory(self.data * constants.foot ** 2 / constants.lb)
 
 
 class Energy(float):
     """Energy in J, Btu, cal, kWh"""
     def __init__(self, data):
+        u"""Initialize energy object."""
         self.data = float(data)
 
     @classmethod
@@ -398,7 +439,7 @@ class Energy(float):
         return cls(data)
 
     def unit(self, units='J'):
-        """Btu, cal or kWh"""
+        u"""Set unit for energy."""
         if units.upper() == 'BTU':
             return self.__factory(self.data * constants.Btu)
         elif units == 'cal':
@@ -408,13 +449,15 @@ class Energy(float):
 
     @property
     def Btu(self):
+        u"""Property of Btu unit."""
         return self.__factory(self.data / constants.Btu)
 
     @property
     def cal(self):
+        u"""Property of cal unit."""
         return self.__factory(self.data / constants.calorie)
 
     @property
     def kWh(self):
+        u"""Property of KWh unit."""
         return self.__factory(self.data / constants.kWh)
-
