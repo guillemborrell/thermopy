@@ -1,13 +1,7 @@
-## Note:
+# thermopy 
 
-This repo just received https://github.com/fmv1992/thermopy3. There is an
-ongoing process to join the old thermopy (python2) with thermopy (python3).
-Soon there will be only thermopy supporting python3.
-
-# thermopy / thermopy3 (see note above)
-
-Python library for thermodynamics and other handy tools. The library was not extensively tested
-with python2.
+Python library for thermodynamics and other handy tools. Only python3 is
+supported.
 
 Thermodynamics (all these properties as function of temperature for thousands of compounds):
 
@@ -27,7 +21,7 @@ Temperature independent data:
 
 and much more.
 
-For water pressure is also an input (higher accuracy).
+For water, pressure is also an input (higher accuracy using IAPWS).
 
 Modelling of chemical reactions is also present. Main features:
 
@@ -63,7 +57,8 @@ python3 thermopy/setup.py test
 
 v0.5.4:
 
-    - Merge complete.
+    - Merge with old 'thermopy3' complete. The only name from now on is
+      thermopy.
 
     - Documentation now using sphinx instead of pdf files.
 
@@ -101,6 +96,9 @@ v0.5.0:
 
 ## TODO
 
+    - Despite burcat was supersed with nasa9polynomials update its
+      documentation.
+
 	- Transform IAPWS module into molar basis to be consistent with burcat and nasa9polynomials.
 
 	- Fix the setting of a compound when it is ambiguous:
@@ -110,19 +108,6 @@ v0.5.0:
 		  File "/home/monteiro/cloud/cloud_work/fmv1992_github/thermopy/thermopy/nasa9polynomials.py", line 501, in set_compound
 			('Ga2O', 'gallium;oxygen(2-)')
 		Exception: ("The compound 'LYQFWZFBNBDLEO-UHFFFAOYSA-M' you are trying to set is not unique: CsBr", 'CsBr(cr)')
-
-	- Put examples again in docstrings; need to update.
-
-	- Uniformize code (imports and the like) and improve compliance with PEP8.
-
-	- Update docstrings to conform to PEP 257.
-
-	- Update documentation to use the package's name after merge: 'thermopy'.
-
-	- Do more testing. It looks like in some cases there are some import errors
-	  (see 'EXAMPLE 02: Hydrazine ’messing around’ example.' in documentation). 
-
-	- Make the PDFs 'copy and pastable'.
 
 	- Increase the testing coverage.
 
