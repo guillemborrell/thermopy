@@ -66,7 +66,7 @@ v0.5.4:
 
     - Code and logic uniformized.
 
-v0.5.3 (ongoing):
+v0.5.3:
 	
 	- Merged with original thermopy and discarded the 'thermopy3' name.
 
