@@ -1,0 +1,610 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>thermopy.constants &mdash; thermopy  documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="top" title="thermopy  documentation" href="../../index.html" />
+    <link rel="up" title="Module code" href="../index.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">thermopy  documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for thermopy.constants</h1><div class="highlight"><pre>
+<span class="sd">u&quot;&quot;&quot;</span>
+<span class="sd">Collection of physical constants and conversion factors.</span>
+
+<span class="sd">Most constants are in SI units, so you can do</span>
+<span class="sd">print(&#39;10 mile per minute is&#39;, 10*mile/minute, &#39;m/s or&#39;,</span>
+<span class="sd">    10*mile/(minute*knot), &#39;knots&#39;)</span>
+
+<span class="sd">The list is not meant to be comprehensive, but just a convenient list for</span>
+<span class="sd">everyday use.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">absolute_import</span>
+<span class="kn">import</span> <span class="nn">math</span> <span class="kn">as</span> <span class="nn">_math</span>
+<span class="c"># physical constants</span>
+<span class="c"># physical constants:</span>
+<span class="c"># (value, unit, precision)</span>
+<span class="n">cu_x_unit</span> <span class="o">=</span> <span class="p">(</span><span class="mf">1.0020771e-13</span><span class="p">,</span> <span class="s">&#39;m&#39;</span><span class="p">,</span> <span class="mf">2.9e-20</span><span class="p">)</span>
+<span class="n">atomic_unit_of_time</span> <span class="o">=</span> <span class="p">(</span><span class="mf">2.418884326505e-17</span><span class="p">,</span> <span class="s">&#39;s&#39;</span><span class="p">,</span> <span class="mf">1.6e-28</span><span class="p">)</span>
+<span class="n">neutronproton_mass_ratio</span> <span class="o">=</span> <span class="p">(</span><span class="mf">1.0013784187</span><span class="p">,</span> <span class="s">&#39;&#39;</span><span class="p">,</span> <span class="mf">5.8e-10</span><span class="p">)</span>
+<span class="n">kilogramkelvin_relationship</span> <span class="o">=</span> <span class="p">(</span><span class="mf">6.50965e+39</span><span class="p">,</span> <span class="s">&#39;K&#39;</span><span class="p">,</span> <span class="mf">1.1e+34</span><span class="p">)</span>
+<span class="n">atomic_mass_unitjoule_relationship</span> <span class="o">=</span> <span class="p">(</span><span class="mf">1.4924179e-10</span><span class="p">,</span> <span class="s">&#39;J&#39;</span><span class="p">,</span> <span class="mf">2.6e-17</span><span class="p">)</span>
+<span class="n">hertzhartree_relationship</span> <span class="o">=</span> <span class="p">(</span><span class="mf">1.519829846006e-16</span><span class="p">,</span> <span class="s">&#39;E_h&#39;</span><span class="p">,</span> <span class="mf">1e-27</span><span class="p">)</span>
+<span class="n">sackurtetrode_constant_1_k_101325_kpa</span> <span class="o">=</span> <span class="p">(</span><span class="o">-</span><span class="mf">1.1648677</span><span class="p">,</span> <span class="s">&#39;&#39;</span><span class="p">,</span> <span class="mf">4.4e-06</span><span class="p">)</span>
+<span class="n">atomic_unit_of_force</span> <span class="o">=</span> <span class="p">(</span><span class="mf">8.2387225e-08</span><span class="p">,</span> <span class="s">&#39;N&#39;</span><span class="p">,</span> <span class="mf">1.4e-14</span><span class="p">)</span>
+<span class="n">tau_mass_energy_equivalent</span> <span class="o">=</span> <span class="p">(</span><span class="mf">2.84705e-10</span><span class="p">,</span> <span class="s">&#39;J&#39;</span><span class="p">,</span> <span class="mf">4.6e-14</span><span class="p">)</span>
+<span class="n">muon_magnetic_moment</span> <span class="o">=</span> <span class="p">(</span><span class="o">-</span><span class="mf">4.49044799e-26</span><span class="p">,</span> <span class="s">&#39;J T^-1&#39;</span><span class="p">,</span> <span class="mf">4e-33</span><span class="p">)</span>
+<span class="n">atomic_unit_of_1st_hyperpolarizablity</span> <span class="o">=</span> <span class="p">(</span><span class="mf">3.20636151e-53</span><span class="p">,</span> <span class="s">&#39;C^3 m^3 J^-2&#39;</span><span class="p">,</span>
+                                         <span class="mf">2.8e-60</span><span class="p">)</span>
+<span class="n">electron_molar_mass</span> <span class="o">=</span> <span class="p">(</span><span class="mf">5.4857990945e-07</span><span class="p">,</span> <span class="s">&#39;kg mol^-1&#39;</span><span class="p">,</span> <span class="mf">2.4e-16</span><span class="p">)</span>
+<span class="n">neutron_gyromagnetic_ratio_over_2_pi</span> <span class="o">=</span> <span class="p">(</span><span class="mf">29.164695</span><span class="p">,</span> <span class="s">&#39;MHz T^-1&#39;</span><span class="p">,</span> <span class="mf">7.3e-06</span><span class="p">)</span>
+<span class="n">characteristic_impedance_of_vacuum</span> <span class="o">=</span> <span class="p">(</span><span class="mf">376.73031346177066</span><span class="p">,</span> <span class="s">&#39;ohm&#39;</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)</span>
+<span class="n">atomic_unit_of_electric_field</span> <span class="o">=</span> <span class="p">(</span><span class="mf">514220642000.0</span><span class="p">,</span> <span class="s">&#39;V m^-1&#39;</span><span class="p">,</span> <span class="mf">44000.0</span><span class="p">)</span>
+<span class="n">boltzmann_constant_in_inverse_meters_per_kelvin</span> <span class="o">=</span> <span class="p">(</span><span class="mf">69.50356</span><span class="p">,</span> <span class="s">&#39;m^-1 K^-1&#39;</span><span class="p">,</span>
+                                                   <span class="mf">0.00012</span><span class="p">)</span>
+<span class="n">classical_electron_radius</span> <span class="o">=</span> <span class="p">(</span><span class="mf">2.817940325e-15</span><span class="p">,</span> <span class="s">&#39;m&#39;</span><span class="p">,</span> <span class="mf">2.8e-23</span><span class="p">)</span>
+<span class="n">electronmuon_mass_ratio</span> <span class="o">=</span> <span class="p">(</span><span class="mf">0.00483633167</span><span class="p">,</span> <span class="s">&#39;&#39;</span><span class="p">,</span> <span class="mf">1.3e-10</span><span class="p">)</span>
+<span class="n">quantum_of_circulation_times_2</span> <span class="o">=</span> <span class="p">(</span><span class="mf">0.0007273895101</span><span class="p">,</span> <span class="s">&#39;m^2 s^-1&#39;</span><span class="p">,</span> <span class="mf">4.8e-12</span><span class="p">)</span>
+<span class="n">muonneutron_mass_ratio</span> <span class="o">=</span> <span class="p">(</span><span class="mf">0.1124545175</span><span class="p">,</span> <span class="s">&#39;&#39;</span><span class="p">,</span> <span class="mf">2.9e-09</span><span class="p">)</span>
+<span class="n">alpha_particle_mass_energy_equivalent_in_mev</span> <span class="o">=</span> <span class="p">(</span><span class="mf">3727.37917</span><span class="p">,</span> <span class="s">&#39;MeV&#39;</span><span class="p">,</span> <span class="mf">0.00032</span><span class="p">)</span>
+<span class="n">molar_mass_of_carbon12</span> <span class="o">=</span> <span class="p">(</span><span class="mf">0.012</span><span class="p">,</span> <span class="s">&#39;kg mol^-1&#39;</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)</span>
+<span class="n">atomic_unit_of_electric_polarizablity</span> <span class="o">=</span> <span class="p">(</span><span class="mf">1.648777274e-41</span><span class="p">,</span> <span class="s">&#39;C^2 m^2 J^-1&#39;</span><span class="p">,</span>
+                                         <span class="mf">1.6e-49</span><span class="p">)</span>
+<span class="n">atomic_mass_unithartree_relationship</span> <span class="o">=</span> <span class="p">(</span><span class="mf">34231776.86</span><span class="p">,</span> <span class="s">&#39;E_h&#39;</span><span class="p">,</span> <span class="mf">0.23</span><span class="p">)</span>
+<span class="n">loschmidt_constant_27315_k_101325_kpa</span> <span class="o">=</span> <span class="p">(</span><span class="mf">2.6867773e+25</span><span class="p">,</span> <span class="s">&#39;m^-3&#39;</span><span class="p">,</span> <span class="mf">4.7e+19</span><span class="p">)</span>
+<span class="n">molar_volume_of_ideal_gas_27315_k_100_kpa</span> <span class="o">=</span> <span class="p">(</span><span class="mf">0.022710981</span><span class="p">,</span> <span class="s">&#39;m^3 mol^-1&#39;</span><span class="p">,</span> <span class="mf">4e-08</span><span class="p">)</span>
+<span class="n">proton_magnetic_moment_to_nuclear_magneton_ratio</span> <span class="o">=</span> <span class="p">(</span><span class="mf">2.792847351</span><span class="p">,</span> <span class="s">&#39;&#39;</span><span class="p">,</span> <span class="mf">2.8e-08</span><span class="p">)</span>
+<span class="n">atomic_unit_of_permittivity</span> <span class="o">=</span> <span class="p">(</span><span class="mf">1.1126500560536183e-10</span><span class="p">,</span> <span class="s">&#39;F m^-1&#39;</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)</span>
+<span class="n">atomic_unit_of_2nd_hyperpolarizablity</span> <span class="o">=</span> <span class="p">(</span><span class="mf">6.2353808e-65</span><span class="p">,</span> <span class="s">&#39;C^4 m^4 J^-3&#39;</span><span class="p">,</span>
+                                         <span class="mf">1.1e-71</span><span class="p">)</span>
+<span class="n">electron_voltinverse_meter_relationship</span> <span class="o">=</span> <span class="p">(</span><span class="mf">806554.445</span><span class="p">,</span> <span class="s">&#39;m^-1&#39;</span><span class="p">,</span> <span class="mf">0.069</span><span class="p">)</span>
+<span class="n">inverse_meterjoule_relationship</span> <span class="o">=</span> <span class="p">(</span><span class="mf">1.98644561e-25</span><span class="p">,</span> <span class="s">&#39;J&#39;</span><span class="p">,</span> <span class="mf">3.4e-32</span><span class="p">)</span>
+<span class="n">compton_wavelength_over_2_pi</span> <span class="o">=</span> <span class="p">(</span><span class="mf">3.861592678e-13</span><span class="p">,</span> <span class="s">&#39;m&#39;</span><span class="p">,</span> <span class="mf">2.6e-21</span><span class="p">)</span>
+<span class="n">deuteronelectron_magnetic_moment_ratio</span> <span class="o">=</span> <span class="p">(</span><span class="o">-</span><span class="mf">0.0004664345548</span><span class="p">,</span> <span class="s">&#39;&#39;</span><span class="p">,</span> <span class="mf">5e-12</span><span class="p">)</span>
+<span class="n">neutronproton_magnetic_moment_ratio</span> <span class="o">=</span> <span class="p">(</span><span class="o">-</span><span class="mf">0.68497934</span><span class="p">,</span> <span class="s">&#39;&#39;</span><span class="p">,</span> <span class="mf">1.6e-07</span><span class="p">)</span>
+<span class="n">electron_voltatomic_mass_unit_relationship</span> <span class="o">=</span> <span class="p">(</span><span class="mf">1.073544171e-09</span><span class="p">,</span> <span class="s">&#39;u&#39;</span><span class="p">,</span> <span class="mf">9.2e-17</span><span class="p">)</span>
+<span class="n">electron_mass_energy_equivalent</span> <span class="o">=</span> <span class="p">(</span><span class="mf">8.1871047e-14</span><span class="p">,</span> <span class="s">&#39;J&#39;</span><span class="p">,</span> <span class="mf">1.4e-20</span><span class="p">)</span>
+<span class="n">electron_to_shielded_helion_magnetic_moment_ratio</span> <span class="o">=</span> <span class="p">(</span><span class="mf">864.058255</span><span class="p">,</span> <span class="s">&#39;&#39;</span><span class="p">,</span> <span class="mf">1e-05</span><span class="p">)</span>
+<span class="n">electronproton_magnetic_moment_ratio</span> <span class="o">=</span> <span class="p">(</span><span class="o">-</span><span class="mf">658.2106862</span><span class="p">,</span> <span class="s">&#39;&#39;</span><span class="p">,</span> <span class="mf">6.6e-06</span><span class="p">)</span>
+<span class="n">deuteronelectron_mass_ratio</span> <span class="o">=</span> <span class="p">(</span><span class="mf">3670.4829652</span><span class="p">,</span> <span class="s">&#39;&#39;</span><span class="p">,</span> <span class="mf">1.8e-06</span><span class="p">)</span>
+<span class="n">molar_mass_constant</span> <span class="o">=</span> <span class="p">(</span><span class="mf">0.001</span><span class="p">,</span> <span class="s">&#39;kg mol^-1&#39;</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)</span>
+<span class="n">atomic_mass_unitkelvin_relationship</span> <span class="o">=</span> <span class="p">(</span><span class="mf">10809527000000.0</span><span class="p">,</span> <span class="s">&#39;K&#39;</span><span class="p">,</span> <span class="mf">19000000.0</span><span class="p">)</span>
+<span class="n">lattice_parameter_of_silicon</span> <span class="o">=</span> <span class="p">(</span><span class="mf">5.43102122e-10</span><span class="p">,</span> <span class="s">&#39;m&#39;</span><span class="p">,</span> <span class="mf">2e-17</span><span class="p">)</span>
+<span class="n">hertzkelvin_relationship</span> <span class="o">=</span> <span class="p">(</span><span class="mf">4.7992374e-11</span><span class="p">,</span> <span class="s">&#39;K&#39;</span><span class="p">,</span> <span class="mf">8.4e-17</span><span class="p">)</span>
+<span class="n">natural_unit_of_action</span> <span class="o">=</span> <span class="p">(</span><span class="mf">1.05457168e-34</span><span class="p">,</span> <span class="s">&#39;J s&#39;</span><span class="p">,</span> <span class="mf">1.8e-41</span><span class="p">)</span>
+<span class="n">tau_mass_energy_equivalent_in_mev</span> <span class="o">=</span> <span class="p">(</span><span class="mf">1776.99</span><span class="p">,</span> <span class="s">&#39;MeV&#39;</span><span class="p">,</span> <span class="mf">0.29</span><span class="p">)</span>
+<span class="n">deuteron_magnetic_moment_to_bohr_magneton_ratio</span> <span class="o">=</span> <span class="p">(</span><span class="mf">0.0004669754567</span><span class="p">,</span> <span class="s">&#39;&#39;</span><span class="p">,</span> <span class="mf">5e-12</span><span class="p">)</span>
+<span class="n">standard_atmosphere</span> <span class="o">=</span> <span class="p">(</span><span class="mf">101325.0</span><span class="p">,</span> <span class="s">&#39;Pa&#39;</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)</span>
+<span class="n">deuteronneutron_magnetic_moment_ratio</span> <span class="o">=</span> <span class="p">(</span><span class="o">-</span><span class="mf">0.44820652</span><span class="p">,</span> <span class="s">&#39;&#39;</span><span class="p">,</span> <span class="mf">1.1e-07</span><span class="p">)</span>
+<span class="n">wien_displacement_law_constant</span> <span class="o">=</span> <span class="p">(</span><span class="mf">0.0028977685</span><span class="p">,</span> <span class="s">&#39;m K&#39;</span><span class="p">,</span> <span class="mf">5.1e-09</span><span class="p">)</span>
+<span class="n">electrondeuteron_mass_ratio</span> <span class="o">=</span> <span class="p">(</span><span class="mf">0.00027244371095</span><span class="p">,</span> <span class="s">&#39;&#39;</span><span class="p">,</span> <span class="mf">1.3e-13</span><span class="p">)</span>
+<span class="n">kelvinatomic_mass_unit_relationship</span> <span class="o">=</span> <span class="p">(</span><span class="mf">9.251098e-14</span><span class="p">,</span> <span class="s">&#39;u&#39;</span><span class="p">,</span> <span class="mf">1.6e-19</span><span class="p">)</span>
+<span class="n">electron_magnetic_moment_to_nuclear_magneton_ratio</span> <span class="o">=</span> <span class="p">(</span><span class="o">-</span><span class="mf">1838.28197107</span><span class="p">,</span> <span class="s">&#39;&#39;</span><span class="p">,</span>
+                                                      <span class="mf">8.5e-07</span><span class="p">)</span>
+<span class="n">electron_volthertz_relationship</span> <span class="o">=</span> <span class="p">(</span><span class="mf">241798940000000.0</span><span class="p">,</span> <span class="s">&#39;Hz&#39;</span><span class="p">,</span> <span class="mf">21000000.0</span><span class="p">)</span>
+<span class="n">helion_mass_energy_equivalent</span> <span class="o">=</span> <span class="p">(</span><span class="mf">4.49953884e-10</span><span class="p">,</span> <span class="s">&#39;J&#39;</span><span class="p">,</span> <span class="mf">7.7e-17</span><span class="p">)</span>
+<span class="n">proton_mass_energy_equivalent</span> <span class="o">=</span> <span class="p">(</span><span class="mf">1.50327743e-10</span><span class="p">,</span> <span class="s">&#39;J&#39;</span><span class="p">,</span> <span class="mf">2.6e-17</span><span class="p">)</span>
+<span class="n">hartreehertz_relationship</span> <span class="o">=</span> <span class="p">(</span><span class="mf">6579683920721000.0</span><span class="p">,</span> <span class="s">&#39;Hz&#39;</span><span class="p">,</span> <span class="mf">44000.0</span><span class="p">)</span>
+<span class="n">muon_mass_in_u</span> <span class="o">=</span> <span class="p">(</span><span class="mf">0.1134289264</span><span class="p">,</span> <span class="s">&#39;u&#39;</span><span class="p">,</span> <span class="mf">3e-09</span><span class="p">)</span>
+<span class="n">atomic_unit_of_electric_potential</span> <span class="o">=</span> <span class="p">(</span><span class="mf">27.2113845</span><span class="p">,</span> <span class="s">&#39;V&#39;</span><span class="p">,</span> <span class="mf">2.3e-06</span><span class="p">)</span>
+<span class="n">atomic_mass_constant_energy_equivalent_in_mev</span> <span class="o">=</span> <span class="p">(</span><span class="mf">931.494043</span><span class="p">,</span> <span class="s">&#39;MeV&#39;</span><span class="p">,</span> <span class="mf">8e-05</span><span class="p">)</span>
+<span class="n">two_hundred_twenty_lattice_spacing_of_silicon</span> <span class="o">=</span> <span class="p">(</span><span class="mf">1.920155965e-10</span><span class="p">,</span> <span class="s">&#39;m&#39;</span><span class="p">,</span> <span class="mf">7e-18</span><span class="p">)</span>
+<span class="n">boltzmann_constant_in_evk</span> <span class="o">=</span> <span class="p">(</span><span class="mf">8.617343e-05</span><span class="p">,</span> <span class="s">&#39;eV K^-1&#39;</span><span class="p">,</span> <span class="mf">1.5e-10</span><span class="p">)</span>
+<span class="n">electron_voltjoule_relationship</span> <span class="o">=</span> <span class="p">(</span><span class="mf">1.60217653e-19</span><span class="p">,</span> <span class="s">&#39;J&#39;</span><span class="p">,</span> <span class="mf">1.4e-26</span><span class="p">)</span>
+<span class="n">atomic_unit_of_mass</span> <span class="o">=</span> <span class="p">(</span><span class="mf">9.1093826e-31</span><span class="p">,</span> <span class="s">&#39;kg&#39;</span><span class="p">,</span> <span class="mf">1.6e-37</span><span class="p">)</span>
+<span class="n">conductance_quantum</span> <span class="o">=</span> <span class="p">(</span><span class="mf">7.748091733e-05</span><span class="p">,</span> <span class="s">&#39;S&#39;</span><span class="p">,</span> <span class="mf">2.6e-13</span><span class="p">)</span>
+<span class="n">electron_volt</span> <span class="o">=</span> <span class="p">(</span><span class="mf">1.60217653e-19</span><span class="p">,</span> <span class="s">&#39;J&#39;</span><span class="p">,</span> <span class="mf">1.4e-26</span><span class="p">)</span>
+<span class="n">neutron_g_factor</span> <span class="o">=</span> <span class="p">(</span><span class="o">-</span><span class="mf">3.82608546</span><span class="p">,</span> <span class="s">&#39;&#39;</span><span class="p">,</span> <span class="mf">9e-07</span><span class="p">)</span>
+<span class="n">electron_volthartree_relationship</span> <span class="o">=</span> <span class="p">(</span><span class="mf">0.0367493245</span><span class="p">,</span> <span class="s">&#39;E_h&#39;</span><span class="p">,</span> <span class="mf">3.1e-09</span><span class="p">)</span>
+<span class="n">atomic_unit_of_current</span> <span class="o">=</span> <span class="p">(</span><span class="mf">0.00662361782</span><span class="p">,</span> <span class="s">&#39;A&#39;</span><span class="p">,</span> <span class="mf">5.7e-10</span><span class="p">)</span>
+<span class="n">neutron_gyromagnetic_ratio</span> <span class="o">=</span> <span class="p">(</span><span class="mf">183247183.0</span><span class="p">,</span> <span class="s">&#39;s^-1 T^-1&#39;</span><span class="p">,</span> <span class="mf">46.0</span><span class="p">)</span>
+<span class="n">natural_unit_of_energy_in_mev</span> <span class="o">=</span> <span class="p">(</span><span class="mf">0.510998918</span><span class="p">,</span> <span class="s">&#39;MeV&#39;</span><span class="p">,</span> <span class="mf">4.4e-08</span><span class="p">)</span>
+<span class="n">nuclear_magneton_in_kt</span> <span class="o">=</span> <span class="p">(</span><span class="mf">0.00036582637</span><span class="p">,</span> <span class="s">&#39;K T^-1&#39;</span><span class="p">,</span> <span class="mf">6.4e-10</span><span class="p">)</span>
+<span class="n">kilogramatomic_mass_unit_relationship</span> <span class="o">=</span> <span class="p">(</span><span class="mf">6.0221415e+26</span><span class="p">,</span> <span class="s">&#39;u&#39;</span><span class="p">,</span> <span class="mf">1e+20</span><span class="p">)</span>
+<span class="n">bohr_magneton_in_inverse_meters_per_tesla</span> <span class="o">=</span> <span class="p">(</span><span class="mf">46.6864507</span><span class="p">,</span> <span class="s">&#39;m^-1 T^-1&#39;</span><span class="p">,</span> <span class="mf">4e-06</span><span class="p">)</span>
+<span class="n">natural_unit_of_momentum</span> <span class="o">=</span> <span class="p">(</span><span class="mf">2.73092419e-22</span><span class="p">,</span> <span class="s">&#39;kg m s^-1&#39;</span><span class="p">,</span> <span class="mf">4.7e-29</span><span class="p">)</span>
+<span class="n">atomic_unit_of_action</span> <span class="o">=</span> <span class="p">(</span><span class="mf">1.05457168e-34</span><span class="p">,</span> <span class="s">&#39;J s&#39;</span><span class="p">,</span> <span class="mf">1.8e-41</span><span class="p">)</span>
+<span class="n">electronneutron_mass_ratio</span> <span class="o">=</span> <span class="p">(</span><span class="mf">0.00054386734481</span><span class="p">,</span> <span class="s">&#39;&#39;</span><span class="p">,</span> <span class="mf">3.8e-13</span><span class="p">)</span>
+<span class="n">proton_mass_in_u</span> <span class="o">=</span> <span class="p">(</span><span class="mf">1.00727646688</span><span class="p">,</span> <span class="s">&#39;u&#39;</span><span class="p">,</span> <span class="mf">1.3e-10</span><span class="p">)</span>
+<span class="n">rydberg_constant_times_c_in_hz</span> <span class="o">=</span> <span class="p">(</span><span class="mf">3289841960360000.0</span><span class="p">,</span> <span class="s">&#39;Hz&#39;</span><span class="p">,</span> <span class="mf">22000.0</span><span class="p">)</span>
+<span class="n">hertzatomic_mass_unit_relationship</span> <span class="o">=</span> <span class="p">(</span><span class="mf">4.439821667e-24</span><span class="p">,</span> <span class="s">&#39;u&#39;</span><span class="p">,</span> <span class="mf">3e-32</span><span class="p">)</span>
+<span class="n">neutron_to_shielded_proton_magnetic_moment_ratio</span> <span class="o">=</span> <span class="p">(</span><span class="o">-</span><span class="mf">0.68499694</span><span class="p">,</span> <span class="s">&#39;&#39;</span><span class="p">,</span> <span class="mf">1.6e-07</span><span class="p">)</span>
+<span class="n">atomic_unit_of_momentum</span> <span class="o">=</span> <span class="p">(</span><span class="mf">1.99285166e-24</span><span class="p">,</span> <span class="s">&#39;kg m s^-1&#39;</span><span class="p">,</span> <span class="mf">3.4e-31</span><span class="p">)</span>
+<span class="n">hartreekilogram_relationship</span> <span class="o">=</span> <span class="p">(</span><span class="mf">4.8508696e-35</span><span class="p">,</span> <span class="s">&#39;kg&#39;</span><span class="p">,</span> <span class="mf">8.3e-42</span><span class="p">)</span>
+<span class="n">kelvinjoule_relationship</span> <span class="o">=</span> <span class="p">(</span><span class="mf">1.3806505e-23</span><span class="p">,</span> <span class="s">&#39;J&#39;</span><span class="p">,</span> <span class="mf">2.4e-29</span><span class="p">)</span>
+<span class="n">neutron_compton_wavelength_over_2_pi</span> <span class="o">=</span> <span class="p">(</span><span class="mf">2.100194157e-16</span><span class="p">,</span> <span class="s">&#39;m&#39;</span><span class="p">,</span> <span class="mf">1.4e-24</span><span class="p">)</span>
+<span class="n">muon_g_factor</span> <span class="o">=</span> <span class="p">(</span><span class="o">-</span><span class="mf">2.0023318396</span><span class="p">,</span> <span class="s">&#39;&#39;</span><span class="p">,</span> <span class="mf">1.2e-09</span><span class="p">)</span>
+<span class="n">electronmuon_magnetic_moment_ratio</span> <span class="o">=</span> <span class="p">(</span><span class="mf">206.7669894</span><span class="p">,</span> <span class="s">&#39;&#39;</span><span class="p">,</span> <span class="mf">5.4e-06</span><span class="p">)</span>
+<span class="n">deuteron_rms_charge_radius</span> <span class="o">=</span> <span class="p">(</span><span class="mf">2.1394e-15</span><span class="p">,</span> <span class="s">&#39;m&#39;</span><span class="p">,</span> <span class="mf">2.8e-18</span><span class="p">)</span>
+<span class="n">first_radiation_constant_for_spectral_radiance</span> <span class="o">=</span> <span class="p">(</span><span class="mf">1.19104282e-16</span><span class="p">,</span>
+                                                  <span class="s">&#39;W m^2 sr^-1&#39;</span><span class="p">,</span> <span class="mf">2e-23</span><span class="p">)</span>
+<span class="n">atomic_unit_of_length</span> <span class="o">=</span> <span class="p">(</span><span class="mf">5.291772108e-11</span><span class="p">,</span> <span class="s">&#39;m&#39;</span><span class="p">,</span> <span class="mf">1.8e-19</span><span class="p">)</span>
+<span class="n">tauelectron_mass_ratio</span> <span class="o">=</span> <span class="p">(</span><span class="mf">3477.48</span><span class="p">,</span> <span class="s">&#39;&#39;</span><span class="p">,</span> <span class="mf">0.57</span><span class="p">)</span>
+<span class="n">electron_mass</span> <span class="o">=</span> <span class="p">(</span><span class="mf">9.1093826e-31</span><span class="p">,</span> <span class="s">&#39;kg&#39;</span><span class="p">,</span> <span class="mf">1.6e-37</span><span class="p">)</span>
+<span class="n">neutron_mass_energy_equivalent_in_mev</span> <span class="o">=</span> <span class="p">(</span><span class="mf">939.56536</span><span class="p">,</span> <span class="s">&#39;MeV&#39;</span><span class="p">,</span> <span class="mf">8.1e-05</span><span class="p">)</span>
+<span class="n">shielded_helion_gyromagnetic_ratio_over_2_pi</span> <span class="o">=</span> <span class="p">(</span><span class="mf">32.4341015</span><span class="p">,</span> <span class="s">&#39;MHz T^-1&#39;</span><span class="p">,</span>
+                                                <span class="mf">2.8e-06</span><span class="p">)</span>
+<span class="n">inverse_meterkilogram_relationship</span> <span class="o">=</span> <span class="p">(</span><span class="mf">2.21021881e-42</span><span class="p">,</span> <span class="s">&#39;kg&#39;</span><span class="p">,</span> <span class="mf">3.8e-49</span><span class="p">)</span>
+<span class="n">alpha_particle_molar_mass</span> <span class="o">=</span> <span class="p">(</span><span class="mf">0.004001506179149</span><span class="p">,</span> <span class="s">&#39;kg mol^-1&#39;</span><span class="p">,</span> <span class="mf">5.6e-14</span><span class="p">)</span>
+<span class="n">nuclear_magneton_in_mhzt</span> <span class="o">=</span> <span class="p">(</span><span class="mf">7.62259371</span><span class="p">,</span> <span class="s">&#39;MHz T^-1&#39;</span><span class="p">,</span> <span class="mf">6.5e-07</span><span class="p">)</span>
+<span class="n">hartree_energy</span> <span class="o">=</span> <span class="p">(</span><span class="mf">4.35974417e-18</span><span class="p">,</span> <span class="s">&#39;J&#39;</span><span class="p">,</span> <span class="mf">7.5e-25</span><span class="p">)</span>
+<span class="n">magnetic_constant</span> <span class="o">=</span> <span class="p">(</span><span class="mf">1.2566370614359173e-06</span><span class="p">,</span> <span class="s">&#39;N A^-2&#39;</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)</span>
+<span class="n">electrontau_mass_ratio</span> <span class="o">=</span> <span class="p">(</span><span class="mf">0.000287564</span><span class="p">,</span> <span class="s">&#39;&#39;</span><span class="p">,</span> <span class="mf">4.7e-08</span><span class="p">)</span>
+<span class="n">proton_magnetic_moment</span> <span class="o">=</span> <span class="p">(</span><span class="mf">1.41060671e-26</span><span class="p">,</span> <span class="s">&#39;J T^-1&#39;</span><span class="p">,</span> <span class="mf">1.2e-33</span><span class="p">)</span>
+<span class="n">deuteron_magnetic_moment</span> <span class="o">=</span> <span class="p">(</span><span class="mf">4.33073482e-27</span><span class="p">,</span> <span class="s">&#39;J T^-1&#39;</span><span class="p">,</span> <span class="mf">3.8e-34</span><span class="p">)</span>
+<span class="n">rydberg_constant_times_hc_in_j</span> <span class="o">=</span> <span class="p">(</span><span class="mf">2.17987209e-18</span><span class="p">,</span> <span class="s">&#39;J&#39;</span><span class="p">,</span> <span class="mf">3.7e-25</span><span class="p">)</span>
+<span class="n">tau_compton_wavelength_over_2_pi</span> <span class="o">=</span> <span class="p">(</span><span class="mf">1.11046e-16</span><span class="p">,</span> <span class="s">&#39;m&#39;</span><span class="p">,</span> <span class="mf">1.8e-20</span><span class="p">)</span>
+<span class="n">quantum_of_circulation</span> <span class="o">=</span> <span class="p">(</span><span class="mf">0.000363694755</span><span class="p">,</span> <span class="s">&#39;m^2 s^-1&#39;</span><span class="p">,</span> <span class="mf">2.4e-12</span><span class="p">)</span>
+<span class="n">planck_time</span> <span class="o">=</span> <span class="p">(</span><span class="mf">5.39121e-44</span><span class="p">,</span> <span class="s">&#39;s&#39;</span><span class="p">,</span> <span class="mf">4e-48</span><span class="p">)</span>
+<span class="n">thomson_cross_section</span> <span class="o">=</span> <span class="p">(</span><span class="mf">6.65245873e-29</span><span class="p">,</span> <span class="s">&#39;m^2&#39;</span><span class="p">,</span> <span class="mf">1.3e-36</span><span class="p">)</span>
+<span class="n">second_radiation_constant</span> <span class="o">=</span> <span class="p">(</span><span class="mf">0.014387752</span><span class="p">,</span> <span class="s">&#39;m K&#39;</span><span class="p">,</span> <span class="mf">2.5e-08</span><span class="p">)</span>
+<span class="n">neutron_mass_in_u</span> <span class="o">=</span> <span class="p">(</span><span class="mf">1.0086649156</span><span class="p">,</span> <span class="s">&#39;u&#39;</span><span class="p">,</span> <span class="mf">5.5e-10</span><span class="p">)</span>
+<span class="n">tau_mass_in_u</span> <span class="o">=</span> <span class="p">(</span><span class="mf">1.90768</span><span class="p">,</span> <span class="s">&#39;u&#39;</span><span class="p">,</span> <span class="mf">0.00031</span><span class="p">)</span>
+<span class="n">kilogramhartree_relationship</span> <span class="o">=</span> <span class="p">(</span><span class="mf">2.06148605e+34</span><span class="p">,</span> <span class="s">&#39;E_h&#39;</span><span class="p">,</span> <span class="mf">3.5e+27</span><span class="p">)</span>
+<span class="n">proton_mass_energy_equivalent_in_mev</span> <span class="o">=</span> <span class="p">(</span><span class="mf">938.272029</span><span class="p">,</span> <span class="s">&#39;MeV&#39;</span><span class="p">,</span> <span class="mf">8e-05</span><span class="p">)</span>
+<span class="n">protonneutron_mass_ratio</span> <span class="o">=</span> <span class="p">(</span><span class="mf">0.99862347872</span><span class="p">,</span> <span class="s">&#39;&#39;</span><span class="p">,</span> <span class="mf">5.8e-10</span><span class="p">)</span>
+<span class="n">atomic_mass_unitkilogram_relationship</span> <span class="o">=</span> <span class="p">(</span><span class="mf">1.66053886e-27</span><span class="p">,</span> <span class="s">&#39;kg&#39;</span><span class="p">,</span> <span class="mf">2.8e-34</span><span class="p">)</span>
+<span class="n">hertzkilogram_relationship</span> <span class="o">=</span> <span class="p">(</span><span class="mf">7.3724964e-51</span><span class="p">,</span> <span class="s">&#39;kg&#39;</span><span class="p">,</span> <span class="mf">1.3e-57</span><span class="p">)</span>
+<span class="n">neutron_mass</span> <span class="o">=</span> <span class="p">(</span><span class="mf">1.67492728e-27</span><span class="p">,</span> <span class="s">&#39;kg&#39;</span><span class="p">,</span> <span class="mf">2.9e-34</span><span class="p">)</span>
+<span class="n">planck_constant</span> <span class="o">=</span> <span class="p">(</span><span class="mf">6.6260693e-34</span><span class="p">,</span> <span class="s">&#39;J s&#39;</span><span class="p">,</span> <span class="mf">1.1e-40</span><span class="p">)</span>
+<span class="n">sackurtetrode_constant_1_k_100_kpa</span> <span class="o">=</span> <span class="p">(</span><span class="o">-</span><span class="mf">1.1517047</span><span class="p">,</span> <span class="s">&#39;&#39;</span><span class="p">,</span> <span class="mf">4.4e-06</span><span class="p">)</span>
+<span class="n">joulehartree_relationship</span> <span class="o">=</span> <span class="p">(</span><span class="mf">2.29371257e+17</span><span class="p">,</span> <span class="s">&#39;E_h&#39;</span><span class="p">,</span> <span class="mf">39000000000.0</span><span class="p">)</span>
+<span class="n">electron_magnetic_moment</span> <span class="o">=</span> <span class="p">(</span><span class="o">-</span><span class="mf">9.28476412e-24</span><span class="p">,</span> <span class="s">&#39;J T^-1&#39;</span><span class="p">,</span> <span class="mf">8e-31</span><span class="p">)</span>
+<span class="n">conventional_value_of_von_klitzing_constant</span> <span class="o">=</span> <span class="p">(</span><span class="mf">25812.807</span><span class="p">,</span> <span class="s">&#39;ohm&#39;</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)</span>
+<span class="n">planck_constant_over_2_pi_in_ev_s</span> <span class="o">=</span> <span class="p">(</span><span class="mf">6.58211915e-16</span><span class="p">,</span> <span class="s">&#39;eV s&#39;</span><span class="p">,</span> <span class="mf">5.6e-23</span><span class="p">)</span>
+<span class="n">electron_magnetic_moment_anomaly</span> <span class="o">=</span> <span class="p">(</span><span class="mf">0.0011596521859</span><span class="p">,</span> <span class="s">&#39;&#39;</span><span class="p">,</span> <span class="mf">3.8e-12</span><span class="p">)</span>
+<span class="n">proton_mass</span> <span class="o">=</span> <span class="p">(</span><span class="mf">1.67262171e-27</span><span class="p">,</span> <span class="s">&#39;kg&#39;</span><span class="p">,</span> <span class="mf">2.9e-34</span><span class="p">)</span>
+<span class="n">natural_unit_of_time</span> <span class="o">=</span> <span class="p">(</span><span class="mf">1.2880886677e-21</span><span class="p">,</span> <span class="s">&#39;s&#39;</span><span class="p">,</span> <span class="mf">8.6e-30</span><span class="p">)</span>
+<span class="n">shielded_helion_gyromagnetic_ratio</span> <span class="o">=</span> <span class="p">(</span><span class="mf">203789470.0</span><span class="p">,</span> <span class="s">&#39;s^-1 T^-1&#39;</span><span class="p">,</span> <span class="mf">18.0</span><span class="p">)</span>
+<span class="n">hartreeelectron_volt_relationship</span> <span class="o">=</span> <span class="p">(</span><span class="mf">27.2113845</span><span class="p">,</span> <span class="s">&#39;eV&#39;</span><span class="p">,</span> <span class="mf">2.3e-06</span><span class="p">)</span>
+<span class="n">neutron_magnetic_moment</span> <span class="o">=</span> <span class="p">(</span><span class="o">-</span><span class="mf">9.6623645e-27</span><span class="p">,</span> <span class="s">&#39;J T^-1&#39;</span><span class="p">,</span> <span class="mf">2.4e-33</span><span class="p">)</span>
+<span class="n">shielded_helion_to_proton_magnetic_moment_ratio</span> <span class="o">=</span> <span class="p">(</span><span class="o">-</span><span class="mf">0.761766562</span><span class="p">,</span> <span class="s">&#39;&#39;</span><span class="p">,</span> <span class="mf">1.2e-08</span><span class="p">)</span>
+<span class="n">kilogramelectron_volt_relationship</span> <span class="o">=</span> <span class="p">(</span><span class="mf">5.60958896e+35</span><span class="p">,</span> <span class="s">&#39;eV&#39;</span><span class="p">,</span> <span class="mf">4.8e+28</span><span class="p">)</span>
+<span class="n">deuteron_mass_in_u</span> <span class="o">=</span> <span class="p">(</span><span class="mf">2.0135532127</span><span class="p">,</span> <span class="s">&#39;u&#39;</span><span class="p">,</span> <span class="mf">3.5e-10</span><span class="p">)</span>
+<span class="n">protontau_mass_ratio</span> <span class="o">=</span> <span class="p">(</span><span class="mf">0.528012</span><span class="p">,</span> <span class="s">&#39;&#39;</span><span class="p">,</span> <span class="mf">8.6e-05</span><span class="p">)</span>
+<span class="n">von_klitzing_constant</span> <span class="o">=</span> <span class="p">(</span><span class="mf">25812.807449</span><span class="p">,</span> <span class="s">&#39;ohm&#39;</span><span class="p">,</span> <span class="mf">8.6e-05</span><span class="p">)</span>
+<span class="n">atomic_unit_of_charge_density</span> <span class="o">=</span> <span class="p">(</span><span class="mf">1081202317000.0</span><span class="p">,</span> <span class="s">&#39;C m^-3&#39;</span><span class="p">,</span> <span class="mf">93000.0</span><span class="p">)</span>
+<span class="n">planck_constant_in_ev_s</span> <span class="o">=</span> <span class="p">(</span><span class="mf">4.13566743e-15</span><span class="p">,</span> <span class="s">&#39;eV s&#39;</span><span class="p">,</span> <span class="mf">3.5e-22</span><span class="p">)</span>
+<span class="n">ideal_gas_constant</span> <span class="o">=</span> <span class="p">(</span><span class="mf">8.314472</span><span class="p">,</span> <span class="s">&#39;J mol^-1 K^-1&#39;</span><span class="p">,</span> <span class="mf">1.5e-05</span><span class="p">)</span>
+<span class="n">ideal_gas_constant_massic_basis</span> <span class="o">=</span> <span class="p">(</span><span class="mf">0.461526</span><span class="p">,</span> <span class="s">&#39;J g^-1 K^-1&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
+<span class="n">finestructure_constant</span> <span class="o">=</span> <span class="p">(</span><span class="mf">0.007297352568</span><span class="p">,</span> <span class="s">&#39;&#39;</span><span class="p">,</span> <span class="mf">2.4e-11</span><span class="p">)</span>
+<span class="n">planck_constant_over_2_pi_times_c_in_mev_fm</span> <span class="o">=</span> <span class="p">(</span><span class="mf">197.326968</span><span class="p">,</span> <span class="s">&#39;MeV fm&#39;</span><span class="p">,</span> <span class="mf">1.7e-05</span><span class="p">)</span>
+<span class="n">electron_g_factor</span> <span class="o">=</span> <span class="p">(</span><span class="o">-</span><span class="mf">2.0023193043718</span><span class="p">,</span> <span class="s">&#39;&#39;</span><span class="p">,</span> <span class="mf">7.5e-12</span><span class="p">)</span>
+<span class="n">tauproton_mass_ratio</span> <span class="o">=</span> <span class="p">(</span><span class="mf">1.8939</span><span class="p">,</span> <span class="s">&#39;&#39;</span><span class="p">,</span> <span class="mf">0.00031</span><span class="p">)</span>
+<span class="n">kelvinelectron_volt_relationship</span> <span class="o">=</span> <span class="p">(</span><span class="mf">8.617343e-05</span><span class="p">,</span> <span class="s">&#39;eV&#39;</span><span class="p">,</span> <span class="mf">1.5e-10</span><span class="p">)</span>
+<span class="n">boltzmann_constant</span> <span class="o">=</span> <span class="p">(</span><span class="mf">1.3806505e-23</span><span class="p">,</span> <span class="s">&#39;J K^-1&#39;</span><span class="p">,</span> <span class="mf">2.4e-29</span><span class="p">)</span>
+<span class="n">electron_voltkilogram_relationship</span> <span class="o">=</span> <span class="p">(</span><span class="mf">1.78266181e-36</span><span class="p">,</span> <span class="s">&#39;kg&#39;</span><span class="p">,</span> <span class="mf">1.5e-43</span><span class="p">)</span>
+<span class="n">newtonian_constant_of_gravitation_over_hbar_c</span> <span class="o">=</span> <span class="p">(</span><span class="mf">6.7087e-39</span><span class="p">,</span> <span class="s">&#39;(GeV/c^2)^-2&#39;</span><span class="p">,</span>
+                                                 <span class="mf">1e-42</span><span class="p">)</span>
+<span class="n">boltzmann_constant_in_hzk</span> <span class="o">=</span> <span class="p">(</span><span class="mf">20836644000.0</span><span class="p">,</span> <span class="s">&#39;Hz K^-1&#39;</span><span class="p">,</span> <span class="mf">36000.0</span><span class="p">)</span>
+<span class="n">atomic_unit_of_charge</span> <span class="o">=</span> <span class="p">(</span><span class="mf">1.60217653e-19</span><span class="p">,</span> <span class="s">&#39;C&#39;</span><span class="p">,</span> <span class="mf">1.4e-26</span><span class="p">)</span>
+<span class="n">conventional_value_of_josephson_constant</span> <span class="o">=</span> <span class="p">(</span><span class="mf">483597900000000.0</span><span class="p">,</span> <span class="s">&#39;Hz V^-1&#39;</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)</span>
+<span class="n">inverse_meterhartree_relationship</span> <span class="o">=</span> <span class="p">(</span><span class="mf">4.55633525276e-08</span><span class="p">,</span> <span class="s">&#39;E_h&#39;</span><span class="p">,</span> <span class="mf">3e-19</span><span class="p">)</span>
+<span class="n">kilogramhertz_relationship</span> <span class="o">=</span> <span class="p">(</span><span class="mf">1.35639266e+50</span><span class="p">,</span> <span class="s">&#39;Hz&#39;</span><span class="p">,</span> <span class="mf">2.3e+43</span><span class="p">)</span>
+<span class="n">proton_g_factor</span> <span class="o">=</span> <span class="p">(</span><span class="mf">5.585694701</span><span class="p">,</span> <span class="s">&#39;&#39;</span><span class="p">,</span> <span class="mf">5.6e-08</span><span class="p">)</span>
+<span class="n">tau_mass</span> <span class="o">=</span> <span class="p">(</span><span class="mf">3.16777e-27</span><span class="p">,</span> <span class="s">&#39;kg&#39;</span><span class="p">,</span> <span class="mf">5.2e-31</span><span class="p">)</span>
+<span class="n">fermi_coupling_constant</span> <span class="o">=</span> <span class="p">(</span><span class="mf">1.16639e-05</span><span class="p">,</span> <span class="s">&#39;GeV^-2&#39;</span><span class="p">,</span> <span class="mf">1e-10</span><span class="p">)</span>
+<span class="n">bohr_magneton</span> <span class="o">=</span> <span class="p">(</span><span class="mf">9.27400949e-24</span><span class="p">,</span> <span class="s">&#39;J T^-1&#39;</span><span class="p">,</span> <span class="mf">8e-31</span><span class="p">)</span>
+<span class="n">deuteron_molar_mass</span> <span class="o">=</span> <span class="p">(</span><span class="mf">0.0020135532127</span><span class="p">,</span> <span class="s">&#39;kg mol^-1&#39;</span><span class="p">,</span> <span class="mf">3.5e-13</span><span class="p">)</span>
+<span class="n">deuteron_mass_energy_equivalent</span> <span class="o">=</span> <span class="p">(</span><span class="mf">3.00506285e-10</span><span class="p">,</span> <span class="s">&#39;J&#39;</span><span class="p">,</span> <span class="mf">5.1e-17</span><span class="p">)</span>
+<span class="n">kelvinkilogram_relationship</span> <span class="o">=</span> <span class="p">(</span><span class="mf">1.5361808e-40</span><span class="p">,</span> <span class="s">&#39;kg&#39;</span><span class="p">,</span> <span class="mf">2.7e-46</span><span class="p">)</span>
+<span class="n">neutron_compton_wavelength</span> <span class="o">=</span> <span class="p">(</span><span class="mf">1.3195909067e-15</span><span class="p">,</span> <span class="s">&#39;m&#39;</span><span class="p">,</span> <span class="mf">8.8e-24</span><span class="p">)</span>
+<span class="n">electronproton_mass_ratio</span> <span class="o">=</span> <span class="p">(</span><span class="mf">0.00054461702173</span><span class="p">,</span> <span class="s">&#39;&#39;</span><span class="p">,</span> <span class="mf">2.5e-13</span><span class="p">)</span>
+<span class="n">mo_x_unit</span> <span class="o">=</span> <span class="p">(</span><span class="mf">1.00209966e-13</span><span class="p">,</span> <span class="s">&#39;m&#39;</span><span class="p">,</span> <span class="mf">5.3e-20</span><span class="p">)</span>
+<span class="n">helion_molar_mass</span> <span class="o">=</span> <span class="p">(</span><span class="mf">0.0030149322434</span><span class="p">,</span> <span class="s">&#39;kg mol^-1&#39;</span><span class="p">,</span> <span class="mf">5.8e-12</span><span class="p">)</span>
+<span class="n">planck_constant_over_2_pi</span> <span class="o">=</span> <span class="p">(</span><span class="mf">1.05457168e-34</span><span class="p">,</span> <span class="s">&#39;J s&#39;</span><span class="p">,</span> <span class="mf">1.8e-41</span><span class="p">)</span>
+<span class="n">kilograminverse_meter_relationship</span> <span class="o">=</span> <span class="p">(</span><span class="mf">4.52443891e+41</span><span class="p">,</span> <span class="s">&#39;m^-1&#39;</span><span class="p">,</span> <span class="mf">7.7e+34</span><span class="p">)</span>
+<span class="n">rydberg_constant</span> <span class="o">=</span> <span class="p">(</span><span class="mf">10973731.568525</span><span class="p">,</span> <span class="s">&#39;m^-1&#39;</span><span class="p">,</span> <span class="mf">7.3e-05</span><span class="p">)</span>
+<span class="n">nuclear_magneton_in_evt</span> <span class="o">=</span> <span class="p">(</span><span class="mf">3.152451259e-08</span><span class="p">,</span> <span class="s">&#39;eV T^-1&#39;</span><span class="p">,</span> <span class="mf">2.1e-16</span><span class="p">)</span>
+<span class="n">bohr_magneton_in_evt</span> <span class="o">=</span> <span class="p">(</span><span class="mf">5.788381804e-05</span><span class="p">,</span> <span class="s">&#39;eV T^-1&#39;</span><span class="p">,</span> <span class="mf">3.9e-13</span><span class="p">)</span>
+<span class="n">muonproton_mass_ratio</span> <span class="o">=</span> <span class="p">(</span><span class="mf">0.1126095269</span><span class="p">,</span> <span class="s">&#39;&#39;</span><span class="p">,</span> <span class="mf">2.9e-09</span><span class="p">)</span>
+<span class="n">standard_acceleration_of_gravity</span> <span class="o">=</span> <span class="p">(</span><span class="mf">9.80665</span><span class="p">,</span> <span class="s">&#39;m s^-2&#39;</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)</span>
+<span class="n">electronneutron_magnetic_moment_ratio</span> <span class="o">=</span> <span class="p">(</span><span class="mf">960.9205</span><span class="p">,</span> <span class="s">&#39;&#39;</span><span class="p">,</span> <span class="mf">0.00023</span><span class="p">)</span>
+<span class="n">hartree_energy_in_ev</span> <span class="o">=</span> <span class="p">(</span><span class="mf">27.2113845</span><span class="p">,</span> <span class="s">&#39;eV&#39;</span><span class="p">,</span> <span class="mf">2.3e-06</span><span class="p">)</span>
+<span class="n">hartreeinverse_meter_relationship</span> <span class="o">=</span> <span class="p">(</span><span class="mf">21947463.13705</span><span class="p">,</span> <span class="s">&#39;m^-1&#39;</span><span class="p">,</span> <span class="mf">0.00015</span><span class="p">)</span>
+<span class="n">proton_gyromagnetic_ratio</span> <span class="o">=</span> <span class="p">(</span><span class="mf">267522205.0</span><span class="p">,</span> <span class="s">&#39;s^-1 T^-1&#39;</span><span class="p">,</span> <span class="mf">23.0</span><span class="p">)</span>
+<span class="n">shielded_helion_magnetic_moment</span> <span class="o">=</span> <span class="p">(</span><span class="o">-</span><span class="mf">1.074553024e-26</span><span class="p">,</span> <span class="s">&#39;J T^-1&#39;</span><span class="p">,</span> <span class="mf">9.3e-34</span><span class="p">)</span>
+<span class="n">proton_rms_charge_radius</span> <span class="o">=</span> <span class="p">(</span><span class="mf">8.75e-16</span><span class="p">,</span> <span class="s">&#39;m&#39;</span><span class="p">,</span> <span class="mf">6.8e-18</span><span class="p">)</span>
+<span class="n">natural_unit_of_action_in_ev_s</span> <span class="o">=</span> <span class="p">(</span><span class="mf">6.58211915e-16</span><span class="p">,</span> <span class="s">&#39;eV s&#39;</span><span class="p">,</span> <span class="mf">5.6e-23</span><span class="p">)</span>
+<span class="n">deuteronproton_mass_ratio</span> <span class="o">=</span> <span class="p">(</span><span class="mf">1.99900750082</span><span class="p">,</span> <span class="s">&#39;&#39;</span><span class="p">,</span> <span class="mf">4.1e-10</span><span class="p">)</span>
+<span class="n">helion_mass_energy_equivalent_in_mev</span> <span class="o">=</span> <span class="p">(</span><span class="mf">2808.39142</span><span class="p">,</span> <span class="s">&#39;MeV&#39;</span><span class="p">,</span> <span class="mf">0.00024</span><span class="p">)</span>
+<span class="n">nuclear_magneton_in_inverse_meters_per_tesla</span> <span class="o">=</span> <span class="p">(</span><span class="mf">0.0254262358</span><span class="p">,</span> <span class="s">&#39;m^-1 T^-1&#39;</span><span class="p">,</span>
+                                                <span class="mf">2.2e-09</span><span class="p">)</span>
+<span class="n">atomic_unit_of_magnetic_dipole_moment</span> <span class="o">=</span> <span class="p">(</span><span class="mf">1.8548019e-23</span><span class="p">,</span> <span class="s">&#39;J T^-1&#39;</span><span class="p">,</span> <span class="mf">1.6e-30</span><span class="p">)</span>
+<span class="n">inverse_of_conductance_quantum</span> <span class="o">=</span> <span class="p">(</span><span class="mf">12906.403725</span><span class="p">,</span> <span class="s">&#39;ohm&#39;</span><span class="p">,</span> <span class="mf">4.3e-05</span><span class="p">)</span>
+<span class="n">electron_mass_in_u</span> <span class="o">=</span> <span class="p">(</span><span class="mf">0.00054857990945</span><span class="p">,</span> <span class="s">&#39;u&#39;</span><span class="p">,</span> <span class="mf">2.4e-13</span><span class="p">)</span>
+<span class="n">kelvininverse_meter_relationship</span> <span class="o">=</span> <span class="p">(</span><span class="mf">69.50356</span><span class="p">,</span> <span class="s">&#39;m^-1&#39;</span><span class="p">,</span> <span class="mf">0.00012</span><span class="p">)</span>
+<span class="n">neutron_magnetic_moment_to_bohr_magneton_ratio</span> <span class="o">=</span> <span class="p">(</span><span class="o">-</span><span class="mf">0.00104187563</span><span class="p">,</span> <span class="s">&#39;&#39;</span><span class="p">,</span> <span class="mf">2.5e-10</span><span class="p">)</span>
+<span class="n">joulekelvin_relationship</span> <span class="o">=</span> <span class="p">(</span><span class="mf">7.242963e+22</span><span class="p">,</span> <span class="s">&#39;K&#39;</span><span class="p">,</span> <span class="mf">1.3e+17</span><span class="p">)</span>
+<span class="n">shielded_helion_magnetic_moment_to_bohr_magneton_ratio</span> <span class="o">=</span> <span class="p">(</span><span class="o">-</span><span class="mf">0.001158671474</span><span class="p">,</span> <span class="s">&#39;&#39;</span><span class="p">,</span>
+                                                          <span class="mf">1.4e-11</span><span class="p">)</span>
+<span class="n">natural_unit_of_momentum_in_mevc</span> <span class="o">=</span> <span class="p">(</span><span class="mf">0.510998918</span><span class="p">,</span> <span class="s">&#39;MeV/c&#39;</span><span class="p">,</span> <span class="mf">4.4e-08</span><span class="p">)</span>
+<span class="n">magnetic_flux_quantum</span> <span class="o">=</span> <span class="p">(</span><span class="mf">2.06783372e-15</span><span class="p">,</span> <span class="s">&#39;Wb&#39;</span><span class="p">,</span> <span class="mf">1.8e-22</span><span class="p">)</span>
+<span class="n">shielded_proton_magnetic_moment_to_nuclear_magneton_ratio</span> <span class="o">=</span> <span class="p">(</span><span class="mf">2.792775604</span><span class="p">,</span> <span class="s">&#39;&#39;</span><span class="p">,</span>
+                                                             <span class="mf">3e-08</span><span class="p">)</span>
+<span class="n">molar_volume_of_silicon</span> <span class="o">=</span> <span class="p">(</span><span class="mf">1.20588382e-05</span><span class="p">,</span> <span class="s">&#39;m^3 mol^-1&#39;</span><span class="p">,</span> <span class="mf">2.4e-12</span><span class="p">)</span>
+<span class="n">tau_compton_wavelength</span> <span class="o">=</span> <span class="p">(</span><span class="mf">6.9772e-16</span><span class="p">,</span> <span class="s">&#39;m&#39;</span><span class="p">,</span> <span class="mf">1.1e-19</span><span class="p">)</span>
+<span class="n">atomic_mass_unitinverse_meter_relationship</span> <span class="o">=</span> <span class="p">(</span><span class="mf">751300660800000.0</span><span class="p">,</span> <span class="s">&#39;m^-1&#39;</span><span class="p">,</span>
+                                              <span class="mf">5000000.0</span><span class="p">)</span>
+<span class="n">muon_mass_energy_equivalent_in_mev</span> <span class="o">=</span> <span class="p">(</span><span class="mf">105.6583692</span><span class="p">,</span> <span class="s">&#39;MeV&#39;</span><span class="p">,</span> <span class="mf">9.4e-06</span><span class="p">)</span>
+<span class="n">shielded_helion_magnetic_moment_to_nuclear_magneton_ratio</span> <span class="o">=</span> <span class="p">(</span><span class="o">-</span><span class="mf">2.127497723</span><span class="p">,</span> <span class="s">&#39;&#39;</span><span class="p">,</span>
+                                                             <span class="mf">2.5e-08</span><span class="p">)</span>
+<span class="n">muon_magnetic_moment_anomaly</span> <span class="o">=</span> <span class="p">(</span><span class="mf">0.00116591981</span><span class="p">,</span> <span class="s">&#39;&#39;</span><span class="p">,</span> <span class="mf">6.2e-10</span><span class="p">)</span>
+<span class="n">jouleinverse_meter_relationship</span> <span class="o">=</span> <span class="p">(</span><span class="mf">5.0341172e+24</span><span class="p">,</span> <span class="s">&#39;m^-1&#39;</span><span class="p">,</span> <span class="mf">8.6e+17</span><span class="p">)</span>
+<span class="n">atomic_unit_of_electric_quadrupole_moment</span> <span class="o">=</span> <span class="p">(</span><span class="mf">4.48655124e-40</span><span class="p">,</span> <span class="s">&#39;C m^2&#39;</span><span class="p">,</span> <span class="mf">3.9e-47</span><span class="p">)</span>
+<span class="n">kelvinhertz_relationship</span> <span class="o">=</span> <span class="p">(</span><span class="mf">20836644000.0</span><span class="p">,</span> <span class="s">&#39;Hz&#39;</span><span class="p">,</span> <span class="mf">36000.0</span><span class="p">)</span>
+<span class="n">helion_mass_in_u</span> <span class="o">=</span> <span class="p">(</span><span class="mf">3.0149322434</span><span class="p">,</span> <span class="s">&#39;u&#39;</span><span class="p">,</span> <span class="mf">5.8e-09</span><span class="p">)</span>
+<span class="n">inverse_meterkelvin_relationship</span> <span class="o">=</span> <span class="p">(</span><span class="mf">0.014387752</span><span class="p">,</span> <span class="s">&#39;K&#39;</span><span class="p">,</span> <span class="mf">2.5e-08</span><span class="p">)</span>
+<span class="n">atomic_unit_of_electric_dipole_moment</span> <span class="o">=</span> <span class="p">(</span><span class="mf">8.47835309e-30</span><span class="p">,</span> <span class="s">&#39;C m&#39;</span><span class="p">,</span> <span class="mf">7.3e-37</span><span class="p">)</span>
+<span class="n">avogadro_constant</span> <span class="o">=</span> <span class="p">(</span><span class="mf">6.0221415e+23</span><span class="p">,</span> <span class="s">&#39;mol^-1&#39;</span><span class="p">,</span> <span class="mf">1e+17</span><span class="p">)</span>
+<span class="n">hartreekelvin_relationship</span> <span class="o">=</span> <span class="p">(</span><span class="mf">315774.65</span><span class="p">,</span> <span class="s">&#39;K&#39;</span><span class="p">,</span> <span class="mf">0.55</span><span class="p">)</span>
+<span class="n">electric_constant</span> <span class="o">=</span> <span class="p">(</span><span class="mf">8.854187817620389e-12</span><span class="p">,</span> <span class="s">&#39;F m^-1&#39;</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)</span>
+<span class="n">angstrom_star</span> <span class="o">=</span> <span class="p">(</span><span class="mf">1.00001509e-10</span><span class="p">,</span> <span class="s">&#39;m&#39;</span><span class="p">,</span> <span class="mf">9e-17</span><span class="p">)</span>
+<span class="n">faraday_constant</span> <span class="o">=</span> <span class="p">(</span><span class="mf">96485.3383</span><span class="p">,</span> <span class="s">&#39;C mol^-1&#39;</span><span class="p">,</span> <span class="mf">0.0083</span><span class="p">)</span>
+<span class="n">first_radiation_constant</span> <span class="o">=</span> <span class="p">(</span><span class="mf">3.74177138e-16</span><span class="p">,</span> <span class="s">&#39;W m^2&#39;</span><span class="p">,</span> <span class="mf">6.4e-23</span><span class="p">)</span>
+<span class="n">electrondeuteron_magnetic_moment_ratio</span> <span class="o">=</span> <span class="p">(</span><span class="o">-</span><span class="mf">2143.923493</span><span class="p">,</span> <span class="s">&#39;&#39;</span><span class="p">,</span> <span class="mf">2.3e-05</span><span class="p">)</span>
+<span class="n">atomic_mass_unithertz_relationship</span> <span class="o">=</span> <span class="p">(</span><span class="mf">2.252342718e+23</span><span class="p">,</span> <span class="s">&#39;Hz&#39;</span><span class="p">,</span>
+                                      <span class="mf">1500000000000000.0</span><span class="p">)</span>
+<span class="n">proton_charge_to_mass_quotient</span> <span class="o">=</span> <span class="p">(</span><span class="mf">95788337.6</span><span class="p">,</span> <span class="s">&#39;C kg^-1&#39;</span><span class="p">,</span> <span class="mf">8.2</span><span class="p">)</span>
+<span class="n">elementary_charge_over_h</span> <span class="o">=</span> <span class="p">(</span><span class="mf">241798940000000.0</span><span class="p">,</span> <span class="s">&#39;A J^-1&#39;</span><span class="p">,</span> <span class="mf">21000000.0</span><span class="p">)</span>
+<span class="n">muon_molar_mass</span> <span class="o">=</span> <span class="p">(</span><span class="mf">0.0001134289264</span><span class="p">,</span> <span class="s">&#39;kg mol^-1&#39;</span><span class="p">,</span> <span class="mf">3e-12</span><span class="p">)</span>
+<span class="n">jouleelectron_volt_relationship</span> <span class="o">=</span> <span class="p">(</span><span class="mf">6.24150947e+18</span><span class="p">,</span> <span class="s">&#39;eV&#39;</span><span class="p">,</span> <span class="mf">530000000000.0</span><span class="p">)</span>
+<span class="n">muonproton_magnetic_moment_ratio</span> <span class="o">=</span> <span class="p">(</span><span class="o">-</span><span class="mf">3.183345118</span><span class="p">,</span> <span class="s">&#39;&#39;</span><span class="p">,</span> <span class="mf">8.9e-08</span><span class="p">)</span>
+<span class="n">muon_compton_wavelength</span> <span class="o">=</span> <span class="p">(</span><span class="mf">1.173444105e-14</span><span class="p">,</span> <span class="s">&#39;m&#39;</span><span class="p">,</span> <span class="mf">3e-22</span><span class="p">)</span>
+<span class="n">helion_mass</span> <span class="o">=</span> <span class="p">(</span><span class="mf">5.00641214e-27</span><span class="p">,</span> <span class="s">&#39;kg&#39;</span><span class="p">,</span> <span class="mf">8.6e-34</span><span class="p">)</span>
+<span class="n">joulekilogram_relationship</span> <span class="o">=</span> <span class="p">(</span><span class="mf">1.1126500560536185e-17</span><span class="p">,</span> <span class="s">&#39;kg&#39;</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)</span>
+<span class="n">electron_mass_energy_equivalent_in_mev</span> <span class="o">=</span> <span class="p">(</span><span class="mf">0.510998918</span><span class="p">,</span> <span class="s">&#39;MeV&#39;</span><span class="p">,</span> <span class="mf">4.4e-08</span><span class="p">)</span>
+<span class="n">proton_magnetic_shielding_correction</span> <span class="o">=</span> <span class="p">(</span><span class="mf">2.5689e-05</span><span class="p">,</span> <span class="s">&#39;&#39;</span><span class="p">,</span> <span class="mf">1.5e-08</span><span class="p">)</span>
+<span class="n">electron_charge_to_mass_quotient</span> <span class="o">=</span> <span class="p">(</span><span class="o">-</span><span class="mf">175882012000.0</span><span class="p">,</span> <span class="s">&#39;C kg^-1&#39;</span><span class="p">,</span> <span class="mf">15000.0</span><span class="p">)</span>
+<span class="n">atomic_unit_of_magnetic_flux_density</span> <span class="o">=</span> <span class="p">(</span><span class="mf">235051.742</span><span class="p">,</span> <span class="s">&#39;T&#39;</span><span class="p">,</span> <span class="mf">0.02</span><span class="p">)</span>
+<span class="n">alpha_particle_mass_in_u</span> <span class="o">=</span> <span class="p">(</span><span class="mf">4.001506179149</span><span class="p">,</span> <span class="s">&#39;u&#39;</span><span class="p">,</span> <span class="mf">5.6e-11</span><span class="p">)</span>
+<span class="n">atomic_unit_of_energy</span> <span class="o">=</span> <span class="p">(</span><span class="mf">4.35974417e-18</span><span class="p">,</span> <span class="s">&#39;J&#39;</span><span class="p">,</span> <span class="mf">7.5e-25</span><span class="p">)</span>
+<span class="n">neutronelectron_mass_ratio</span> <span class="o">=</span> <span class="p">(</span><span class="mf">1838.6836598</span><span class="p">,</span> <span class="s">&#39;&#39;</span><span class="p">,</span> <span class="mf">1.3e-06</span><span class="p">)</span>
+<span class="n">taumuon_mass_ratio</span> <span class="o">=</span> <span class="p">(</span><span class="mf">16.8183</span><span class="p">,</span> <span class="s">&#39;&#39;</span><span class="p">,</span> <span class="mf">0.0027</span><span class="p">)</span>
+<span class="n">shielded_proton_magnetic_moment_to_bohr_magneton_ratio</span> <span class="o">=</span> <span class="p">(</span><span class="mf">0.001520993132</span><span class="p">,</span> <span class="s">&#39;&#39;</span><span class="p">,</span>
+                                                          <span class="mf">1.6e-11</span><span class="p">)</span>
+<span class="n">deuteron_mass_energy_equivalent_in_mev</span> <span class="o">=</span> <span class="p">(</span><span class="mf">1875.61282</span><span class="p">,</span> <span class="s">&#39;MeV&#39;</span><span class="p">,</span> <span class="mf">0.00016</span><span class="p">)</span>
+<span class="n">atomic_mass_unitelectron_volt_relationship</span> <span class="o">=</span> <span class="p">(</span><span class="mf">931494043.0</span><span class="p">,</span> <span class="s">&#39;eV&#39;</span><span class="p">,</span> <span class="mf">80.0</span><span class="p">)</span>
+<span class="n">natural_unit_of_length</span> <span class="o">=</span> <span class="p">(</span><span class="mf">3.861592678e-13</span><span class="p">,</span> <span class="s">&#39;m&#39;</span><span class="p">,</span> <span class="mf">2.6e-21</span><span class="p">)</span>
+<span class="n">atomic_mass_constant</span> <span class="o">=</span> <span class="p">(</span><span class="mf">1.66053886e-27</span><span class="p">,</span> <span class="s">&#39;kg&#39;</span><span class="p">,</span> <span class="mf">2.8e-34</span><span class="p">)</span>
+<span class="n">proton_molar_mass</span> <span class="o">=</span> <span class="p">(</span><span class="mf">0.00100727646688</span><span class="p">,</span> <span class="s">&#39;kg mol^-1&#39;</span><span class="p">,</span> <span class="mf">1.3e-13</span><span class="p">)</span>
+<span class="n">electron_gyromagnetic_ratio</span> <span class="o">=</span> <span class="p">(</span><span class="mf">176085974000.0</span><span class="p">,</span> <span class="s">&#39;s^-1 T^-1&#39;</span><span class="p">,</span> <span class="mf">15000.0</span><span class="p">)</span>
+<span class="n">stefanboltzmann_constant</span> <span class="o">=</span> <span class="p">(</span><span class="mf">5.6704e-08</span><span class="p">,</span> <span class="s">&#39;W m^-2 K^-4&#39;</span><span class="p">,</span> <span class="mf">4e-13</span><span class="p">)</span>
+<span class="n">tau_molar_mass</span> <span class="o">=</span> <span class="p">(</span><span class="mf">0.00190768</span><span class="p">,</span> <span class="s">&#39;kg mol^-1&#39;</span><span class="p">,</span> <span class="mf">3.1e-07</span><span class="p">)</span>
+<span class="n">neutron_molar_mass</span> <span class="o">=</span> <span class="p">(</span><span class="mf">0.0010086649156</span><span class="p">,</span> <span class="s">&#39;kg mol^-1&#39;</span><span class="p">,</span> <span class="mf">5.5e-13</span><span class="p">)</span>
+<span class="n">atomic_unit_of_velocity</span> <span class="o">=</span> <span class="p">(</span><span class="mf">2187691.2633</span><span class="p">,</span> <span class="s">&#39;m s^-1&#39;</span><span class="p">,</span> <span class="mf">0.0073</span><span class="p">)</span>
+<span class="n">hartreeatomic_mass_unit_relationship</span> <span class="o">=</span> <span class="p">(</span><span class="mf">2.921262323e-08</span><span class="p">,</span> <span class="s">&#39;u&#39;</span><span class="p">,</span> <span class="mf">1.9e-16</span><span class="p">)</span>
+<span class="n">electron_to_shielded_proton_magnetic_moment_ratio</span> <span class="o">=</span> <span class="p">(</span><span class="o">-</span><span class="mf">658.2275956</span><span class="p">,</span> <span class="s">&#39;&#39;</span><span class="p">,</span> <span class="mf">7.1e-06</span><span class="p">)</span>
+<span class="n">proton_compton_wavelength</span> <span class="o">=</span> <span class="p">(</span><span class="mf">1.3214098555e-15</span><span class="p">,</span> <span class="s">&#39;m&#39;</span><span class="p">,</span> <span class="mf">8.8e-24</span><span class="p">)</span>
+<span class="n">shielded_proton_gyromagnetic_ratio</span> <span class="o">=</span> <span class="p">(</span><span class="mf">267515333.0</span><span class="p">,</span> <span class="s">&#39;s^-1 T^-1&#39;</span><span class="p">,</span> <span class="mf">23.0</span><span class="p">)</span>
+<span class="n">alpha_particle_mass_energy_equivalent</span> <span class="o">=</span> <span class="p">(</span><span class="mf">5.9719194e-10</span><span class="p">,</span> <span class="s">&#39;J&#39;</span><span class="p">,</span> <span class="mf">1e-16</span><span class="p">)</span>
+<span class="n">electron_gyromagnetic_ratio_over_2_pi</span> <span class="o">=</span> <span class="p">(</span><span class="mf">28024.9532</span><span class="p">,</span> <span class="s">&#39;MHz T^-1&#39;</span><span class="p">,</span> <span class="mf">0.0024</span><span class="p">)</span>
+<span class="n">inverse_finestructure_constant</span> <span class="o">=</span> <span class="p">(</span><span class="mf">137.03599911</span><span class="p">,</span> <span class="s">&#39;&#39;</span><span class="p">,</span> <span class="mf">4.6e-07</span><span class="p">)</span>
+<span class="n">protonneutron_magnetic_moment_ratio</span> <span class="o">=</span> <span class="p">(</span><span class="o">-</span><span class="mf">1.45989805</span><span class="p">,</span> <span class="s">&#39;&#39;</span><span class="p">,</span> <span class="mf">3.4e-07</span><span class="p">)</span>
+<span class="n">inverse_meteratomic_mass_unit_relationship</span> <span class="o">=</span> <span class="p">(</span><span class="mf">1.3310250506e-15</span><span class="p">,</span> <span class="s">&#39;u&#39;</span><span class="p">,</span> <span class="mf">8.9e-24</span><span class="p">)</span>
+<span class="n">alpha_particleproton_mass_ratio</span> <span class="o">=</span> <span class="p">(</span><span class="mf">3.97259968907</span><span class="p">,</span> <span class="s">&#39;&#39;</span><span class="p">,</span> <span class="mf">5.2e-10</span><span class="p">)</span>
+<span class="n">proton_gyromagnetic_ratio_over_2_pi</span> <span class="o">=</span> <span class="p">(</span><span class="mf">42.5774813</span><span class="p">,</span> <span class="s">&#39;MHz T^-1&#39;</span><span class="p">,</span> <span class="mf">3.7e-06</span><span class="p">)</span>
+<span class="n">elementary_charge</span> <span class="o">=</span> <span class="p">(</span><span class="mf">1.60217653e-19</span><span class="p">,</span> <span class="s">&#39;C&#39;</span><span class="p">,</span> <span class="mf">1.4e-26</span><span class="p">)</span>
+<span class="n">electron_voltkelvin_relationship</span> <span class="o">=</span> <span class="p">(</span><span class="mf">11604.505</span><span class="p">,</span> <span class="s">&#39;K&#39;</span><span class="p">,</span> <span class="mf">0.02</span><span class="p">)</span>
+<span class="n">jouleatomic_mass_unit_relationship</span> <span class="o">=</span> <span class="p">(</span><span class="mf">6700536100.0</span><span class="p">,</span> <span class="s">&#39;u&#39;</span><span class="p">,</span> <span class="mf">1100.0</span><span class="p">)</span>
+<span class="n">unified_atomic_mass_unit</span> <span class="o">=</span> <span class="p">(</span><span class="mf">1.66053886e-27</span><span class="p">,</span> <span class="s">&#39;kg&#39;</span><span class="p">,</span> <span class="mf">2.8e-34</span><span class="p">)</span>
+<span class="n">kelvinhartree_relationship</span> <span class="o">=</span> <span class="p">(</span><span class="mf">3.1668153e-06</span><span class="p">,</span> <span class="s">&#39;E_h&#39;</span><span class="p">,</span> <span class="mf">5.5e-12</span><span class="p">)</span>
+<span class="n">neutron_mass_energy_equivalent</span> <span class="o">=</span> <span class="p">(</span><span class="mf">1.50534957e-10</span><span class="p">,</span> <span class="s">&#39;J&#39;</span><span class="p">,</span> <span class="mf">2.6e-17</span><span class="p">)</span>
+<span class="n">bohr_magneton_in_hzt</span> <span class="o">=</span> <span class="p">(</span><span class="mf">13996245800.0</span><span class="p">,</span> <span class="s">&#39;Hz T^-1&#39;</span><span class="p">,</span> <span class="mf">1200.0</span><span class="p">)</span>
+<span class="n">hertzjoule_relationship</span> <span class="o">=</span> <span class="p">(</span><span class="mf">6.6260693e-34</span><span class="p">,</span> <span class="s">&#39;J&#39;</span><span class="p">,</span> <span class="mf">1.1e-40</span><span class="p">)</span>
+<span class="n">helionelectron_mass_ratio</span> <span class="o">=</span> <span class="p">(</span><span class="mf">5495.885269</span><span class="p">,</span> <span class="s">&#39;&#39;</span><span class="p">,</span> <span class="mf">1.1e-05</span><span class="p">)</span>
+<span class="n">alpha_particle_mass</span> <span class="o">=</span> <span class="p">(</span><span class="mf">6.6446565e-27</span><span class="p">,</span> <span class="s">&#39;kg&#39;</span><span class="p">,</span> <span class="mf">1.1e-33</span><span class="p">)</span>
+<span class="n">newtonian_constant_of_gravitation</span> <span class="o">=</span> <span class="p">(</span><span class="mf">6.6742e-11</span><span class="p">,</span> <span class="s">&#39;m^3 kg^-1 s^-2&#39;</span><span class="p">,</span> <span class="mf">1e-14</span><span class="p">)</span>
+<span class="n">atomic_unit_of_electric_field_gradient</span> <span class="o">=</span> <span class="p">(</span><span class="mf">9.71736182e+21</span><span class="p">,</span> <span class="s">&#39;V m^-2&#39;</span><span class="p">,</span>
+                                          <span class="mf">830000000000000.0</span><span class="p">)</span>
+<span class="n">planck_mass</span> <span class="o">=</span> <span class="p">(</span><span class="mf">2.17645e-08</span><span class="p">,</span> <span class="s">&#39;kg&#39;</span><span class="p">,</span> <span class="mf">1.6e-12</span><span class="p">)</span>
+<span class="n">electron_to_alpha_particle_mass_ratio</span> <span class="o">=</span> <span class="p">(</span><span class="mf">0.000137093355575</span><span class="p">,</span> <span class="s">&#39;&#39;</span><span class="p">,</span> <span class="mf">6.1e-14</span><span class="p">)</span>
+<span class="n">protonelectron_mass_ratio</span> <span class="o">=</span> <span class="p">(</span><span class="mf">1836.15267261</span><span class="p">,</span> <span class="s">&#39;&#39;</span><span class="p">,</span> <span class="mf">8.5e-07</span><span class="p">)</span>
+<span class="n">protonmuon_mass_ratio</span> <span class="o">=</span> <span class="p">(</span><span class="mf">8.88024333</span><span class="p">,</span> <span class="s">&#39;&#39;</span><span class="p">,</span> <span class="mf">2.3e-07</span><span class="p">)</span>
+<span class="n">inverse_meterhertz_relationship</span> <span class="o">=</span> <span class="p">(</span><span class="mf">299792458.0</span><span class="p">,</span> <span class="s">&#39;Hz&#39;</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)</span>
+<span class="n">molar_planck_constant_times_c</span> <span class="o">=</span> <span class="p">(</span><span class="mf">0.11962656572</span><span class="p">,</span> <span class="s">&#39;J m mol^-1&#39;</span><span class="p">,</span> <span class="mf">8e-10</span><span class="p">)</span>
+<span class="n">muonelectron_mass_ratio</span> <span class="o">=</span> <span class="p">(</span><span class="mf">206.7682838</span><span class="p">,</span> <span class="s">&#39;&#39;</span><span class="p">,</span> <span class="mf">5.4e-06</span><span class="p">)</span>
+<span class="n">inverse_meterelectron_volt_relationship</span> <span class="o">=</span> <span class="p">(</span><span class="mf">1.23984191e-06</span><span class="p">,</span> <span class="s">&#39;eV&#39;</span><span class="p">,</span> <span class="mf">1.1e-13</span><span class="p">)</span>
+<span class="n">molar_planck_constant</span> <span class="o">=</span> <span class="p">(</span><span class="mf">3.990312716e-10</span><span class="p">,</span> <span class="s">&#39;J s mol^-1&#39;</span><span class="p">,</span> <span class="mf">2.7e-18</span><span class="p">)</span>
+<span class="n">proton_magnetic_moment_to_bohr_magneton_ratio</span> <span class="o">=</span> <span class="p">(</span><span class="mf">0.001521032206</span><span class="p">,</span> <span class="s">&#39;&#39;</span><span class="p">,</span> <span class="mf">1.5e-11</span><span class="p">)</span>
+<span class="n">electron_magnetic_moment_to_bohr_magneton_ratio</span> <span class="o">=</span> <span class="p">(</span><span class="o">-</span><span class="mf">1.0011596521859</span><span class="p">,</span> <span class="s">&#39;&#39;</span><span class="p">,</span>
+                                                   <span class="mf">3.8e-12</span><span class="p">)</span>
+<span class="n">neutronelectron_magnetic_moment_ratio</span> <span class="o">=</span> <span class="p">(</span><span class="mf">0.00104066882</span><span class="p">,</span> <span class="s">&#39;&#39;</span><span class="p">,</span> <span class="mf">2.5e-10</span><span class="p">)</span>
+<span class="n">shielded_helion_to_shielded_proton_magnetic_moment_ratio</span> <span class="o">=</span> <span class="p">(</span><span class="o">-</span><span class="mf">0.7617861313</span><span class="p">,</span> <span class="s">&#39;&#39;</span><span class="p">,</span>
+                                                            <span class="mf">3.3e-09</span><span class="p">)</span>
+<span class="n">alpha_particleelectron_mass_ratio</span> <span class="o">=</span> <span class="p">(</span><span class="mf">7294.2995363</span><span class="p">,</span> <span class="s">&#39;&#39;</span><span class="p">,</span> <span class="mf">3.2e-06</span><span class="p">)</span>
+<span class="n">muon_mass_energy_equivalent</span> <span class="o">=</span> <span class="p">(</span><span class="mf">1.6928336e-11</span><span class="p">,</span> <span class="s">&#39;J&#39;</span><span class="p">,</span> <span class="mf">2.9e-18</span><span class="p">)</span>
+<span class="n">muon_mass</span> <span class="o">=</span> <span class="p">(</span><span class="mf">1.8835314e-28</span><span class="p">,</span> <span class="s">&#39;kg&#39;</span><span class="p">,</span> <span class="mf">3.3e-35</span><span class="p">)</span>
+<span class="n">shielded_proton_gyromagnetic_ratio_over_2_pi</span> <span class="o">=</span> <span class="p">(</span><span class="mf">42.5763875</span><span class="p">,</span> <span class="s">&#39;MHz T^-1&#39;</span><span class="p">,</span>
+                                                <span class="mf">3.7e-06</span><span class="p">)</span>
+<span class="n">atomic_mass_constant_energy_equivalent</span> <span class="o">=</span> <span class="p">(</span><span class="mf">1.4924179e-10</span><span class="p">,</span> <span class="s">&#39;J&#39;</span><span class="p">,</span> <span class="mf">2.6e-17</span><span class="p">)</span>
+<span class="n">speed_of_light_in_vacuum</span> <span class="o">=</span> <span class="p">(</span><span class="mf">299792458.0</span><span class="p">,</span> <span class="s">&#39;m s^-1&#39;</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)</span>
+<span class="n">neutron_magnetic_moment_to_nuclear_magneton_ratio</span> <span class="o">=</span> <span class="p">(</span><span class="o">-</span><span class="mf">1.91304273</span><span class="p">,</span> <span class="s">&#39;&#39;</span><span class="p">,</span> <span class="mf">4.5e-07</span><span class="p">)</span>
+<span class="n">joulehertz_relationship</span> <span class="o">=</span> <span class="p">(</span><span class="mf">1.50919037e+33</span><span class="p">,</span> <span class="s">&#39;Hz&#39;</span><span class="p">,</span> <span class="mf">2.6e+26</span><span class="p">)</span>
+<span class="n">atomic_unit_of_magnetizability</span> <span class="o">=</span> <span class="p">(</span><span class="mf">7.8910366e-29</span><span class="p">,</span> <span class="s">&#39;J T^-2&#39;</span><span class="p">,</span> <span class="mf">1.3e-36</span><span class="p">)</span>
+<span class="n">tauneutron_mass_ratio</span> <span class="o">=</span> <span class="p">(</span><span class="mf">1.89129</span><span class="p">,</span> <span class="s">&#39;&#39;</span><span class="p">,</span> <span class="mf">0.00031</span><span class="p">)</span>
+<span class="n">deuteron_mass</span> <span class="o">=</span> <span class="p">(</span><span class="mf">3.34358335e-27</span><span class="p">,</span> <span class="s">&#39;kg&#39;</span><span class="p">,</span> <span class="mf">5.7e-34</span><span class="p">)</span>
+<span class="n">proton_compton_wavelength_over_2_pi</span> <span class="o">=</span> <span class="p">(</span><span class="mf">2.103089104e-16</span><span class="p">,</span> <span class="s">&#39;m&#39;</span><span class="p">,</span> <span class="mf">1.4e-24</span><span class="p">)</span>
+<span class="n">planck_length</span> <span class="o">=</span> <span class="p">(</span><span class="mf">1.61624e-35</span><span class="p">,</span> <span class="s">&#39;m&#39;</span><span class="p">,</span> <span class="mf">1.2e-39</span><span class="p">)</span>
+<span class="n">nuclear_magneton</span> <span class="o">=</span> <span class="p">(</span><span class="mf">5.05078343e-27</span><span class="p">,</span> <span class="s">&#39;J T^-1&#39;</span><span class="p">,</span> <span class="mf">4.3e-34</span><span class="p">)</span>
+<span class="n">muontau_mass_ratio</span> <span class="o">=</span> <span class="p">(</span><span class="mf">0.0594592</span><span class="p">,</span> <span class="s">&#39;&#39;</span><span class="p">,</span> <span class="mf">9.7e-06</span><span class="p">)</span>
+<span class="n">josephson_constant</span> <span class="o">=</span> <span class="p">(</span><span class="mf">483597879000000.0</span><span class="p">,</span> <span class="s">&#39;Hz V^-1&#39;</span><span class="p">,</span> <span class="mf">41000000.0</span><span class="p">)</span>
+<span class="n">kilogramjoule_relationship</span> <span class="o">=</span> <span class="p">(</span><span class="mf">8.987551787368176e+16</span><span class="p">,</span> <span class="s">&#39;J&#39;</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)</span>
+<span class="n">faraday_constant_for_conventional_electric_current</span> <span class="o">=</span> <span class="p">(</span><span class="mf">96485.336</span><span class="p">,</span> <span class="s">&#39;C_90 mol^-1&#39;</span><span class="p">,</span>
+                                                      <span class="mf">0.016</span><span class="p">)</span>
+<span class="n">deuteronproton_magnetic_moment_ratio</span> <span class="o">=</span> <span class="p">(</span><span class="mf">0.3070122084</span><span class="p">,</span> <span class="s">&#39;&#39;</span><span class="p">,</span> <span class="mf">4.5e-09</span><span class="p">)</span>
+<span class="n">deuteron_magnetic_moment_to_nuclear_magneton_ratio</span> <span class="o">=</span> <span class="p">(</span><span class="mf">0.8574382329</span><span class="p">,</span> <span class="s">&#39;&#39;</span><span class="p">,</span>
+                                                      <span class="mf">9.2e-09</span><span class="p">)</span>
+<span class="n">bohr_magneton_in_kt</span> <span class="o">=</span> <span class="p">(</span><span class="mf">0.6717131</span><span class="p">,</span> <span class="s">&#39;K T^-1&#39;</span><span class="p">,</span> <span class="mf">1.2e-06</span><span class="p">)</span>
+<span class="n">molar_volume_of_ideal_gas_27315_k_101325_kpa</span> <span class="o">=</span> <span class="p">(</span><span class="mf">0.022413996</span><span class="p">,</span> <span class="s">&#39;m^3 mol^-1&#39;</span><span class="p">,</span>
+                                                <span class="mf">3.9e-08</span><span class="p">)</span>
+<span class="n">rydberg_constant_times_hc_in_ev</span> <span class="o">=</span> <span class="p">(</span><span class="mf">13.6056923</span><span class="p">,</span> <span class="s">&#39;eV&#39;</span><span class="p">,</span> <span class="mf">1.2e-06</span><span class="p">)</span>
+<span class="n">natural_unit_of_velocity</span> <span class="o">=</span> <span class="p">(</span><span class="mf">299792458.0</span><span class="p">,</span> <span class="s">&#39;m s^-1&#39;</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)</span>
+<span class="n">weak_mixing_angle</span> <span class="o">=</span> <span class="p">(</span><span class="mf">0.22215</span><span class="p">,</span> <span class="s">&#39;&#39;</span><span class="p">,</span> <span class="mf">0.00076</span><span class="p">)</span>
+<span class="n">hertzinverse_meter_relationship</span> <span class="o">=</span> <span class="p">(</span><span class="mf">3.3356409519815204e-09</span><span class="p">,</span> <span class="s">&#39;m^-1&#39;</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)</span>
+<span class="n">hertzelectron_volt_relationship</span> <span class="o">=</span> <span class="p">(</span><span class="mf">4.13566743e-15</span><span class="p">,</span> <span class="s">&#39;eV&#39;</span><span class="p">,</span> <span class="mf">3.5e-22</span><span class="p">)</span>
+<span class="n">compton_wavelength</span> <span class="o">=</span> <span class="p">(</span><span class="mf">2.426310238e-12</span><span class="p">,</span> <span class="s">&#39;m&#39;</span><span class="p">,</span> <span class="mf">1.6e-20</span><span class="p">)</span>
+<span class="n">bohr_radius</span> <span class="o">=</span> <span class="p">(</span><span class="mf">5.291772108e-11</span><span class="p">,</span> <span class="s">&#39;m&#39;</span><span class="p">,</span> <span class="mf">1.8e-19</span><span class="p">)</span>
+<span class="n">planck_temperature</span> <span class="o">=</span> <span class="p">(</span><span class="mf">1.41679e+32</span><span class="p">,</span> <span class="s">&#39;K&#39;</span><span class="p">,</span> <span class="mf">1.1e+28</span><span class="p">)</span>
+<span class="n">hartreejoule_relationship</span> <span class="o">=</span> <span class="p">(</span><span class="mf">4.35974417e-18</span><span class="p">,</span> <span class="s">&#39;J&#39;</span><span class="p">,</span> <span class="mf">7.5e-25</span><span class="p">)</span>
+<span class="n">neutrontau_mass_ratio</span> <span class="o">=</span> <span class="p">(</span><span class="mf">0.52874</span><span class="p">,</span> <span class="s">&#39;&#39;</span><span class="p">,</span> <span class="mf">8.6e-05</span><span class="p">)</span>
+<span class="n">muon_magnetic_moment_to_bohr_magneton_ratio</span> <span class="o">=</span> <span class="p">(</span><span class="o">-</span><span class="mf">0.00484197045</span><span class="p">,</span> <span class="s">&#39;&#39;</span><span class="p">,</span> <span class="mf">1.3e-10</span><span class="p">)</span>
+<span class="n">shielded_proton_magnetic_moment</span> <span class="o">=</span> <span class="p">(</span><span class="mf">1.41057047e-26</span><span class="p">,</span> <span class="s">&#39;J T^-1&#39;</span><span class="p">,</span> <span class="mf">1.2e-33</span><span class="p">)</span>
+<span class="n">helionproton_mass_ratio</span> <span class="o">=</span> <span class="p">(</span><span class="mf">2.9931526671</span><span class="p">,</span> <span class="s">&#39;&#39;</span><span class="p">,</span> <span class="mf">5.8e-09</span><span class="p">)</span>
+<span class="n">muon_magnetic_moment_to_nuclear_magneton_ratio</span> <span class="o">=</span> <span class="p">(</span><span class="o">-</span><span class="mf">8.89059698</span><span class="p">,</span> <span class="s">&#39;&#39;</span><span class="p">,</span> <span class="mf">2.3e-07</span><span class="p">)</span>
+<span class="n">natural_unit_of_energy</span> <span class="o">=</span> <span class="p">(</span><span class="mf">8.1871047e-14</span><span class="p">,</span> <span class="s">&#39;J&#39;</span><span class="p">,</span> <span class="mf">1.4e-20</span><span class="p">)</span>
+<span class="n">neutronmuon_mass_ratio</span> <span class="o">=</span> <span class="p">(</span><span class="mf">8.89248402</span><span class="p">,</span> <span class="s">&#39;&#39;</span><span class="p">,</span> <span class="mf">2.3e-07</span><span class="p">)</span>
+<span class="n">natural_unit_of_mass</span> <span class="o">=</span> <span class="p">(</span><span class="mf">9.1093826e-31</span><span class="p">,</span> <span class="s">&#39;kg&#39;</span><span class="p">,</span> <span class="mf">1.6e-37</span><span class="p">)</span>
+<span class="n">muon_compton_wavelength_over_2_pi</span> <span class="o">=</span> <span class="p">(</span><span class="mf">1.867594298e-15</span><span class="p">,</span> <span class="s">&#39;m&#39;</span><span class="p">,</span> <span class="mf">4.7e-23</span><span class="p">)</span>
+
+
+<span class="c"># mathematical constants</span>
+<span class="n">pi</span> <span class="o">=</span> <span class="n">_math</span><span class="o">.</span><span class="n">pi</span>
+<span class="n">golden</span> <span class="o">=</span> <span class="n">golden_ratio</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="n">_math</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">5</span><span class="p">))</span> <span class="o">/</span> <span class="mi">2</span>
+
+<span class="c"># SI prefixes</span>
+<span class="n">yotta</span> <span class="o">=</span> <span class="mf">1e24</span>
+<span class="n">zetta</span> <span class="o">=</span> <span class="mf">1e21</span>
+<span class="n">exa</span> <span class="o">=</span> <span class="mf">1e18</span>
+<span class="n">peta</span> <span class="o">=</span> <span class="mf">1e15</span>
+<span class="n">tera</span> <span class="o">=</span> <span class="mf">1e12</span>
+<span class="n">giga</span> <span class="o">=</span> <span class="mf">1e9</span>
+<span class="n">mega</span> <span class="o">=</span> <span class="mf">1e6</span>
+<span class="n">kilo</span> <span class="o">=</span> <span class="mf">1e3</span>
+<span class="n">hecto</span> <span class="o">=</span> <span class="mf">1e2</span>
+<span class="n">deka</span> <span class="o">=</span> <span class="mf">1e1</span>
+<span class="n">deci</span> <span class="o">=</span> <span class="mf">1e-1</span>
+<span class="n">centi</span> <span class="o">=</span> <span class="mf">1e-2</span>
+<span class="n">milli</span> <span class="o">=</span> <span class="mf">1e-3</span>
+<span class="n">micro</span> <span class="o">=</span> <span class="mf">1e-6</span>
+<span class="n">nano</span> <span class="o">=</span> <span class="mf">1e-9</span>
+<span class="n">pico</span> <span class="o">=</span> <span class="mf">1e-12</span>
+<span class="n">femto</span> <span class="o">=</span> <span class="mf">1e-15</span>
+<span class="n">atto</span> <span class="o">=</span> <span class="mf">1e-18</span>
+<span class="n">zepto</span> <span class="o">=</span> <span class="mf">1e-21</span>
+
+<span class="c"># binary prefixes</span>
+<span class="n">kibi</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">**</span> <span class="mi">10</span>
+<span class="n">mebi</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">**</span> <span class="mi">20</span>
+<span class="n">gibi</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">**</span> <span class="mi">30</span>
+<span class="n">tebi</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">**</span> <span class="mi">40</span>
+<span class="n">pebi</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">**</span> <span class="mi">50</span>
+<span class="n">exbi</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">**</span> <span class="mi">60</span>
+<span class="n">zebi</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">**</span> <span class="mi">70</span>
+<span class="n">yobi</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">**</span> <span class="mi">80</span>
+
+<span class="c"># weight in kg</span>
+<span class="n">gram</span> <span class="o">=</span> <span class="mf">1e-3</span>
+<span class="n">metric_ton</span> <span class="o">=</span> <span class="mf">1e3</span>
+<span class="n">grain</span> <span class="o">=</span> <span class="mf">64.79891e-6</span>
+<span class="n">lb</span> <span class="o">=</span> <span class="n">pound</span> <span class="o">=</span> <span class="mi">7000</span> <span class="o">*</span> <span class="n">grain</span>  <span class="c"># avoirdupois</span>
+<span class="n">oz</span> <span class="o">=</span> <span class="n">ounce</span> <span class="o">=</span> <span class="n">pound</span> <span class="o">/</span> <span class="mi">16</span>
+<span class="n">stone</span> <span class="o">=</span> <span class="mi">14</span> <span class="o">*</span> <span class="n">pound</span>
+<span class="n">long_ton</span> <span class="o">=</span> <span class="mi">2240</span> <span class="o">*</span> <span class="n">pound</span>
+<span class="n">short_ton</span> <span class="o">=</span> <span class="mi">2000</span> <span class="o">*</span> <span class="n">pound</span>
+
+<span class="n">troy_ounce</span> <span class="o">=</span> <span class="mi">480</span> <span class="o">*</span> <span class="n">grain</span>  <span class="c"># only for metals / gems</span>
+<span class="n">troy_pound</span> <span class="o">=</span> <span class="mi">12</span> <span class="o">*</span> <span class="n">troy_ounce</span>
+<span class="n">carat</span> <span class="o">=</span> <span class="mf">200e-6</span>
+
+<span class="c"># angle in rad</span>
+<span class="n">degree</span> <span class="o">=</span> <span class="n">pi</span> <span class="o">/</span> <span class="mi">180</span>
+<span class="n">arcmin</span> <span class="o">=</span> <span class="n">arcminute</span> <span class="o">=</span> <span class="n">degree</span> <span class="o">/</span> <span class="mi">60</span>
+<span class="n">arcsec</span> <span class="o">=</span> <span class="n">arcsecond</span> <span class="o">=</span> <span class="n">arcmin</span> <span class="o">/</span> <span class="mi">60</span>
+
+<span class="c"># time in second</span>
+<span class="n">minute</span> <span class="o">=</span> <span class="mf">60.0</span>
+<span class="n">hour</span> <span class="o">=</span> <span class="mi">60</span> <span class="o">*</span> <span class="n">minute</span>
+<span class="n">day</span> <span class="o">=</span> <span class="mi">24</span> <span class="o">*</span> <span class="n">hour</span>
+<span class="n">week</span> <span class="o">=</span> <span class="mi">7</span> <span class="o">*</span> <span class="n">day</span>
+<span class="n">year</span> <span class="o">=</span> <span class="mi">365</span> <span class="o">*</span> <span class="n">day</span>
+<span class="n">Julian_year</span> <span class="o">=</span> <span class="mf">365.25</span> <span class="o">*</span> <span class="n">day</span>
+
+<span class="c"># length in meter</span>
+<span class="n">inch</span> <span class="o">=</span> <span class="mf">0.0254</span>
+<span class="n">foot</span> <span class="o">=</span> <span class="mi">12</span> <span class="o">*</span> <span class="n">inch</span>
+<span class="n">yard</span> <span class="o">=</span> <span class="mi">3</span> <span class="o">*</span> <span class="n">foot</span>
+<span class="n">mile</span> <span class="o">=</span> <span class="mi">1760</span> <span class="o">*</span> <span class="n">yard</span>
+<span class="n">mil</span> <span class="o">=</span> <span class="n">inch</span> <span class="o">/</span> <span class="mi">1000</span>
+<span class="n">pt</span> <span class="o">=</span> <span class="n">point</span> <span class="o">=</span> <span class="n">inch</span> <span class="o">/</span> <span class="mi">72</span>  <span class="c"># typography</span>
+<span class="n">survey_foot</span> <span class="o">=</span> <span class="mf">1200.0</span> <span class="o">/</span> <span class="mi">3937</span>
+<span class="n">survey_mile</span> <span class="o">=</span> <span class="mi">5280</span> <span class="o">*</span> <span class="n">survey_foot</span>
+<span class="n">nautical_mile</span> <span class="o">=</span> <span class="mf">1852.0</span>
+<span class="n">fermi</span> <span class="o">=</span> <span class="mf">1e-15</span>
+<span class="n">angstrom</span> <span class="o">=</span> <span class="mf">1e-10</span>
+<span class="n">micron</span> <span class="o">=</span> <span class="mf">1e-6</span>
+<span class="n">au</span> <span class="o">=</span> <span class="n">astronomical_unit</span> <span class="o">=</span> <span class="mf">149597870691.0</span>
+<span class="n">light_year</span> <span class="o">=</span> <span class="n">Julian_year</span> <span class="o">*</span> <span class="n">speed_of_light_in_vacuum</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+<span class="n">parsec</span> <span class="o">=</span> <span class="n">au</span> <span class="o">/</span> <span class="n">arcsec</span>
+
+<span class="c"># pressure in pascal</span>
+<span class="n">atm</span> <span class="o">=</span> <span class="n">standard_atmosphere</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+<span class="n">bar</span> <span class="o">=</span> <span class="mf">1e5</span>
+<span class="n">torr</span> <span class="o">=</span> <span class="n">mmHg</span> <span class="o">=</span> <span class="n">atm</span> <span class="o">/</span> <span class="mi">760</span>
+<span class="n">psi</span> <span class="o">=</span> <span class="n">pound</span> <span class="o">*</span> <span class="n">standard_acceleration_of_gravity</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">/</span> <span class="p">(</span><span class="n">inch</span> <span class="o">*</span> <span class="n">inch</span><span class="p">)</span>
+
+<span class="c"># area in meter**2</span>
+<span class="n">hectare</span> <span class="o">=</span> <span class="mf">1e4</span>
+<span class="n">acre</span> <span class="o">=</span> <span class="mi">43560</span> <span class="o">*</span> <span class="n">foot</span> <span class="o">**</span> <span class="mi">2</span>
+
+<span class="c"># volume in meter**3</span>
+<span class="n">litre</span> <span class="o">=</span> <span class="n">liter</span> <span class="o">=</span> <span class="mf">1e-3</span>
+<span class="n">gallon</span> <span class="o">=</span> <span class="n">gallon_US</span> <span class="o">=</span> <span class="mi">231</span> <span class="o">*</span> <span class="n">inch</span> <span class="o">**</span> <span class="mi">3</span>  <span class="c"># US</span>
+<span class="n">pint</span> <span class="o">=</span> <span class="n">gallon_US</span> <span class="o">/</span> <span class="mi">8</span>
+<span class="n">fluid_ounce</span> <span class="o">=</span> <span class="n">fluid_ounce_US</span> <span class="o">=</span> <span class="n">gallon_US</span> <span class="o">/</span> <span class="mi">128</span>
+<span class="n">bbl</span> <span class="o">=</span> <span class="n">barrel</span> <span class="o">=</span> <span class="mi">42</span> <span class="o">*</span> <span class="n">gallon_US</span>  <span class="c"># for oil</span>
+
+<span class="n">gallon_imp</span> <span class="o">=</span> <span class="mf">4.54609e-3</span>  <span class="c"># uk</span>
+<span class="n">fluid_ounce_imp</span> <span class="o">=</span> <span class="n">gallon_imp</span> <span class="o">/</span> <span class="mi">160</span>
+
+<span class="c"># speed in meter per second</span>
+<span class="n">kmh</span> <span class="o">=</span> <span class="mf">1e3</span> <span class="o">/</span> <span class="n">hour</span>
+<span class="n">mph</span> <span class="o">=</span> <span class="n">mile</span> <span class="o">/</span> <span class="n">hour</span>
+<span class="n">mach</span> <span class="o">=</span> <span class="n">speed_of_sound</span> <span class="o">=</span> <span class="mf">340.3</span>
+<span class="n">knot</span> <span class="o">=</span> <span class="n">nautical_mile</span> <span class="o">/</span> <span class="n">hour</span>
+
+<span class="c"># temperature in kelvin</span>
+<span class="n">zero_Celsius</span> <span class="o">=</span> <span class="mf">273.15</span>
+<span class="n">degree_Fahrenheit</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">/</span> <span class="mf">1.8</span>  <span class="c"># only for differences</span>
+
+<span class="c"># energy in joule</span>
+<span class="n">eV</span> <span class="o">=</span> <span class="n">electron_volt</span> <span class="o">=</span> <span class="n">elementary_charge</span>  <span class="c"># * 1 Volt</span>
+<span class="n">calorie</span> <span class="o">=</span> <span class="n">calorie_th</span> <span class="o">=</span> <span class="mf">4.184</span>
+<span class="n">calorie_IT</span> <span class="o">=</span> <span class="mf">4.1868</span>
+<span class="n">erg</span> <span class="o">=</span> <span class="mf">1e-7</span>
+<span class="n">Btu_th</span> <span class="o">=</span> <span class="n">pound</span> <span class="o">*</span> <span class="n">degree_Fahrenheit</span> <span class="o">*</span> <span class="n">calorie_th</span> <span class="o">/</span> <span class="n">gram</span>
+<span class="n">Btu</span> <span class="o">=</span> <span class="n">Btu_IT</span> <span class="o">=</span> <span class="n">pound</span> <span class="o">*</span> <span class="n">degree_Fahrenheit</span> <span class="o">*</span> <span class="n">calorie_IT</span> <span class="o">/</span> <span class="n">gram</span>
+<span class="n">ton_TNT</span> <span class="o">=</span> <span class="mf">1e9</span> <span class="o">*</span> <span class="n">calorie_th</span>
+<span class="n">kWh</span> <span class="o">=</span> <span class="n">kilo</span> <span class="o">*</span> <span class="n">hour</span>
+<span class="c"># Wh = watt_hour</span>
+
+<span class="c"># power in watt</span>
+<span class="c"># hp = horsepower = 550 * foot * pound * g</span>
+
+<span class="c"># force in newton</span>
+<span class="n">dyn</span> <span class="o">=</span> <span class="n">dyne</span> <span class="o">=</span> <span class="mf">1e-5</span>
+<span class="n">lbf</span> <span class="o">=</span> <span class="n">pound_force</span> <span class="o">=</span> <span class="n">pound</span> <span class="o">*</span> <span class="n">standard_acceleration_of_gravity</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+<span class="n">kgf</span> <span class="o">=</span> <span class="n">kilogram_force</span> <span class="o">=</span> <span class="n">standard_acceleration_of_gravity</span>  <span class="c"># * 1 kg</span>
+
+<span class="c"># functions for conversions that are not linear</span>
+
+
+<div class="viewcode-block" id="C2K"><a class="viewcode-back" href="../../thermopy.html#thermopy.constants.C2K">[docs]</a><span class="k">def</span> <span class="nf">C2K</span><span class="p">(</span><span class="n">C</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Convert Celcius to Kelvin&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">C</span> <span class="o">+</span> <span class="n">zero_Celsius</span></div>
+
+
+<div class="viewcode-block" id="K2C"><a class="viewcode-back" href="../../thermopy.html#thermopy.constants.K2C">[docs]</a><span class="k">def</span> <span class="nf">K2C</span><span class="p">(</span><span class="n">K</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Convert Kelvin to Celcius&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">K</span> <span class="o">-</span> <span class="n">zero_Celsius</span></div>
+
+
+<div class="viewcode-block" id="F2C"><a class="viewcode-back" href="../../thermopy.html#thermopy.constants.F2C">[docs]</a><span class="k">def</span> <span class="nf">F2C</span><span class="p">(</span><span class="n">F</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Convert Fahrenheit to Celcius&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="p">(</span><span class="n">F</span> <span class="o">-</span> <span class="mi">32</span><span class="p">)</span> <span class="o">/</span> <span class="mf">1.8</span></div>
+
+
+<div class="viewcode-block" id="C2F"><a class="viewcode-back" href="../../thermopy.html#thermopy.constants.C2F">[docs]</a><span class="k">def</span> <span class="nf">C2F</span><span class="p">(</span><span class="n">C</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Convert Celcius to Fahrenheit&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="mf">1.8</span> <span class="o">*</span> <span class="n">C</span> <span class="o">+</span> <span class="mi">32</span></div>
+
+
+<div class="viewcode-block" id="F2K"><a class="viewcode-back" href="../../thermopy.html#thermopy.constants.F2K">[docs]</a><span class="k">def</span> <span class="nf">F2K</span><span class="p">(</span><span class="n">F</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Convert Fahrenheit to Kelvin&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">C2K</span><span class="p">(</span><span class="n">F2C</span><span class="p">(</span><span class="n">F</span><span class="p">))</span></div>
+
+
+<div class="viewcode-block" id="K2F"><a class="viewcode-back" href="../../thermopy.html#thermopy.constants.K2F">[docs]</a><span class="k">def</span> <span class="nf">K2F</span><span class="p">(</span><span class="n">K</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Convert Kelvin to Fahrenheit&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">C2F</span><span class="p">(</span><span class="n">K2C</span><span class="p">(</span><span class="n">K</span><span class="p">))</span></div>
+
+<span class="c"># optics</span>
+
+
+<div class="viewcode-block" id="lambda2nu"><a class="viewcode-back" href="../../thermopy.html#thermopy.constants.lambda2nu">[docs]</a><span class="k">def</span> <span class="nf">lambda2nu</span><span class="p">(</span><span class="n">lambda_</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Convert wavelength to optical frequency&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">speed_of_light_in_vacuum</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">/</span> <span class="n">lambda_</span></div>
+
+
+<div class="viewcode-block" id="nu2lambda"><a class="viewcode-back" href="../../thermopy.html#thermopy.constants.nu2lambda">[docs]</a><span class="k">def</span> <span class="nf">nu2lambda</span><span class="p">(</span><span class="n">nu</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Convert optical frequency to wavelength&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">speed_of_light_in_vacuum</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">/</span> <span class="n">nu</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">thermopy  documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2016, Author.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.4.
+    </div>
+  </body>
+</html>

@@ -1,0 +1,1000 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>thermopy.nasa9polynomials &mdash; thermopy  documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="top" title="thermopy  documentation" href="../../index.html" />
+    <link rel="up" title="Module code" href="../index.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">thermopy  documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for thermopy.nasa9polynomials</h1><div class="highlight"><pre>
+<span class="sd">u&quot;&quot;&quot;</span>
+<span class="sd">Enable the NASA 9 term polynomials to create chemical compound objects.</span>
+
+<span class="sd">This module allows the user to use the NASA9 term polynomials (abbreviated as</span>
+<span class="sd">NASA 9) to model chemical compounds and reactions. It is worth noting that all</span>
+<span class="sd">the output is stripped of any phyisical unit, that is, results are returned as</span>
+<span class="sd">numpy floats. *Therefore to end any form of ambiguity we reinstate that all the</span>
+<span class="sd">results are in SI units using molar basis*. It is up to the user to beware of</span>
+<span class="sd">any physical unit conversion concerning his problem.</span>
+
+<span class="sd">Classes:</span>
+
+<span class="sd">    Compound: chemical compound present in the NASA9 term polynomials</span>
+<span class="sd">    database.</span>
+
+<span class="sd">    CompoundIdealGas: chemical compound as an ideal gas present in the NASA9</span>
+<span class="sd">    term polynomials database. It inherits from Compound.</span>
+
+<span class="sd">    Reaction: model of a chemical reaction.</span>
+
+<span class="sd">Example:</span>
+<span class="sd">    &gt;&gt;&gt; import thermopy</span>
+<span class="sd">    &gt;&gt;&gt; from thermopy import nasa9polynomials as nasa9</span>
+<span class="sd">    &gt;&gt;&gt; db = nasa9.Database()</span>
+<span class="sd">    &gt;&gt;&gt; caf2 = db.set_compound(&#39;caf2&#39;)</span>
+<span class="sd">    &gt;&gt;&gt; print(caf2.elements)</span>
+<span class="sd">    [(&#39;C&#39;, 1), (&#39;F&#39;, 2)]</span>
+<span class="sd">    &gt;&gt;&gt; print(caf2.inchikey)</span>
+<span class="sd">    WUKWITHWXAAZEY-UHFFFAOYSA-L</span>
+<span class="sd">    &gt;&gt;&gt; print(caf2.enthalpy_of_formation)</span>
+<span class="sd">    -790828.409</span>
+<span class="sd">    &gt;&gt;&gt; print(caf2.heat_capacity(300))</span>
+<span class="sd">    51.2707324499</span>
+<span class="sd">    &gt;&gt;&gt; print(caf2.molecular_weight)</span>
+<span class="sd">    0.0780748064</span>
+<span class="sd">    &gt;&gt;&gt; water = db.set_compound(&#39;h2o(l)&#39;)</span>
+<span class="sd">    &gt;&gt;&gt; print(water.entropy(300))</span>
+<span class="sd">    69.633703</span>
+<span class="sd">    &gt;&gt;&gt; print(water.elements)</span>
+<span class="sd">    [(&#39;H&#39;, 2), (&#39;O&#39;, 1)]</span>
+
+<span class="sd">References: [1] Bonnie J. McBride, Michael J. Zehe, and Sanford Gordon. NASA</span>
+<span class="sd">Glenn Coefficients for Calculating Thermodynamic Properties of Individual</span>
+<span class="sd">Species. September 2002.</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">re</span>
+<span class="kn">import</span> <span class="nn">xml.etree.ElementTree</span> <span class="kn">as</span> <span class="nn">ET</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">thermopy.constants</span> <span class="kn">import</span> <span class="n">ideal_gas_constant</span>
+<span class="n">_R</span> <span class="o">=</span> <span class="n">ideal_gas_constant</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+
+<div class="viewcode-block" id="Compound"><a class="viewcode-back" href="../../thermopy.html#thermopy.nasa9polynomials.Compound">[docs]</a><span class="k">class</span> <span class="nc">Compound</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">u&quot;&quot;&quot;</span>
+<span class="sd">    Chemical compound present in the NASA9 term polynomials database.</span>
+
+<span class="sd">    It is usually set by nasa9polyniomials.Database.set_compound(&#39;identifier&#39;).</span>
+<span class="sd">    If set this way this method already instantiates either a Compound or a</span>
+<span class="sd">    CompoundIdealGas based on the phase of the chemical compound specified by</span>
+<span class="sd">    the identifier (see note below).</span>
+
+<span class="sd">    Note: *The default phase for compounds in this database is gas.* Thus if</span>
+<span class="sd">    instantiating with the name &#39;H2O&#39; one would get steam. For liquid water and</span>
+<span class="sd">    ice one would rather look for &#39;H2O(L)&#39; or &#39;H2O(cr)&#39;. The same is valid for</span>
+<span class="sd">    a lot of compounds expected to be in the condensed form (such as NaCl,</span>
+<span class="sd">    Tungsten, etc).</span>
+
+<span class="sd">    It has all the thermodynamic functions listed in [1] as methods which take</span>
+<span class="sd">    temperature as their sole argument. Those were expanded to include</span>
+<span class="sd">    gibbs_energy that could be defined by the given functions.</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">        canonical_smiles (str): Canonical SMILES</span>
+<span class="sd">            (Simplified molecular-input line-entry system) of the compound.</span>
+<span class="sd">        cas_number (str): CAS (Chemical Abstract Service) number of the</span>
+<span class="sd">            compound.</span>
+<span class="sd">        comment (str): Comment found in the xml database. Usually references.</span>
+<span class="sd">        condensed (bool): True if the compound is condensed, False if not.</span>
+<span class="sd">        xml_compounds (list): List containing tuples of two entries. The first</span>
+<span class="sd">            is the xml_compound and the second is the proportion of the</span>
+<span class="sd">            xml_compound in the molecule. Both values are strings.</span>
+<span class="sd">        enthalpy_of_formation (float): Enthalpy of formation of the compound.</span>
+<span class="sd">        inchikey (str): InChI (International Chemical Identifier) key</span>
+<span class="sd">            for the compound.</span>
+<span class="sd">        inp_name (str): Name as per the original &#39;inp&#39; file.</span>
+<span class="sd">        iupac_name (str): IUPAC (International Union of Pure and Applied</span>
+<span class="sd">            Chemistry) name of the compound.</span>
+<span class="sd">        molecular_weight (float): Molecular</span>
+<span class="sd">            weight of the compound.</span>
+<span class="sd">        reference (str): Reference for the compound. See [1] for details.</span>
+
+<span class="sd">    Methods:</span>
+<span class="sd">        enthalpy:calculates the enthalpy for a Compound object.</span>
+<span class="sd">        entropy: calculates the entropy for a Compound object.</span>
+<span class="sd">        gibbs_energy: calculates the Gibbs energy for a Compound object.</span>
+<span class="sd">        heat_capacity: calculates the heat capacity for a Compound object.</span>
+
+<span class="sd">    Subclasses:</span>
+<span class="sd">        CompoundIdealGas: chemical compound as an ideal gas present in</span>
+<span class="sd">        the NASA9 term polynomials database. It inherits from Compound.</span>
+
+<span class="sd">    Examples:</span>
+<span class="sd">        &gt;&gt;&gt; import thermopy</span>
+<span class="sd">        &gt;&gt;&gt; from thermopy import nasa9polynomials as nasa9</span>
+<span class="sd">        &gt;&gt;&gt; db = nasa9.Database()</span>
+<span class="sd">        &gt;&gt;&gt; uf6 = db.set_compound(&#39;uf6(cr)&#39;)</span>
+<span class="sd">        &gt;&gt;&gt; print(uf6)</span>
+<span class="sd">        hexafluorouranium: UF6(cr)</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">xml_compound</span><span class="p">):</span>
+        <span class="sd">u&quot;&quot;&quot;</span>
+<span class="sd">        Instantiate a Compound object from xml info.</span>
+
+<span class="sd">        Arguments:</span>
+<span class="sd">            xml_compound: xml tree containing the relevant fields to</span>
+<span class="sd">        characterize the attributes and boundaries of temperature for which</span>
+<span class="sd">        calculations are valid.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_xml_compound</span> <span class="o">=</span> <span class="n">xml_compound</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">inp_name</span> <span class="o">=</span> <span class="n">xml_compound</span><span class="o">.</span><span class="n">attrib</span><span class="p">[</span><span class="s">&#39;inp_file_name&#39;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">inchikey</span> <span class="o">=</span> <span class="n">xml_compound</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s">&#39;identification&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">find</span><span class="p">(</span>
+            <span class="s">&#39;InChIKey&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">text</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">canonical_smiles</span> <span class="o">=</span> <span class="n">xml_compound</span><span class="o">.</span><span class="n">find</span><span class="p">(</span>
+            <span class="s">&#39;identification&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s">&#39;canonical_smiles&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">text</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cas_number</span> <span class="o">=</span> <span class="n">xml_compound</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s">&#39;identification&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">find</span><span class="p">(</span>
+            <span class="s">&#39;cas_number&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">text</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">iupac_name</span> <span class="o">=</span> <span class="n">xml_compound</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s">&#39;identification&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">find</span><span class="p">(</span>
+            <span class="s">&#39;IUPAC_name&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">text</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">comment</span> <span class="o">=</span> <span class="n">xml_compound</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s">&#39;comment&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">text</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">reference</span> <span class="o">=</span> <span class="n">xml_compound</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s">&#39;reference&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">text</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">elements</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_xml_compounds</span><span class="p">(</span><span class="n">xml_compound</span><span class="o">.</span><span class="n">find</span><span class="p">(</span>
+            <span class="s">&#39;elements&#39;</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">condensed</span> <span class="o">=</span> <span class="nb">bool</span><span class="p">(</span>
+            <span class="n">xml_compound</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s">&#39;condensed&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">text</span> <span class="o">==</span> <span class="s">&#39;True&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">molecular_weight</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span>
+            <span class="n">xml_compound</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s">&#39;molecular_weight&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">text</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">enthalpy_of_formation</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span>
+            <span class="n">xml_compound</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s">&#39;hf298.15&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">text</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_get_xml_compounds</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">xml_compound</span><span class="p">):</span>
+        <span class="sd">u&quot;&quot;&quot;</span>
+<span class="sd">        Return a list of tuples containing the elements and their</span>
+<span class="sd">        proportion in the chemical compound.</span>
+
+<span class="sd">        Arguments:</span>
+<span class="sd">            xml_compound (list): list of Element Tree objects containing</span>
+<span class="sd">        elements.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            list: list of tuples. Tuples are of the form (str, int) where</span>
+<span class="sd">        str is the symbol of the element and int is its proportion in the</span>
+<span class="sd">        molecule.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">xml_compounds_list</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">one_xml_compound</span> <span class="ow">in</span> <span class="n">xml_compound</span><span class="p">:</span>
+            <span class="n">xml_compounds_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">tuple</span><span class="p">(</span><span class="o">*</span><span class="nb">map</span><span class="p">(</span>
+                <span class="k">lambda</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">:</span> <span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">y</span><span class="p">)),</span>
+                <span class="o">*</span><span class="n">one_xml_compound</span><span class="o">.</span><span class="n">items</span><span class="p">()[</span><span class="mi">0</span><span class="p">])))</span>
+        <span class="k">return</span> <span class="n">xml_compounds_list</span>
+
+    <span class="k">def</span> <span class="nf">_evaluate_temperature_interval</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">T</span><span class="p">):</span>
+        <span class="sd">u&quot;&quot;&quot;</span>
+<span class="sd">        Ouput temperature interval to be used by public methods.</span>
+
+<span class="sd">        Helper method to ouput temperature interval order.</span>
+
+<span class="sd">        Arguments:</span>
+<span class="sd">            T (float): temperature.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            int: The order of the temperature range (0th, 1st, 2nd, etc).</span>
+<span class="sd">        Some compounds have more than one temperature range with different</span>
+<span class="sd">        corrisponding coefficients. Therefore the temperature range has to be</span>
+<span class="sd">        specified.</span>
+
+<span class="sd">        Example: The KI gas has two temperature intervals (thus two sets of</span>
+<span class="sd">        coefficients to be used). The ranges are: [200, 1000] and [1000, 6000]</span>
+<span class="sd">        as for most gases. Thus requiring a property to be measured at 1100 K</span>
+<span class="sd">        the second interval should be used and this method shall return the</span>
+<span class="sd">        number 1 (as opposed to zero).</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">Trange</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_xml_compound</span><span class="o">.</span><span class="n">findall</span><span class="p">(</span><span class="s">&#39;T_range&#39;</span><span class="p">)):</span>
+            <span class="k">if</span> <span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">Trange</span><span class="o">.</span><span class="n">attrib</span><span class="p">[</span><span class="s">&#39;Tlow&#39;</span><span class="p">])</span> <span class="o">&lt;=</span> <span class="n">T</span> <span class="o">&lt;=</span> <span class="nb">float</span><span class="p">(</span>
+                    <span class="n">Trange</span><span class="o">.</span><span class="n">attrib</span><span class="p">[</span><span class="s">&#39;Thigh&#39;</span><span class="p">])):</span>
+                <span class="k">return</span> <span class="n">i</span>
+        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s">&#39;Temperature out of range for &#39;</span>
+                        <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">iupac_name</span> <span class="o">+</span> <span class="s">&#39;/&#39;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">inp_name</span>
+                        <span class="o">+</span> <span class="s">&#39; with &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">T</span><span class="p">)</span> <span class="o">+</span> <span class="s">&#39; K&#39;</span><span class="p">)</span>
+
+<div class="viewcode-block" id="Compound.heat_capacity"><a class="viewcode-back" href="../../thermopy.html#thermopy.nasa9polynomials.Compound.heat_capacity">[docs]</a>    <span class="k">def</span> <span class="nf">heat_capacity</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">T</span><span class="p">):</span>
+        <span class="sd">u&quot;&quot;&quot;</span>
+<span class="sd">        Calculate molar heat capacity at constant pressure for standard</span>
+<span class="sd">        state.</span>
+
+<span class="sd">        Arguments:</span>
+<span class="sd">            T (float): temperature.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            numpy_float: The molar heat capacity for the compound for a</span>
+<span class="sd">        given temperature.</span>
+
+<span class="sd">        Examples:</span>
+<span class="sd">            &gt;&gt;&gt; import thermopy</span>
+<span class="sd">            &gt;&gt;&gt; from thermopy import nasa9polynomials as nasa9</span>
+<span class="sd">            &gt;&gt;&gt; db = nasa9.Database()</span>
+<span class="sd">            &gt;&gt;&gt; libr = db.set_compound(&#39;LiBr&#39;)</span>
+<span class="sd">            &gt;&gt;&gt; print(libr, &#39;-&#39;, libr.heat_capacity(2700))</span>
+<span class="sd">            lithium;bromide: LiBr - 39.6593057506</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">coefficients</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="mi">9</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+        <span class="k">for</span> <span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">coef</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_xml_compound</span><span class="o">.</span><span class="n">findall</span><span class="p">(</span>
+                <span class="s">&#39;T_range&#39;</span><span class="p">)[</span><span class="bp">self</span><span class="o">.</span><span class="n">_evaluate_temperature_interval</span><span class="p">(</span><span class="n">T</span><span class="p">)]):</span>
+            <span class="n">coefficients</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">coef</span><span class="o">.</span><span class="n">text</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+        <span class="n">exponents</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">signedinteger</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">multiply</span><span class="p">(</span>
+                <span class="n">np</span><span class="o">.</span><span class="n">power</span><span class="p">(</span><span class="n">T</span><span class="p">,</span> <span class="n">exponents</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">),</span>
+                <span class="n">coefficients</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">7</span><span class="p">]),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span> <span class="o">*</span> <span class="n">_R</span></div>
+
+<div class="viewcode-block" id="Compound.enthalpy"><a class="viewcode-back" href="../../thermopy.html#thermopy.nasa9polynomials.Compound.enthalpy">[docs]</a>    <span class="k">def</span> <span class="nf">enthalpy</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">T</span><span class="p">):</span>
+        <span class="sd">u&quot;&quot;&quot;</span>
+<span class="sd">        Calculate molar enthalpy at constant pressure for the compound for</span>
+<span class="sd">        a given temperature.</span>
+
+<span class="sd">        Arguments:</span>
+<span class="sd">            T (float): temperature.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            numpy_float: The molar enthalpy for the compound for a given</span>
+<span class="sd">            temperature.</span>
+
+<span class="sd">        Examples:</span>
+<span class="sd">            &gt;&gt;&gt; import thermopy</span>
+<span class="sd">            &gt;&gt;&gt; from thermopy import nasa9polynomials as nasa9</span>
+<span class="sd">            &gt;&gt;&gt; db = nasa9.Database()</span>
+<span class="sd">            &gt;&gt;&gt; magnesium_hydroxide = db.set_compound(&#39;Mg(OH)2(cr)&#39;)</span>
+<span class="sd">            &gt;&gt;&gt; print(magnesium_hydroxide, &#39;-&#39;,</span>
+<span class="sd">            &gt;&gt;&gt; magnesium_hydroxide.enthalpy(500))  # J/mol</span>
+<span class="sd">            Mg(OH)2(cr) - -906097.801815</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">coefficients</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="mi">9</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+        <span class="k">for</span> <span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">coef</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_xml_compound</span><span class="o">.</span><span class="n">findall</span><span class="p">(</span>
+                <span class="s">&#39;T_range&#39;</span><span class="p">)[</span><span class="bp">self</span><span class="o">.</span><span class="n">_evaluate_temperature_interval</span><span class="p">(</span><span class="n">T</span><span class="p">)]):</span>
+            <span class="n">coefficients</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">coef</span><span class="o">.</span><span class="n">text</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+        <span class="n">exponents</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">],</span>
+                             <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">signedinteger</span><span class="p">)</span>
+        <span class="n">other_factors</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">T</span><span class="p">),</span> <span class="mi">1</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="mi">1</span><span class="o">/</span><span class="mi">3</span><span class="p">,</span> <span class="mf">0.25</span><span class="p">,</span> <span class="mf">0.2</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span>
+                                 <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">multiply</span><span class="p">(</span>
+                <span class="n">np</span><span class="o">.</span><span class="n">multiply</span><span class="p">(</span>
+                    <span class="n">np</span><span class="o">.</span><span class="n">power</span><span class="p">(</span><span class="n">T</span><span class="p">,</span> <span class="n">exponents</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">),</span>
+                    <span class="n">coefficients</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">8</span><span class="p">]),</span>
+                <span class="n">other_factors</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span> <span class="o">*</span> <span class="n">_R</span> <span class="o">*</span> <span class="n">T</span></div>
+
+<div class="viewcode-block" id="Compound.entropy"><a class="viewcode-back" href="../../thermopy.html#thermopy.nasa9polynomials.Compound.entropy">[docs]</a>    <span class="k">def</span> <span class="nf">entropy</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">T</span><span class="p">):</span>
+        <span class="sd">u&quot;&quot;&quot;</span>
+<span class="sd">        Calculate molar entropy at constant pressure for the compound for</span>
+<span class="sd">        a given temperature.</span>
+
+<span class="sd">        Arguments:</span>
+<span class="sd">            T (float): temperature.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            numpy_float: The molar entropy for the compound for a given</span>
+<span class="sd">            temperature.</span>
+
+<span class="sd">        Examples:</span>
+<span class="sd">            &gt;&gt;&gt; import thermopy</span>
+<span class="sd">            &gt;&gt;&gt; from thermopy import nasa9polynomials as nasa9</span>
+<span class="sd">            &gt;&gt;&gt; db = nasa9.Database()</span>
+<span class="sd">            &gt;&gt;&gt; argon = db.set_compound(&#39;ar&#39;)</span>
+<span class="sd">            &gt;&gt;&gt; print(argon, &#39;-&#39;, argon.entropy(200))</span>
+<span class="sd">            argon: Ar - 146.546470215</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">coefficients</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="mi">9</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+        <span class="k">for</span> <span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">coef</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_xml_compound</span><span class="o">.</span><span class="n">findall</span><span class="p">(</span>
+                <span class="s">&#39;T_range&#39;</span><span class="p">)[</span><span class="bp">self</span><span class="o">.</span><span class="n">_evaluate_temperature_interval</span><span class="p">(</span><span class="n">T</span><span class="p">)]):</span>
+            <span class="n">coefficients</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">coef</span><span class="o">.</span><span class="n">text</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+        <span class="n">exponents</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span>
+                             <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">signedinteger</span><span class="p">)</span>
+        <span class="n">other_factors</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="o">-</span><span class="mf">0.5</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">T</span><span class="p">),</span> <span class="mi">1</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="mi">1</span><span class="o">/</span><span class="mi">3</span><span class="p">,</span> <span class="mf">0.25</span><span class="p">,</span>
+                                  <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span>
+                                 <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">multiply</span><span class="p">(</span>
+                <span class="n">np</span><span class="o">.</span><span class="n">multiply</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">power</span><span class="p">(</span><span class="n">T</span><span class="p">,</span> <span class="n">exponents</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">),</span>
+                            <span class="n">coefficients</span><span class="p">[:]),</span>
+                <span class="n">other_factors</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span> <span class="o">*</span> <span class="n">_R</span></div>
+
+<div class="viewcode-block" id="Compound.gibbs_energy"><a class="viewcode-back" href="../../thermopy.html#thermopy.nasa9polynomials.Compound.gibbs_energy">[docs]</a>    <span class="k">def</span> <span class="nf">gibbs_energy</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">T</span><span class="p">):</span>
+        <span class="sd">u&quot;&quot;&quot;</span>
+<span class="sd">        Calculate molar Gibbs energy at constant pressure for the compound</span>
+<span class="sd">        for a given temperature.</span>
+
+<span class="sd">        Arguments:</span>
+<span class="sd">            T (float): temperature.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            numpy_float: The molar entropy for the compound for a given</span>
+<span class="sd">            temperature.</span>
+
+<span class="sd">        Examples:</span>
+<span class="sd">            &gt;&gt;&gt; import thermopy</span>
+<span class="sd">            &gt;&gt;&gt; from thermopy import nasa9polynomials as nasa9</span>
+<span class="sd">            &gt;&gt;&gt; db = nasa9.Database()</span>
+<span class="sd">            &gt;&gt;&gt; csbr = db.set_compound(&#39;csbr(cr)&#39;)</span>
+<span class="sd">            &gt;&gt;&gt; print(csbr, &#39;-&#39;, csbr.gibbs_energy(273.15))</span>
+<span class="sd">            cesium;bromide: CsBr(cr) - -436504.410044</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">enthalpy</span><span class="p">(</span><span class="n">T</span><span class="p">)</span> <span class="o">-</span> <span class="n">T</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">entropy</span><span class="p">(</span><span class="n">T</span><span class="p">)</span></div>
+
+    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">iupac_name</span> <span class="o">!=</span> <span class="s">&#39;N/A&#39;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">iupac_name</span><span class="p">)</span> <span class="o">+</span> <span class="s">&#39;: &#39;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">inp_name</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">canonical_smiles</span> <span class="o">!=</span> <span class="s">&#39;N/A&#39;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">canonical_smiles</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inp_name</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="CompoundIdealGas"><a class="viewcode-back" href="../../thermopy.html#thermopy.nasa9polynomials.CompoundIdealGas">[docs]</a><span class="k">class</span> <span class="nc">CompoundIdealGas</span><span class="p">(</span><span class="n">Compound</span><span class="p">):</span>
+    <span class="sd">u&quot;&quot;&quot;</span>
+<span class="sd">    Chemical compound as an ideal gas present in the NASA9 term</span>
+<span class="sd">    polynomials database.</span>
+
+<span class="sd">    It is usually set by nasa9polyniomials.Database.set_compound(&#39;identifier&#39;).</span>
+<span class="sd">    If set this way this method already instantiates either a Compound or a</span>
+<span class="sd">    CompoundIdealGas based on the phase of the chemical compound specified by</span>
+<span class="sd">    the identifier (see note below).</span>
+
+<span class="sd">    Note: *The default phase for compounds in this database is gas.* Thus if</span>
+<span class="sd">    instantiating with the name &#39;H2O&#39; one would get steam. For liquid water and</span>
+<span class="sd">    ice one would rather look for &#39;H2O(L)&#39; or &#39;H2O(cr)&#39;. The same is valid for</span>
+<span class="sd">    a lot of compounds expected to be in the condensed form (such as NaCl,</span>
+<span class="sd">    Tungsten, etc).</span>
+
+<span class="sd">    It adds two extra methods which come from the thermodynamics of Ideal</span>
+<span class="sd">    Gases.</span>
+
+<span class="sd">    Inherits from Compound.</span>
+
+<span class="sd">    Methods:</span>
+<span class="sd">        heat_capacity_constant_v: calculates the heat capacity at a</span>
+<span class="sd">        constant volume for a CompoundIdealGas object.</span>
+<span class="sd">        internal_energy: calculates</span>
+<span class="sd">        the internal energy for a CompoundIdealGas object.</span>
+
+<span class="sd">    Examples:</span>
+<span class="sd">        &gt;&gt;&gt; # Instantiating a Compound whose condensed attributed is False</span>
+<span class="sd">        &gt;&gt;&gt; # automatically sets it as an Ideal Gas:</span>
+<span class="sd">        &gt;&gt;&gt; import thermopy</span>
+<span class="sd">        &gt;&gt;&gt; from thermopy import nasa9polynomials as nasa9</span>
+<span class="sd">        &gt;&gt;&gt; db = nasa9.Database()</span>
+<span class="sd">        &gt;&gt;&gt; co2 = db.set_compound(&#39;CO2&#39;)</span>
+<span class="sd">        &gt;&gt;&gt; print(co2, type(co2))</span>
+<span class="sd">        carbon dioxide: CO2 &lt;class</span>
+<span class="sd">        &#39;thermopy.nasa9polynomials.CompoundIdealGas&#39;&gt;</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">xml_compound</span><span class="p">):</span>
+        <span class="sd">u&quot;&quot;&quot;</span>
+<span class="sd">        Initialize an ideal gas Compound.</span>
+
+<span class="sd">        Arguments:</span>
+<span class="sd">            xml_compound: xml tree containing the relevant fields to</span>
+<span class="sd">        characterize the attributes and boundaries of temperature for which</span>
+<span class="sd">        calculations are valid.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">Compound</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">xml_compound</span><span class="p">)</span>
+
+<div class="viewcode-block" id="CompoundIdealGas.heat_capacity_constant_v"><a class="viewcode-back" href="../../thermopy.html#thermopy.nasa9polynomials.CompoundIdealGas.heat_capacity_constant_v">[docs]</a>    <span class="k">def</span> <span class="nf">heat_capacity_constant_v</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">T</span><span class="p">):</span>
+        <span class="sd">u&quot;&quot;&quot;</span>
+<span class="sd">        Calculate molar heat capacity at constant volume for standard</span>
+<span class="sd">        state.</span>
+
+<span class="sd">        Arguments:</span>
+<span class="sd">            T (float): temperature.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            numpy_float: The molar heat capacity for the compound for a</span>
+<span class="sd">            given temperature.</span>
+
+<span class="sd">        Examples:</span>
+<span class="sd">            &gt;&gt;&gt; import thermopy</span>
+<span class="sd">            &gt;&gt;&gt; from thermopy import nasa9polynomials as nasa9</span>
+<span class="sd">            &gt;&gt;&gt; db = nasa9.Database()</span>
+<span class="sd">            &gt;&gt;&gt; xenon = db.set_compound(&#39;Xe&#39;)</span>
+<span class="sd">            &gt;&gt;&gt; print(xenon, &#39;-&#39;, xenon.heat_capacity(298.15))</span>
+<span class="sd">            xenon: Xe - 20.78618</span>
+<span class="sd">            &gt;&gt;&gt; print(xenon, &#39;-&#39;, xenon.heat_capacity_constant_v(298.15))</span>
+<span class="sd">            xenon: Xe - 12.471708</span>
+<span class="sd">            &gt;&gt;&gt; print(&#39;subtracting both hc:&#39;,</span>
+<span class="sd">            ...       xenon.heat_capacity(298.15)</span>
+<span class="sd">            ...       - xenon.heat_capacity_constant_v(298.15))</span>
+<span class="sd">            subtracting both hc: 8.314472</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">heat_capacity</span><span class="p">(</span><span class="n">T</span><span class="p">)</span> <span class="o">-</span> <span class="n">_R</span></div>
+
+<div class="viewcode-block" id="CompoundIdealGas.internal_energy"><a class="viewcode-back" href="../../thermopy.html#thermopy.nasa9polynomials.CompoundIdealGas.internal_energy">[docs]</a>    <span class="k">def</span> <span class="nf">internal_energy</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">T</span><span class="p">):</span>
+        <span class="sd">u&quot;&quot;&quot;</span>
+<span class="sd">        Calculate molar internal energy at constant pressure for standard</span>
+<span class="sd">        state.</span>
+
+<span class="sd">        Arguments:</span>
+<span class="sd">            T (float): temperature.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            numpy_float: The molar internal energy for the compound for a</span>
+<span class="sd">            given temperature.</span>
+
+<span class="sd">        Examples:</span>
+<span class="sd">            &gt;&gt;&gt; import thermopy</span>
+<span class="sd">            &gt;&gt;&gt; from thermopy import nasa9polynomials as nasa9</span>
+<span class="sd">            &gt;&gt;&gt; db = nasa9.Database()</span>
+<span class="sd">            &gt;&gt;&gt; hcn = db.set_compound(&#39;hcn&#39;)</span>
+<span class="sd">            &gt;&gt;&gt; print(hcn, &#39;-&#39;, hcn.internal_energy(500))</span>
+<span class="sd">            formonitrile: HCN - 136809.830971</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">enthalpy</span><span class="p">(</span><span class="n">T</span><span class="p">)</span> <span class="o">-</span> <span class="n">_R</span> <span class="o">*</span> <span class="n">T</span></div></div>
+
+
+<div class="viewcode-block" id="Database"><a class="viewcode-back" href="../../thermopy.html#thermopy.nasa9polynomials.Database">[docs]</a><span class="k">class</span> <span class="nc">Database</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">u&quot;&quot;&quot;</span>
+<span class="sd">    Nasa 9 term polynomials database (see NASA/TP—2002-211556).</span>
+
+<span class="sd">    The preferred method for identifying compounds is via *usual name* followed</span>
+<span class="sd">    by an aggregation state if the compound is not a gas. E.g. &#39;(L)&#39;, &#39;(cr)&#39;,</span>
+<span class="sd">    &#39;(a)&#39;, &#39;(b)&#39; where &#39;(a)&#39; and &#39;(b)&#39; are for allotropes.</span>
+<span class="sd">    Other methods are:</span>
+<span class="sd">        1. InChIKey.</span>
+<span class="sd">        2. CAS number.</span>
+<span class="sd">        3. IUPAC name.</span>
+
+<span class="sd">    Examples:</span>
+<span class="sd">        &gt;&gt;&gt; from thermopy import nasa9polynomials as nasa9</span>
+<span class="sd">        &gt;&gt;&gt; db = nasa9.Database()</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">u&quot;&quot;&quot;Initializes the database.&quot;&quot;&quot;</span>
+        <span class="n">xmlPath</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">__file__</span><span class="p">),</span> <span class="n">os</span><span class="o">.</span><span class="n">pardir</span><span class="p">,</span> <span class="s">&#39;databases&#39;</span><span class="p">,</span>
+            <span class="s">&#39;nasa9polynomials.xml&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_nasa9</span> <span class="o">=</span> <span class="n">ET</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">xmlPath</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_root</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_nasa9</span><span class="o">.</span><span class="n">getroot</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">_search_database</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
+        <span class="sd">u&quot;&quot;&quot;</span>
+<span class="sd">        Search the database.</span>
+
+<span class="sd">        Arguments:</span>
+<span class="sd">            x (str): identifier for compound being searched.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            tuple: (inp file name, iupac name, ET.Element).</span>
+
+<span class="sd">        Note:</span>
+<span class="sd">            The preferred method for identifying compounds is via *usual name*</span>
+<span class="sd">            followed by an aggregation state if the compound is not a gas. E.g.</span>
+<span class="sd">            &#39;(L)&#39;, &#39;(cr)&#39;, &#39;(a)&#39;, &#39;(b)&#39; where &#39;(a)&#39; and &#39;(b)&#39; are for</span>
+<span class="sd">            allotropes.</span>
+<span class="sd">            Other methods are:</span>
+<span class="sd">                1. InChIKey.</span>
+<span class="sd">                2. CAS number.</span>
+<span class="sd">                3. IUPAC name.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">result_list</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">inchikey_re</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="s">&#39;[A-Z]{14}-[A-Z]{10}-[A-Z]&#39;</span><span class="p">)</span>
+        <span class="n">cas_re</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="s">&#39;[0-9]{2,7}-[0-9][0-9]-[0-9]&#39;</span><span class="p">)</span>
+        <span class="c"># InChIKey search</span>
+        <span class="k">if</span> <span class="n">re</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">inchikey_re</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>  <span class="c"># is an inchikey</span>
+            <span class="k">for</span> <span class="n">specie</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_root</span><span class="p">:</span>
+                <span class="n">identification</span> <span class="o">=</span> <span class="n">specie</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s">&#39;identification&#39;</span><span class="p">)</span>
+                <span class="n">inchikey</span> <span class="o">=</span> <span class="n">identification</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s">&#39;InChIKey&#39;</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">x</span> <span class="o">==</span> <span class="n">inchikey</span><span class="o">.</span><span class="n">text</span><span class="p">:</span>
+                    <span class="n">result_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">specie</span><span class="p">)</span>
+        <span class="c"># CAS search</span>
+        <span class="k">elif</span> <span class="n">re</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">cas_re</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">specie</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_root</span><span class="p">:</span>
+                <span class="n">identification</span> <span class="o">=</span> <span class="n">specie</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s">&#39;identification&#39;</span><span class="p">)</span>
+                <span class="n">cas_number</span> <span class="o">=</span> <span class="n">identification</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s">&#39;cas_number&#39;</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">x</span> <span class="o">==</span> <span class="n">cas_number</span><span class="o">.</span><span class="n">text</span><span class="p">:</span>
+                    <span class="n">result_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">specie</span><span class="p">)</span>
+        <span class="c"># usual name search</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c"># tries exact match first</span>
+            <span class="k">for</span> <span class="n">specie</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_root</span><span class="p">:</span>
+                <span class="n">iupac_name</span> <span class="o">=</span> <span class="n">specie</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s">&#39;identification&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s">&#39;IUPAC_name&#39;</span><span class="p">)</span>
+                <span class="k">if</span> <span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="n">specie</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s">&#39;identification&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">find</span><span class="p">(</span>
+                        <span class="s">&#39;IUPAC_name&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">text</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="ow">or</span>
+                        <span class="n">x</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="n">specie</span><span class="o">.</span><span class="n">attrib</span><span class="p">[</span><span class="s">&#39;inp_file_name&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">lower</span><span class="p">()):</span>
+                    <span class="n">result_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">specie</span><span class="p">)</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">result_list</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="k">pass</span>
+            <span class="k">else</span><span class="p">:</span>  <span class="c"># exact match was not sucessfull go to loose match</span>
+                <span class="n">result_list</span> <span class="o">=</span> <span class="p">[]</span>
+                <span class="c"># if not found tries loose match</span>
+                <span class="k">for</span> <span class="n">specie</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_root</span><span class="p">:</span>
+                    <span class="n">iupac_name</span> <span class="o">=</span> <span class="n">specie</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s">&#39;identification&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">find</span><span class="p">(</span>
+                        <span class="s">&#39;IUPAC_name&#39;</span><span class="p">)</span>
+                    <span class="n">augmented_namespace</span> <span class="o">=</span> <span class="p">(</span><span class="n">specie</span><span class="o">.</span><span class="n">attrib</span><span class="p">[</span><span class="s">&#39;inp_file_name&#39;</span><span class="p">]</span>
+                                           <span class="o">+</span> <span class="s">&#39; &#39;</span> <span class="o">+</span> <span class="n">specie</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s">&#39;comment&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">text</span>
+                                           <span class="o">+</span> <span class="s">&#39; &#39;</span> <span class="o">+</span> <span class="n">iupac_name</span><span class="o">.</span><span class="n">text</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">x</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="ow">in</span> <span class="n">augmented_namespace</span><span class="o">.</span><span class="n">lower</span><span class="p">():</span>
+                        <span class="n">result_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">specie</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">specie</span> <span class="ow">in</span> <span class="n">result_list</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">[(</span><span class="n">y</span><span class="o">.</span><span class="n">attrib</span><span class="p">[</span><span class="s">&#39;inp_file_name&#39;</span><span class="p">],</span>
+                     <span class="n">y</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s">&#39;identification&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s">&#39;IUPAC_name&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">text</span><span class="p">,</span>
+                     <span class="n">y</span><span class="p">)</span> <span class="k">for</span> <span class="n">y</span> <span class="ow">in</span> <span class="n">result_list</span><span class="p">]</span>
+
+<div class="viewcode-block" id="Database.list_compound"><a class="viewcode-back" href="../../thermopy.html#thermopy.nasa9polynomials.Database.list_compound">[docs]</a>    <span class="k">def</span> <span class="nf">list_compound</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
+        <span class="sd">u&quot;&quot;&quot;</span>
+<span class="sd">        List the compounds for a given input.</span>
+<span class="sd">        It is intended to be used in interactive mode.</span>
+
+<span class="sd">        Arguments:</span>
+<span class="sd">            x (str): identifier for compound being searched.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            list: list of tuples containing (str, str) being the &#39;inp name&#39; and</span>
+<span class="sd">            the IUPAC name respectively.</span>
+
+<span class="sd">        Examples:</span>
+<span class="sd">            &gt;&gt;&gt; from thermopy import nasa9polynomials as nasa9</span>
+<span class="sd">            &gt;&gt;&gt; db = nasa9.Database()</span>
+<span class="sd">            &gt;&gt;&gt; for i in db.list_compound(&#39;fes&#39;):</span>
+<span class="sd">            ...     print(i)</span>
+<span class="sd">            (&#39;FeS(a)&#39;, &#39;sulfanylideneiron&#39;)</span>
+<span class="sd">            (&#39;FeS(b)&#39;, &#39;sulfanylideneiron&#39;)</span>
+<span class="sd">            (&#39;FeS(c)&#39;, &#39;sulfanylideneiron&#39;)</span>
+<span class="sd">            (&#39;FeS(L)&#39;, &#39;sulfanylideneiron&#39;)</span>
+<span class="sd">            (&#39;FeSO4(cr)&#39;, &#39;iron(2+);sulfate&#39;)</span>
+<span class="sd">            (&#39;FeS2(cr)&#39;, &#39;N/A&#39;)</span>
+
+<span class="sd">        Note:</span>
+<span class="sd">            The preferred method for identifying compounds is via *usual name*</span>
+<span class="sd">            followed by an aggregation state if the compound is not a gas. E.g.</span>
+<span class="sd">            &#39;(L)&#39;, &#39;(cr)&#39;, &#39;(a)&#39;, &#39;(b)&#39; where &#39;(a)&#39; and &#39;(b)&#39; are for</span>
+<span class="sd">            allotropes.</span>
+<span class="sd">            Other methods are:</span>
+<span class="sd">                1. InChIKey.</span>
+<span class="sd">                2. CAS number.</span>
+<span class="sd">                3. IUPAC name.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">result_list</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_search_database</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+            <span class="n">result_list</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">i</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">i</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span>
+        <span class="k">return</span> <span class="n">result_list</span></div>
+
+<div class="viewcode-block" id="Database.set_compound"><a class="viewcode-back" href="../../thermopy.html#thermopy.nasa9polynomials.Database.set_compound">[docs]</a>    <span class="k">def</span> <span class="nf">set_compound</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
+        <span class="sd">u&quot;&quot;&quot;</span>
+<span class="sd">        Set the compound if there is one entry specified on the database.</span>
+
+<span class="sd">        It is important to notice that due to the nature of the work of this</span>
+<span class="sd">        database, compounds are gases unless explicitly stated otherwise.</span>
+
+<span class="sd">        Arguments:</span>
+<span class="sd">            x (str): identifier for compound being searched.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Compound: returns a Compound object if the phase is condensed.</span>
+<span class="sd">            Returns a CompoundIdealGas otherwise.</span>
+
+<span class="sd">        Example:</span>
+<span class="sd">            &gt;&gt;&gt; # Someone is looking for the element gallium but is not certain</span>
+<span class="sd">            &gt;&gt;&gt; # how to instantiate it. One would first list the compounds:</span>
+<span class="sd">            &gt;&gt;&gt; from thermopy import nasa9polynomials as nasa9</span>
+<span class="sd">            &gt;&gt;&gt; db = nasa9.Database()</span>
+<span class="sd">            &gt;&gt;&gt; for i in db.list_compound(&#39;gallium&#39;):</span>
+<span class="sd">            ...     print(i)</span>
+<span class="sd">            ...</span>
+<span class="sd">            (&#39;Ga&#39;, &#39;gallium&#39;)</span>
+<span class="sd">            (&#39;Ga+&#39;, &#39;gallium&#39;)</span>
+<span class="sd">            (&#39;GaBr&#39;, &#39;bromogallium&#39;)</span>
+<span class="sd">            (&#39;GaBr2&#39;, &#39;dibromogallium&#39;)</span>
+<span class="sd">            (&#39;GaCl&#39;, &#39;chlorogallium&#39;)</span>
+<span class="sd">            (&#39;GaCl2&#39;, &#39;gallium;dichloride&#39;)</span>
+<span class="sd">            (&#39;GaF2&#39;, &#39;difluorogallium&#39;)</span>
+<span class="sd">            (&#39;GaI2&#39;, &#39;diiodogallium&#39;)</span>
+<span class="sd">            (&#39;GaO&#39;, &#39;oxogallium&#39;)</span>
+<span class="sd">            (&#39;GaOH&#39;, &#39;gallium;hydroxide&#39;)</span>
+<span class="sd">            (&#39;Ga2Cl4&#39;, &#39;gallium;gallium;tetrachloride&#39;)</span>
+<span class="sd">            (&#39;Ga2O&#39;, &#39;gallium;oxygen(2-)&#39;)</span>
+<span class="sd">            (&#39;Ga(cr)&#39;, &#39;gallium&#39;)</span>
+<span class="sd">            (&#39;Ga(L)&#39;, &#39;gallium&#39;)</span>
+<span class="sd">            (&#39;Ga2O3(cr)&#39;, &#39;digallium;oxygen(2-)&#39;)</span>
+<span class="sd">            (&#39;Ga2O3(L)&#39;, &#39;digallium;oxygen(2-)&#39;)</span>
+<span class="sd">            &gt;&gt;&gt; gallium = db.set_compound(&#39;Ga&#39;)</span>
+<span class="sd">            &gt;&gt;&gt; print(gallium)</span>
+<span class="sd">            gallium: Ga</span>
+
+<span class="sd">        Note:</span>
+<span class="sd">            The preferred method for identifying compounds is via *usual name*</span>
+<span class="sd">            followed by an aggregation state if the compound is not a gas. E.g.</span>
+<span class="sd">            &#39;(L)&#39;, &#39;(cr)&#39;, &#39;(a)&#39;, &#39;(b)&#39; where &#39;(a)&#39; and &#39;(b)&#39; are for</span>
+<span class="sd">            allotropes.</span>
+<span class="sd">            Other methods are:</span>
+<span class="sd">                1. InChIKey.</span>
+<span class="sd">                2. CAS number.</span>
+<span class="sd">                3. IUPAC name.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_search_database</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">result</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>  <span class="c"># could not set component: give error messages</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">result</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s">&#39;No compound found.&#39;</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s">&#39;The compound </span><span class="se">\&#39;</span><span class="s">&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">+</span> <span class="s">&#39;</span><span class="se">\&#39;</span><span class="s"> you are &#39;</span>
+                                <span class="s">&#39;trying to set is not unique: &#39;</span> <span class="o">+</span> <span class="n">result</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span>
+                                <span class="n">result</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span>
+        <span class="k">if</span> <span class="n">result</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s">&#39;condensed&#39;</span><span class="p">)</span> <span class="o">==</span> <span class="s">&#39;True&#39;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">Compound</span><span class="p">(</span><span class="n">result</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">2</span><span class="p">])</span>
+        <span class="k">else</span><span class="p">:</span>  <span class="c"># if it is an ideal gas</span>
+            <span class="k">return</span> <span class="n">CompoundIdealGas</span><span class="p">(</span><span class="n">result</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">2</span><span class="p">])</span></div></div>
+
+
+<div class="viewcode-block" id="Reaction"><a class="viewcode-back" href="../../thermopy.html#thermopy.nasa9polynomials.Reaction">[docs]</a><span class="k">class</span> <span class="nc">Reaction</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">u&quot;&quot;&quot;</span>
+<span class="sd">    Model of a chemical reaction.</span>
+
+<span class="sd">    Model of a chemical reaction using the NASA9 Compounds.</span>
+
+<span class="sd">    Inherits from object.</span>
+
+<span class="sd">    Methods:</span>
+<span class="sd">        enthalpy_reaction: enthalpy of the reaction.</span>
+<span class="sd">        entropy_reaction: entropy of the reaction.</span>
+<span class="sd">        gibbs_energy_reaction: Gibbs energy of the reaction.</span>
+<span class="sd">        equilibrium_constant: equilibrium constant of the reaction.</span>
+
+<span class="sd">    Examples:</span>
+<span class="sd">        &gt;&gt;&gt; from thermopy import nasa9polynomials as nasa9</span>
+<span class="sd">        &gt;&gt;&gt; db = nasa9.Database()</span>
+<span class="sd">        &gt;&gt;&gt; na = db.set_compound(&#39;na(cr)&#39;)</span>
+<span class="sd">        &gt;&gt;&gt; # being careful to initilize solid compounds</span>
+<span class="sd">        &gt;&gt;&gt; water = db.set_compound(&#39;h2o(l)&#39;)</span>
+<span class="sd">        &gt;&gt;&gt; # being careful to initilize liquid compounds</span>
+<span class="sd">        &gt;&gt;&gt; sodium_hydroxide = db.set_compound(&#39;naoh(a)&#39;)</span>
+<span class="sd">        &gt;&gt;&gt; # being careful to initilize solid compounds</span>
+<span class="sd">        &gt;&gt;&gt; hydrogen = db.set_compound(&#39;h2&#39;)</span>
+<span class="sd">        &gt;&gt;&gt; reacts = (na, water)</span>
+<span class="sd">        &gt;&gt;&gt; prods = (sodium_hydroxide, hydrogen)</span>
+<span class="sd">        &gt;&gt;&gt; reacts_coefs = (2, 2)</span>
+<span class="sd">        &gt;&gt;&gt; prods_coefs = (2, 1)</span>
+<span class="sd">        &gt;&gt;&gt; reaction1 = nasa9.Reaction(300, reacts, prods, reacts_coefs,</span>
+<span class="sd">        &gt;&gt;&gt; prods_coefs)</span>
+<span class="sd">        &gt;&gt;&gt; print(reaction1)</span>
+<span class="sd">        &lt;reaction&gt; +2 Na(cr) +2 H2O(L)  -&gt; +2 NaOH(a) +1 H2</span>
+<span class="sd">        &gt;&gt;&gt; print(reaction1.entropy_reaction())</span>
+<span class="sd">        149.097547531</span>
+<span class="sd">        &gt;&gt;&gt; print(reaction1.enthalpy_reaction())</span>
+<span class="sd">        -279857.367433</span>
+
+<span class="sd">    Notes:</span>
+<span class="sd">        The Reaction class does not check for imbalances of the reaction (yet).</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">T</span><span class="p">,</span> <span class="n">reactants</span><span class="p">,</span> <span class="n">products</span><span class="p">,</span>
+                 <span class="n">reactants_coefficients</span><span class="p">,</span> <span class="n">product_coefficients</span><span class="p">):</span>
+        <span class="sd">u&quot;&quot;&quot;</span>
+<span class="sd">        Initializes a Reaction object.</span>
+
+<span class="sd">        Arguments:</span>
+<span class="sd">            T (float): temperature of the reaction.</span>
+<span class="sd">            reactants (tuple): tuple of the reactants as Compounds.</span>
+<span class="sd">            products (tuple): tuple of the products as Compounds.</span>
+<span class="sd">            reactants_coefficients (tuple): tuple of the reactants</span>
+<span class="sd">                coefficients.</span>
+<span class="sd">            product_coefficients (tuple): tuple of the products coefficients.</span>
+
+<span class="sd">        Examples:</span>
+<span class="sd">            &gt;&gt;&gt; import thermopy</span>
+<span class="sd">            &gt;&gt;&gt; from thermopy import nasa9polynomials as nasa9</span>
+<span class="sd">            &gt;&gt;&gt; db = nasa9.Database()</span>
+<span class="sd">            &gt;&gt;&gt; co = db.set_compound(&#39;carbon monoxide&#39;)</span>
+<span class="sd">            &gt;&gt;&gt; molybdenium_oxide = db.set_compound(&#39;MoO2(cr)&#39;)  # to set it a</span>
+<span class="sd">            &gt;&gt;&gt; solid</span>
+<span class="sd">            &gt;&gt;&gt; co2 = db.set_compound(&#39;co2&#39;)</span>
+<span class="sd">            &gt;&gt;&gt; molybdenium = db.set_compound(&#39;Mo(cr)&#39;)  # to set it a solid</span>
+<span class="sd">            &gt;&gt;&gt; reagents = (co, molybdenium_oxide)</span>
+<span class="sd">            &gt;&gt;&gt; products = (co2, molybdenium)</span>
+<span class="sd">            &gt;&gt;&gt; reactants_stoichometry = (2, 1)</span>
+<span class="sd">            &gt;&gt;&gt; prodcuts_stoichometry = (2, 1)</span>
+<span class="sd">            &gt;&gt;&gt; reaction1 = nasa9.Reaction(</span>
+<span class="sd">            ...     298,</span>
+<span class="sd">            ...     reagents,</span>
+<span class="sd">            ...     products,</span>
+<span class="sd">            ...     reactants_stoichometry,</span>
+<span class="sd">            ...     prodcuts_stoichometry</span>
+<span class="sd">            ...     )</span>
+<span class="sd">            &gt;&gt;&gt; print(reaction1, reaction1.enthalpy_reaction())</span>
+<span class="sd">            &lt;reaction&gt; +2 CO +1 MoO2(cr)  -&gt; +2 CO2 +1 Mo(cr)  23352.3949968</span>
+
+<span class="sd">        Note:</span>
+<span class="sd">            The tuple of the reactants and its coefficients should refer to the</span>
+<span class="sd">            same compounds (follow the same order). See example.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">T</span> <span class="o">=</span> <span class="n">T</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_reactants</span> <span class="o">=</span> <span class="n">reactants</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_products</span> <span class="o">=</span> <span class="n">products</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_rcoefs</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">z</span><span class="p">)</span> <span class="k">for</span> <span class="n">z</span> <span class="ow">in</span> <span class="n">reactants_coefficients</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_pcoefs</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">z</span><span class="p">)</span> <span class="k">for</span> <span class="n">z</span> <span class="ow">in</span> <span class="n">product_coefficients</span><span class="p">)</span>
+        <span class="c"># error checking</span>
+        <span class="k">if</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_reactants</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_rcoefs</span><span class="p">)</span> <span class="ow">or</span>
+                <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_products</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_pcoefs</span><span class="p">)):</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s">&#39;Number of reactants or products is different&#39;</span>
+                            <span class="s">&#39;from the number of coefficients given&#39;</span><span class="p">)</span>
+
+<div class="viewcode-block" id="Reaction.enthalpy_reaction"><a class="viewcode-back" href="../../thermopy.html#thermopy.nasa9polynomials.Reaction.enthalpy_reaction">[docs]</a>    <span class="k">def</span> <span class="nf">enthalpy_reaction</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">T</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">u&quot;&quot;&quot;</span>
+<span class="sd">        Calculate the enthalpy of the reaction at the standard state.</span>
+
+<span class="sd">        Arguments:</span>
+<span class="sd">            T (float): temperature.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            numpy_float: The enthalpy of the reaction for a given temperature.</span>
+
+<span class="sd">        Examples:</span>
+<span class="sd">            &gt;&gt;&gt; import thermopy</span>
+<span class="sd">            &gt;&gt;&gt; from thermopy import nasa9polynomials as nasa9</span>
+<span class="sd">            &gt;&gt;&gt; db = nasa9.Database()</span>
+<span class="sd">            &gt;&gt;&gt; nitric_acid = db.set_compound(&#39;hno3&#39;)</span>
+<span class="sd">            &gt;&gt;&gt; # the liquid phase is not present in the database</span>
+<span class="sd">            &gt;&gt;&gt; naoh = db.set_compound(&#39;naoh(a)&#39;)</span>
+<span class="sd">            &gt;&gt;&gt; sodium_nitrate = db.set_compound(&#39;nano3(a)&#39;)</span>
+<span class="sd">            &gt;&gt;&gt; water = db.set_compound(&#39;h2o(l)&#39;)</span>
+<span class="sd">            &gt;&gt;&gt; reagents = (nitric_acid, naoh)</span>
+<span class="sd">            &gt;&gt;&gt; products = (sodium_nitrate, water)</span>
+<span class="sd">            &gt;&gt;&gt; reactants_stoichometry = (1, 1)</span>
+<span class="sd">            &gt;&gt;&gt; prodcuts_stoichometry = (1, 1)</span>
+<span class="sd">            &gt;&gt;&gt; reaction1 = nasa9.Reaction(</span>
+<span class="sd">            ...     298,</span>
+<span class="sd">            ...     reagents,</span>
+<span class="sd">            ...     products,</span>
+<span class="sd">            ...     reactants_stoichometry,</span>
+<span class="sd">            ...     prodcuts_stoichometry</span>
+<span class="sd">            ...     )</span>
+<span class="sd">            &gt;&gt;&gt; print(reaction1, reaction1.enthalpy_reaction())</span>
+<span class="sd">            &lt;reaction&gt; +1 HNO3 +1 NaOH(a)  -&gt; +1 NaNO3(a) +1 H2O(L)</span>
+<span class="sd">            -193773.133358</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">T</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">T</span> <span class="o">=</span> <span class="n">T</span>
+        <span class="n">deltah</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">for</span> <span class="p">(</span><span class="n">coefficient</span><span class="p">,</span> <span class="n">compound</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_rcoefs</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_reactants</span><span class="p">):</span>
+            <span class="n">deltah</span> <span class="o">=</span> <span class="n">deltah</span> <span class="o">-</span> <span class="n">coefficient</span> <span class="o">*</span> <span class="n">compound</span><span class="o">.</span><span class="n">enthalpy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">T</span><span class="p">)</span>
+        <span class="k">for</span> <span class="p">(</span><span class="n">coefficient</span><span class="p">,</span> <span class="n">compound</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_rcoefs</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_products</span><span class="p">):</span>
+            <span class="n">deltah</span> <span class="o">=</span> <span class="n">deltah</span> <span class="o">+</span> <span class="n">coefficient</span> <span class="o">*</span> <span class="n">compound</span><span class="o">.</span><span class="n">enthalpy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">T</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">deltah</span></div>
+
+<div class="viewcode-block" id="Reaction.entropy_reaction"><a class="viewcode-back" href="../../thermopy.html#thermopy.nasa9polynomials.Reaction.entropy_reaction">[docs]</a>    <span class="k">def</span> <span class="nf">entropy_reaction</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">T</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">u&quot;&quot;&quot;</span>
+<span class="sd">        Calculate the entropy of the reaction at the standard state.</span>
+
+<span class="sd">        Arguments:</span>
+<span class="sd">            T (float): temperature.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            numpy_float: The entropy of the reaction for a given temperature.</span>
+
+<span class="sd">        Examples:</span>
+<span class="sd">            &gt;&gt;&gt; import thermopy</span>
+<span class="sd">            &gt;&gt;&gt; from thermopy import nasa9polynomials as nasa9</span>
+<span class="sd">            &gt;&gt;&gt; db = nasa9.Database()</span>
+<span class="sd">            &gt;&gt;&gt; nitric_acid = db.set_compound(&#39;hno3&#39;)</span>
+<span class="sd">            &gt;&gt;&gt; # the liquid phase is not present in the database</span>
+<span class="sd">            &gt;&gt;&gt; naoh = db.set_compound(&#39;naoh(a)&#39;)</span>
+<span class="sd">            &gt;&gt;&gt; sodium_nitrate = db.set_compound(&#39;nano3(a)&#39;)</span>
+<span class="sd">            &gt;&gt;&gt; water = db.set_compound(&#39;h2o(l)&#39;)</span>
+<span class="sd">            &gt;&gt;&gt; reagents = (nitric_acid, naoh)</span>
+<span class="sd">            &gt;&gt;&gt; products = (sodium_nitrate, water)</span>
+<span class="sd">            &gt;&gt;&gt; reactants_stoichometry = (1, 1)</span>
+<span class="sd">            &gt;&gt;&gt; prodcuts_stoichometry = (1, 1)</span>
+<span class="sd">            &gt;&gt;&gt; reaction1 = nasa9.Reaction(</span>
+<span class="sd">            ...     298,</span>
+<span class="sd">            ...     reagents,</span>
+<span class="sd">            ...     products,</span>
+<span class="sd">            ...     reactants_stoichometry,</span>
+<span class="sd">            ...     prodcuts_stoichometry</span>
+<span class="sd">            ...     )</span>
+<span class="sd">            &gt;&gt;&gt; print(reaction1, reaction1.entropy_reaction())</span>
+<span class="sd">            &lt;reaction&gt; +1 HNO3 +1 NaOH(a)  -&gt; +1 NaNO3(a) +1 H2O(L)</span>
+<span class="sd">            -145.797754143</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">T</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">T</span> <span class="o">=</span> <span class="n">T</span>
+        <span class="n">deltas</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">for</span> <span class="p">(</span><span class="n">coefficient</span><span class="p">,</span> <span class="n">compound</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_rcoefs</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_reactants</span><span class="p">):</span>
+            <span class="n">deltas</span> <span class="o">=</span> <span class="n">deltas</span> <span class="o">-</span> <span class="n">coefficient</span> <span class="o">*</span> <span class="n">compound</span><span class="o">.</span><span class="n">entropy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">T</span><span class="p">)</span>
+        <span class="k">for</span> <span class="p">(</span><span class="n">coefficient</span><span class="p">,</span> <span class="n">compound</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_rcoefs</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_products</span><span class="p">):</span>
+            <span class="n">deltas</span> <span class="o">=</span> <span class="n">deltas</span> <span class="o">+</span> <span class="n">coefficient</span> <span class="o">*</span> <span class="n">compound</span><span class="o">.</span><span class="n">entropy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">T</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">deltas</span></div>
+
+<div class="viewcode-block" id="Reaction.gibbs_energy_reaction"><a class="viewcode-back" href="../../thermopy.html#thermopy.nasa9polynomials.Reaction.gibbs_energy_reaction">[docs]</a>    <span class="k">def</span> <span class="nf">gibbs_energy_reaction</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">T</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">u&quot;&quot;&quot;</span>
+<span class="sd">        Calculate the Gibbs energy of the reaction at the standard state.</span>
+
+<span class="sd">        Arguments:</span>
+<span class="sd">            T (float): temperature.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            numpy_float: The Gibbs energy of the reaction for a given</span>
+<span class="sd">            temperature.</span>
+
+<span class="sd">        Examples:</span>
+<span class="sd">            &gt;&gt;&gt; import thermopy</span>
+<span class="sd">            &gt;&gt;&gt; from thermopy import nasa9polynomials as nasa9</span>
+<span class="sd">            &gt;&gt;&gt; db = nasa9.Database()</span>
+<span class="sd">            &gt;&gt;&gt; pcl5 = db.set_compound(&#39;pcl5&#39;)</span>
+<span class="sd">            &gt;&gt;&gt; pcl3 = db.set_compound(&#39;pcl3&#39;)</span>
+<span class="sd">            &gt;&gt;&gt; chlorine = db.set_compound(&#39;cl2&#39;)</span>
+<span class="sd">            &gt;&gt;&gt; reagents = (pcl5,)</span>
+<span class="sd">            &gt;&gt;&gt; products = (pcl3, chlorine)</span>
+<span class="sd">            &gt;&gt;&gt; reactants_stoichometry = (1,)</span>
+<span class="sd">            &gt;&gt;&gt; prodcuts_stoichometry = (1, 1)</span>
+<span class="sd">            &gt;&gt;&gt; reaction1 = nasa9.Reaction(</span>
+<span class="sd">            ...     298,</span>
+<span class="sd">            ...     reagents,</span>
+<span class="sd">            ...     products,</span>
+<span class="sd">            ...     reactants_stoichometry,</span>
+<span class="sd">            ...     prodcuts_stoichometry</span>
+<span class="sd">            ...     )</span>
+<span class="sd">            &gt;&gt;&gt; print(reaction1, reaction1.gibbs_energy_reaction())</span>
+<span class="sd">            &lt;reaction&gt; +1 PCl5  -&gt; +1 PCl3 +1 Cl2  103038.712535</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">T</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">T</span> <span class="o">=</span> <span class="n">T</span>
+        <span class="n">deltag</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">for</span> <span class="p">(</span><span class="n">coefficient</span><span class="p">,</span> <span class="n">compound</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_rcoefs</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_reactants</span><span class="p">):</span>
+            <span class="n">deltag</span> <span class="o">=</span> <span class="n">deltag</span> <span class="o">-</span> <span class="n">coefficient</span> <span class="o">*</span> <span class="n">compound</span><span class="o">.</span><span class="n">gibbs_energy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">T</span><span class="p">)</span>
+        <span class="k">for</span> <span class="p">(</span><span class="n">coefficient</span><span class="p">,</span> <span class="n">compound</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_rcoefs</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_products</span><span class="p">):</span>
+            <span class="n">deltag</span> <span class="o">=</span> <span class="n">deltag</span> <span class="o">+</span> <span class="n">coefficient</span> <span class="o">*</span> <span class="n">compound</span><span class="o">.</span><span class="n">gibbs_energy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">T</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">deltag</span></div>
+
+<div class="viewcode-block" id="Reaction.equilibrium_constant"><a class="viewcode-back" href="../../thermopy.html#thermopy.nasa9polynomials.Reaction.equilibrium_constant">[docs]</a>    <span class="k">def</span> <span class="nf">equilibrium_constant</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">T</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">u&quot;&quot;&quot;</span>
+<span class="sd">        Calculate the equilibrium constant of the reaction at the standard</span>
+<span class="sd">        state.</span>
+
+<span class="sd">        Definition: K = exp(- deltaG / (R T))</span>
+
+<span class="sd">        Arguments:</span>
+<span class="sd">            T (float): temperature.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            numpy_float: The Gibbs energy of the reaction for a given</span>
+<span class="sd">            temperature.</span>
+
+
+<span class="sd">        Examples:</span>
+<span class="sd">            &gt;&gt;&gt; import thermopy</span>
+<span class="sd">            &gt;&gt;&gt; from thermopy import nasa9polynomials as nasa9</span>
+<span class="sd">            &gt;&gt;&gt; db = nasa9.Database()</span>
+<span class="sd">            &gt;&gt;&gt; pcl5 = db.set_compound(&#39;pcl5&#39;)</span>
+<span class="sd">            &gt;&gt;&gt; pcl3 = db.set_compound(&#39;pcl3&#39;)</span>
+<span class="sd">            &gt;&gt;&gt; chlorine = db.set_compound(&#39;cl2&#39;)</span>
+<span class="sd">            &gt;&gt;&gt; reagents = (pcl5,)</span>
+<span class="sd">            &gt;&gt;&gt; products = (pcl3, chlorine)</span>
+<span class="sd">            &gt;&gt;&gt; reactants_stoichometry = (1,)</span>
+<span class="sd">            &gt;&gt;&gt; prodcuts_stoichometry = (1, 1)</span>
+<span class="sd">            &gt;&gt;&gt; reaction1 = nasa9.Reaction(</span>
+<span class="sd">            ...     500,</span>
+<span class="sd">            ...     reagents,</span>
+<span class="sd">            ...     products,</span>
+<span class="sd">            ...     reactants_stoichometry,</span>
+<span class="sd">            ...     prodcuts_stoichometry</span>
+<span class="sd">            ...     )</span>
+<span class="sd">            &gt;&gt;&gt; print(reaction1, reaction1.equilibrium_constant())</span>
+<span class="sd">            &lt;reaction&gt; +1 PCl5  -&gt; +1 PCl3 +1 Cl2  6.39431126134e-13</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">T</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">T</span> <span class="o">=</span> <span class="n">T</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">gibbs_energy_reaction</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">T</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span>
+            <span class="n">_R</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">T</span><span class="p">))</span></div>
+
+    <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">u&quot;&quot;&quot;Define how a reaction should be print.&quot;&quot;&quot;</span>
+        <span class="n">r</span> <span class="o">=</span> <span class="s">&#39;&#39;</span>
+        <span class="k">for</span> <span class="p">(</span><span class="n">reag</span><span class="p">,</span> <span class="n">coef</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_reactants</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_rcoefs</span><span class="p">):</span>
+            <span class="n">r</span> <span class="o">=</span> <span class="n">r</span> <span class="o">+</span> <span class="s">&#39;+&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">coef</span><span class="p">)</span> <span class="o">+</span> <span class="s">&#39; &#39;</span> <span class="o">+</span> <span class="n">reag</span><span class="o">.</span><span class="n">inp_name</span> <span class="o">+</span> <span class="s">&#39; &#39;</span>
+        <span class="n">r</span> <span class="o">=</span> <span class="n">r</span> <span class="o">+</span> <span class="s">&#39; -&gt; &#39;</span>
+        <span class="k">for</span> <span class="p">(</span><span class="n">reag</span><span class="p">,</span> <span class="n">coef</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_products</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pcoefs</span><span class="p">):</span>
+            <span class="n">r</span> <span class="o">=</span> <span class="n">r</span> <span class="o">+</span> <span class="s">&#39;+&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">coef</span><span class="p">)</span> <span class="o">+</span> <span class="s">&#39; &#39;</span> <span class="o">+</span> <span class="n">reag</span><span class="o">.</span><span class="n">inp_name</span> <span class="o">+</span> <span class="s">&#39; &#39;</span>
+        <span class="k">return</span> <span class="s">&quot;&quot;&quot;&lt;reaction&gt; {0}&quot;&quot;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">r</span><span class="p">)</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">thermopy  documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2016, Author.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.4.
+    </div>
+  </body>
+</html>
