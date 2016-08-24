@@ -1,9 +1,0 @@
-Version 0.3:
-Guillem Borrell i Nogueras <guillem@torroja.dmt.upm.es>
-The development of this package was originally funded by Vulcano Sadeca S.A.
-
-Version 0.4:
-Adel Qalieh <adelq@sas.upenn.edu>
-
-Version 0.5:
-Felipe M. Vieira <fmv1992@gmail.com>

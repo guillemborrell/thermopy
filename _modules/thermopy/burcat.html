@@ -1,0 +1,480 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>thermopy.burcat &mdash; thermopy  documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="top" title="thermopy  documentation" href="../../index.html" />
+    <link rel="up" title="Module code" href="../index.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">thermopy  documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for thermopy.burcat</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Burcat module is intended to give access to the Burcat&#39;s Database [1].</span>
+
+<span class="sd">This database contains coefficients for thousands of chemicals to be used in</span>
+<span class="sd">polynomial form. Therefore it allows the user to calculate different</span>
+<span class="sd">thermodynamic properties for various compounds. Some of these properties are: 1.</span>
+<span class="sd">Specific heat capacity at constant pressure 2. Enthalpy 3. Entropy 4. Gibbs</span>
+<span class="sd">energy all of them as functions of temperature for a given compound.</span>
+
+<span class="sd">Intended audience from [1]: The database is used by scientists, educators,</span>
+<span class="sd">engineers and students at all levels, dealing primarily with combustion and air</span>
+<span class="sd">pollution, jet engines, rocket propulsion, fireworks, but also by researchers</span>
+<span class="sd">involved in upper atmosphere kinetics, astrophysics, abrasion metallurgy, etc.</span>
+
+<span class="sd">This file is deprecated and shall not be maintained. Use the nasa9polynomials</span>
+<span class="sd">instead.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">from</span> <span class="nn">xml.etree.ElementTree</span> <span class="kn">import</span> <span class="n">parse</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">thermopy.units</span> <span class="kn">as</span> <span class="nn">units</span>
+<span class="kn">from</span> <span class="nn">thermopy.constants</span> <span class="kn">import</span> <span class="n">ideal_gas_constant</span>
+<span class="n">_R</span> <span class="o">=</span> <span class="n">ideal_gas_constant</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+
+<div class="viewcode-block" id="Compound"><a class="viewcode-back" href="../../thermopy.html#thermopy.burcat.Compound">[docs]</a><span class="k">class</span> <span class="nc">Compound</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">u&quot;&quot;&quot;</span>
+<span class="sd">    Create chemical compounds.</span>
+
+<span class="sd">    It is intended to be created via an Elementdb object but you can use it by</span>
+<span class="sd">    your own. Take a look at Elementdb class.</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">        :param cas: (?type?): CAS number of the compound.</span>
+<span class="sd">        description (??): ?</span>
+<span class="sd">        formula (??): ?</span>
+<span class="sd">        aggr_state (??): ?</span>
+<span class="sd">        mm (??): molar mass of the compound.</span>
+<span class="sd">        h_formation (): heat of formation.</span>
+
+<span class="sd">    Units are in SI on a molar basis.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cas</span><span class="p">,</span> <span class="n">description</span><span class="p">,</span> <span class="n">reference</span><span class="p">,</span> <span class="n">formula</span><span class="p">,</span> <span class="n">elements</span><span class="p">,</span>
+                 <span class="n">aggr_state</span><span class="p">,</span> <span class="n">T_limit_low</span><span class="p">,</span> <span class="n">T_limit_high</span><span class="p">,</span> <span class="n">calc_quality</span><span class="p">,</span>
+                 <span class="n">mm</span><span class="p">,</span> <span class="n">low_coefs</span><span class="p">,</span> <span class="n">high_coefs</span><span class="p">,</span> <span class="n">h_formation</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Create a chemical compound usually from the set_compound method.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            cas (type):</span>
+<span class="sd">            description ():</span>
+<span class="sd">            reference ():</span>
+
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cas</span> <span class="o">=</span> <span class="n">cas</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">description</span> <span class="o">=</span> <span class="n">description</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_reference</span> <span class="o">=</span> <span class="n">reference</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">formula</span> <span class="o">=</span> <span class="n">formula</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_elements</span> <span class="o">=</span> <span class="n">elements</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">aggr_state</span> <span class="o">=</span> <span class="n">aggr_state</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_T_limit_low</span> <span class="o">=</span> <span class="n">T_limit_low</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_T_limit_high</span> <span class="o">=</span> <span class="n">T_limit_high</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_calc_quality</span> <span class="o">=</span> <span class="n">calc_quality</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mm</span> <span class="o">=</span> <span class="n">mm</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_low_coefs</span> <span class="o">=</span> <span class="n">low_coefs</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_high_coefs</span> <span class="o">=</span> <span class="n">high_coefs</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">h_formation</span> <span class="o">=</span> <span class="n">h_formation</span>
+
+<div class="viewcode-block" id="Compound.density_ideal_gas"><a class="viewcode-back" href="../../thermopy.html#thermopy.burcat.Compound.density_ideal_gas">[docs]</a>    <span class="k">def</span> <span class="nf">density_ideal_gas</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">p</span><span class="p">,</span> <span class="n">T</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Density in kg/m³.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">units</span><span class="o">.</span><span class="n">Pressure</span><span class="p">(</span><span class="n">p</span><span class="p">)</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">mm</span> <span class="o">/</span> <span class="n">_R</span> <span class="o">/</span> <span class="n">units</span><span class="o">.</span><span class="n">Temperature</span><span class="p">(</span><span class="n">T</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Compound.heat_capacity"><a class="viewcode-back" href="../../thermopy.html#thermopy.burcat.Compound.heat_capacity">[docs]</a>    <span class="k">def</span> <span class="nf">heat_capacity</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">T</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Calculates the specific heat capacity in J/(mol K).</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">Ta</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="n">T</span><span class="p">,</span> <span class="n">T</span> <span class="o">**</span> <span class="mi">2</span><span class="p">,</span> <span class="n">T</span> <span class="o">**</span> <span class="mi">3</span><span class="p">,</span> <span class="n">T</span> <span class="o">**</span> <span class="mi">4</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;d&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">T</span> <span class="o">&gt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_T_limit_low</span> <span class="ow">and</span> <span class="n">T</span> <span class="o">&lt;=</span> <span class="mi">1000</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_low_coefs</span><span class="p">[:</span><span class="mi">5</span><span class="p">],</span> <span class="n">Ta</span><span class="p">)</span> <span class="o">*</span> <span class="n">_R</span>
+        <span class="k">elif</span> <span class="n">T</span> <span class="o">&gt;</span> <span class="mi">1000</span> <span class="ow">and</span> <span class="n">T</span> <span class="o">&lt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_T_limit_high</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_high_coefs</span><span class="p">[:</span><span class="mi">5</span><span class="p">],</span> <span class="n">Ta</span><span class="p">)</span> <span class="o">*</span> <span class="n">_R</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Temperature out of range&quot;</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Compound.heat_capacity_massic"><a class="viewcode-back" href="../../thermopy.html#thermopy.burcat.Compound.heat_capacity_massic">[docs]</a>    <span class="k">def</span> <span class="nf">heat_capacity_massic</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">T</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Computes the specific heat capacity in J/(kg K)</span>
+<span class="sd">        for a given temperature.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">cpo</span><span class="p">(</span><span class="n">T</span><span class="p">)</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">mm</span></div>
+
+<div class="viewcode-block" id="Compound.enthalpy"><a class="viewcode-back" href="../../thermopy.html#thermopy.burcat.Compound.enthalpy">[docs]</a>    <span class="k">def</span> <span class="nf">enthalpy</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">T</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Computes the sensible enthalpy in J/mol.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">Ta</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="n">T</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> <span class="n">T</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">/</span> <span class="mi">3</span><span class="p">,</span> <span class="n">T</span> <span class="o">**</span> <span class="mi">3</span> <span class="o">/</span> <span class="mi">4</span><span class="p">,</span> <span class="n">T</span> <span class="o">**</span> <span class="mi">4</span> <span class="o">/</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">1</span> <span class="o">/</span> <span class="n">T</span><span class="p">],</span>
+                      <span class="s1">&#39;d&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">T</span> <span class="o">&gt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_T_limit_low</span> <span class="ow">and</span> <span class="n">T</span> <span class="o">&lt;=</span> <span class="mi">1000</span><span class="p">:</span>
+            <span class="n">partial</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_low_coefs</span><span class="p">[:</span><span class="mi">6</span><span class="p">],</span> <span class="n">Ta</span><span class="p">)</span> <span class="o">*</span> <span class="n">_R</span> <span class="o">*</span> <span class="n">T</span>
+        <span class="k">elif</span> <span class="n">T</span> <span class="o">&gt;</span> <span class="mi">1000</span> <span class="ow">and</span> <span class="n">T</span> <span class="o">&lt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_T_limit_high</span><span class="p">:</span>
+            <span class="n">partial</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_high_coefs</span><span class="p">[:</span><span class="mi">6</span><span class="p">],</span> <span class="n">Ta</span><span class="p">)</span> <span class="o">*</span> <span class="n">_R</span> <span class="o">*</span> <span class="n">T</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Temperature out of range&quot;</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">partial</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">h_formation</span></div>
+
+<div class="viewcode-block" id="Compound.enthalpy_massic"><a class="viewcode-back" href="../../thermopy.html#thermopy.burcat.Compound.enthalpy_massic">[docs]</a>    <span class="k">def</span> <span class="nf">enthalpy_massic</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">T</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Computes the sensible enthalpy in J/kg.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">Ta</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="n">T</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> <span class="n">T</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">/</span> <span class="mi">3</span><span class="p">,</span> <span class="n">T</span> <span class="o">**</span> <span class="mi">3</span> <span class="o">/</span> <span class="mi">4</span><span class="p">,</span> <span class="n">T</span> <span class="o">**</span> <span class="mi">4</span> <span class="o">/</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">1</span> <span class="o">/</span> <span class="n">T</span><span class="p">],</span>
+                      <span class="s1">&#39;d&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">T</span> <span class="o">&gt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_T_limit_low</span> <span class="ow">and</span> <span class="n">T</span> <span class="o">&lt;=</span> <span class="mi">1000</span><span class="p">:</span>
+            <span class="n">partial</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_low_coefs</span><span class="p">[:</span><span class="mi">6</span><span class="p">],</span> <span class="n">Ta</span><span class="p">)</span> <span class="o">*</span> <span class="n">_R</span> <span class="o">*</span> <span class="n">T</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">mm</span>
+        <span class="k">elif</span> <span class="n">T</span> <span class="o">&gt;</span> <span class="mi">1000</span> <span class="ow">and</span> <span class="n">T</span> <span class="o">&lt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_T_limit_high</span><span class="p">:</span>
+            <span class="n">partial</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_high_coefs</span><span class="p">[:</span><span class="mi">6</span><span class="p">],</span> <span class="n">Ta</span><span class="p">)</span> <span class="o">*</span> <span class="n">_R</span> <span class="o">*</span> <span class="n">T</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">mm</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Temperature out of range&quot;</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">partial</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">h_formation</span></div>
+
+<div class="viewcode-block" id="Compound.enthalpy_engineering"><a class="viewcode-back" href="../../thermopy.html#thermopy.burcat.Compound.enthalpy_engineering">[docs]</a>    <span class="k">def</span> <span class="nf">enthalpy_engineering</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">T</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Computes the total enthalpy in J/mol: h = h_formation +</span>
+<span class="sd">        integral cp(T) dT.\nUseful for heating reacting systems such as:</span>
+<span class="sd">        MgO + Cl2 -&gt; MgCl2 + 0.5 O2</span>
+<span class="sd">        from Tref to 500 K.\ndeltaH total = (sum (h_form product) -</span>
+<span class="sd">        sum (h_form react)) + sum ( enthalpy(500) * prod)_each_product</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">h_formation</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">enthalpy</span><span class="p">(</span><span class="n">T</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Compound.entropy"><a class="viewcode-back" href="../../thermopy.html#thermopy.burcat.Compound.entropy">[docs]</a>    <span class="k">def</span> <span class="nf">entropy</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">T</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Computes enthropy in J/mol K.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">Ta</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">T</span><span class="p">),</span> <span class="n">T</span><span class="p">,</span> <span class="n">T</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> <span class="n">T</span> <span class="o">**</span> <span class="mi">3</span> <span class="o">/</span> <span class="mi">3</span><span class="p">,</span> <span class="n">T</span> <span class="o">**</span> <span class="mi">4</span> <span class="o">/</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span>
+                      <span class="s1">&#39;d&#39;</span><span class="p">)</span>
+        <span class="c1"># right</span>
+        <span class="k">if</span> <span class="n">T</span> <span class="o">&gt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_T_limit_low</span> <span class="ow">and</span> <span class="n">T</span> <span class="o">&lt;=</span> <span class="mi">1000</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_low_coefs</span><span class="p">,</span> <span class="n">Ta</span><span class="p">)</span> <span class="o">*</span> <span class="n">_R</span>
+        <span class="k">elif</span> <span class="n">T</span> <span class="o">&gt;</span> <span class="mi">1000</span> <span class="ow">and</span> <span class="n">T</span> <span class="o">&lt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_T_limit_high</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_high_coefs</span><span class="p">,</span> <span class="n">Ta</span><span class="p">)</span> <span class="o">*</span> <span class="n">_R</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Temperature out of range&quot;</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Compound.gibbs_energy"><a class="viewcode-back" href="../../thermopy.html#thermopy.burcat.Compound.gibbs_energy">[docs]</a>    <span class="k">def</span> <span class="nf">gibbs_energy</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">T</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Computes the Gibbs free energy from the sensible enthalpy in</span>
+<span class="sd">        J/mol.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">T</span> <span class="o">&gt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_T_limit_low</span> <span class="ow">and</span> <span class="n">T</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">_T_limit_high</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">enthalpy</span><span class="p">(</span><span class="n">T</span><span class="p">)</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">entropy</span><span class="p">(</span><span class="n">T</span><span class="p">)</span> <span class="o">*</span> <span class="n">T</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Temperature out of range&quot;</span><span class="p">)</span></div>
+
+    <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s2">&quot;&quot;&quot;&lt;element&gt; </span><span class="si">%s</span><span class="s2">&quot;&quot;&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">formula</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s2">&quot;&quot;&quot;&lt;element&gt; </span><span class="si">%s</span><span class="s2">&quot;&quot;&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">formula</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__unicode__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s2">u&quot;&quot;&quot;&lt;element&gt; </span><span class="si">%s</span><span class="s2">&quot;&quot;&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">formula</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="Database"><a class="viewcode-back" href="../../thermopy.html#thermopy.burcat.Database">[docs]</a><span class="k">class</span> <span class="nc">Database</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Class that reads the Alexander Burcat&#39;s thermochemical database</span>
+<span class="sd">    for combustion.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        The database file is read when the class is instantiated.</span>
+<span class="sd">        This is terribly slow as the database is more than 2MB.</span>
+<span class="sd">        Create the instance and the elements at boot, otherwise be</span>
+<span class="sd">        prepared to face huge computation times.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">db</span> <span class="o">=</span> <span class="n">parse</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">__file__</span><span class="p">))</span> <span class="o">+</span>
+                        <span class="s1">&#39;/databases/burcat_thr.xml&#39;</span><span class="p">))</span><span class="o">.</span><span class="n">getroot</span><span class="p">()</span>
+
+<div class="viewcode-block" id="Database.list_compound"><a class="viewcode-back" href="../../thermopy.html#thermopy.burcat.Database.list_compound">[docs]</a>    <span class="k">def</span> <span class="nf">list_compound</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cas_or_formula</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Takes a string or a CAS number as input and output all</span>
+<span class="sd">        matching results. Helpful for interactive use of the database.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># determines if it is cas or not</span>
+        <span class="k">for</span> <span class="n">char</span> <span class="ow">in</span> <span class="n">cas_or_formula</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">char</span><span class="o">.</span><span class="n">isalpha</span><span class="p">()</span> <span class="ow">is</span> <span class="bp">True</span><span class="p">:</span>
+                <span class="n">formula</span> <span class="o">=</span> <span class="n">cas_or_formula</span>
+                <span class="n">cas</span> <span class="o">=</span> <span class="bp">None</span>
+                <span class="k">break</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">cas</span> <span class="o">=</span> <span class="n">cas_or_formula</span>
+            <span class="n">formula</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="n">matches</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">if</span> <span class="n">cas</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">specie</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">db</span><span class="o">.</span><span class="n">findall</span><span class="p">(</span><span class="s1">&#39;specie&#39;</span><span class="p">):</span>
+                <span class="k">if</span> <span class="n">cas</span> <span class="o">==</span> <span class="nb">str</span><span class="p">(</span><span class="n">specie</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;CAS&#39;</span><span class="p">)):</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="n">specie</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s1">&#39;phase&#39;</span><span class="p">)</span>
+                        <span class="k">for</span> <span class="n">phases</span> <span class="ow">in</span> <span class="n">specie</span><span class="o">.</span><span class="n">findall</span><span class="p">(</span><span class="s1">&#39;phase&#39;</span><span class="p">):</span>
+                            <span class="n">matches</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">phases</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s1">&#39;formula&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">text</span><span class="p">)</span>
+                    <span class="k">except</span><span class="p">:</span>
+                        <span class="k">pass</span>
+            <span class="k">return</span> <span class="n">matches</span>
+        <span class="k">elif</span> <span class="n">formula</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">formula</span> <span class="o">=</span> <span class="n">formula</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
+            <span class="k">for</span> <span class="n">specie</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">db</span><span class="o">.</span><span class="n">findall</span><span class="p">(</span><span class="s1">&#39;specie&#39;</span><span class="p">):</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">specie</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s1">&#39;phase&#39;</span><span class="p">)</span>
+                    <span class="k">for</span> <span class="n">phases</span> <span class="ow">in</span> <span class="n">specie</span><span class="o">.</span><span class="n">findall</span><span class="p">(</span><span class="s1">&#39;phase&#39;</span><span class="p">):</span>
+                        <span class="k">if</span> <span class="n">formula</span> <span class="ow">in</span> <span class="n">phases</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s1">&#39;formula&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">text</span><span class="o">.</span><span class="n">upper</span><span class="p">():</span>
+                            <span class="n">matches</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">phases</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s1">&#39;formula&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">text</span><span class="p">)</span>
+                <span class="k">except</span><span class="p">:</span>
+                    <span class="k">pass</span>
+            <span class="k">return</span> <span class="n">matches</span></div>
+
+<div class="viewcode-block" id="Database.set_compound"><a class="viewcode-back" href="../../thermopy.html#thermopy.burcat.Database.set_compound">[docs]</a>    <span class="k">def</span> <span class="nf">set_compound</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">formula</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns an Element instance given the name of the element.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">formula</span> <span class="o">=</span> <span class="n">formula</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">specie</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">db</span><span class="o">.</span><span class="n">findall</span><span class="p">(</span><span class="s1">&#39;specie&#39;</span><span class="p">):</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">specie</span><span class="o">.</span><span class="n">findall</span><span class="p">(</span><span class="s1">&#39;phase&#39;</span><span class="p">)</span>
+                <span class="k">for</span> <span class="n">each_phase</span> <span class="ow">in</span> <span class="n">specie</span><span class="o">.</span><span class="n">findall</span><span class="p">(</span><span class="s1">&#39;phase&#39;</span><span class="p">):</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="n">each_phase</span><span class="o">.</span><span class="n">findall</span><span class="p">(</span><span class="s1">&#39;formula&#39;</span><span class="p">)</span>
+                        <span class="k">for</span> <span class="n">each_formula</span> <span class="ow">in</span> <span class="n">each_phase</span><span class="o">.</span><span class="n">findall</span><span class="p">(</span><span class="s1">&#39;formula&#39;</span><span class="p">):</span>
+                            <span class="k">if</span> <span class="n">formula</span> <span class="o">==</span> <span class="n">each_formula</span><span class="o">.</span><span class="n">text</span><span class="o">.</span><span class="n">upper</span><span class="p">():</span>
+                                <span class="n">cas</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">specie</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;CAS&#39;</span><span class="p">))</span>
+                                <span class="k">try</span><span class="p">:</span>
+                                    <span class="n">specie</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s1">&#39;formula_name_structure&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">find</span><span class="p">(</span>
+                                        <span class="s1">&#39;formula_name_structure_1&#39;</span><span class="p">)</span>
+                                    <span class="n">description</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span>
+                                        <span class="n">specie</span><span class="o">.</span><span class="n">find</span><span class="p">(</span>
+                                            <span class="s1">&#39;formula_name_structure&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">find</span><span class="p">(</span>
+                                                <span class="s1">&#39;formula_name_structure_1&#39;</span>
+                                            <span class="p">)</span><span class="o">.</span><span class="n">text</span><span class="p">)</span>
+                                <span class="k">except</span><span class="p">:</span>
+                                    <span class="n">description</span> <span class="o">=</span> <span class="bp">None</span>
+                                <span class="k">try</span><span class="p">:</span>
+                                    <span class="n">specie</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s1">&#39;formula_name_structure_1&#39;</span><span class="p">)</span>
+                                    <span class="n">reference</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">specie</span><span class="o">.</span><span class="n">find</span><span class="p">(</span>
+                                        <span class="s1">&#39;formula_name_structure_1&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">text</span><span class="p">)</span>
+                                <span class="k">except</span><span class="p">:</span>
+                                    <span class="n">reference</span> <span class="o">=</span> <span class="bp">None</span>
+                                    <span class="n">elements</span> <span class="o">=</span> <span class="p">[]</span>
+                                    <span class="k">for</span> <span class="n">elem</span> <span class="ow">in</span> <span class="n">each_phase</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s1">&#39;elements&#39;</span><span class="p">):</span>
+                                        <span class="n">elements</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">elem</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;name&#39;</span><span class="p">),</span>
+                                                         <span class="nb">int</span><span class="p">(</span><span class="n">elem</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
+                                                             <span class="s1">&#39;num_of_atoms&#39;</span><span class="p">))))</span>
+                                    <span class="n">aggr_state</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">each_phase</span><span class="o">.</span><span class="n">find</span><span class="p">(</span>
+                                        <span class="s1">&#39;phase&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">text</span><span class="p">)</span>
+                                    <span class="n">T_limit_low</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">each_phase</span><span class="o">.</span><span class="n">find</span><span class="p">(</span>
+                                        <span class="s1">&#39;temp_limit&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;low&#39;</span><span class="p">))</span>
+                                    <span class="n">T_limit_high</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">each_phase</span><span class="o">.</span><span class="n">find</span><span class="p">(</span>
+                                        <span class="s1">&#39;temp_limit&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;high&#39;</span><span class="p">))</span>
+                                    <span class="k">try</span><span class="p">:</span>
+                                        <span class="n">each_phase</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s1">&#39;calc_quality&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">text</span>
+                                        <span class="n">calc_quality</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">each_phase</span><span class="o">.</span><span class="n">find</span><span class="p">(</span>
+                                            <span class="s1">&#39;calc_quality&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">text</span><span class="p">)</span>
+                                    <span class="k">except</span><span class="p">:</span>
+                                        <span class="n">calc_quality</span> <span class="o">=</span> <span class="bp">None</span>
+                                    <span class="n">mm</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">each_phase</span><span class="o">.</span><span class="n">find</span><span class="p">(</span>
+                                        <span class="s1">&#39;molecular_weight&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">text</span><span class="p">)</span> <span class="o">/</span> <span class="mf">1e3</span>
+                                    <span class="n">coefs</span> <span class="o">=</span> <span class="n">each_phase</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s1">&#39;coefficients&#39;</span><span class="p">)</span>
+                                    <span class="n">high_coefs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">((</span><span class="mi">7</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;d&#39;</span><span class="p">)</span>
+                                    <span class="n">low_coefs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">((</span><span class="mi">7</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;d&#39;</span><span class="p">)</span>
+                                    <span class="n">range_1000_to_Tmax</span> <span class="o">=</span> <span class="n">coefs</span><span class="o">.</span><span class="n">find</span><span class="p">(</span>
+                                        <span class="s1">&#39;range_1000_to_Tmax&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">findall</span><span class="p">(</span><span class="s1">&#39;coef&#39;</span><span class="p">)</span>
+                                    <span class="k">for</span> <span class="p">(</span><span class="n">index</span><span class="p">,</span> <span class="n">a_term</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span>
+                                            <span class="n">range_1000_to_Tmax</span><span class="p">):</span>
+                                        <span class="n">high_coefs</span><span class="p">[</span><span class="n">index</span><span class="p">]</span> <span class="o">=</span> <span class="n">a_term</span><span class="o">.</span><span class="n">text</span>
+                                    <span class="n">range_Tmin_to_1000</span> <span class="o">=</span> <span class="n">coefs</span><span class="o">.</span><span class="n">find</span><span class="p">(</span>
+                                        <span class="s1">&#39;range_Tmin_to_1000&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">findall</span><span class="p">(</span><span class="s1">&#39;coef&#39;</span><span class="p">)</span>
+                                    <span class="k">for</span> <span class="p">(</span><span class="n">index</span><span class="p">,</span> <span class="n">a_term</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span>
+                                            <span class="n">range_Tmin_to_1000</span><span class="p">):</span>
+                                        <span class="n">low_coefs</span><span class="p">[</span><span class="n">index</span><span class="p">]</span> <span class="o">=</span> <span class="n">a_term</span><span class="o">.</span><span class="n">text</span>
+                                    <span class="n">h_formation</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span>
+                                        <span class="n">coefs</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s1">&#39;hf298_div_r&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">text</span><span class="p">)</span> <span class="o">*</span> <span class="n">_R</span>
+                                    <span class="k">return</span> <span class="n">Compound</span><span class="p">(</span>
+                                        <span class="n">cas</span><span class="p">,</span>
+                                        <span class="n">description</span><span class="p">,</span>
+                                        <span class="n">reference</span><span class="p">,</span>
+                                        <span class="n">formula</span><span class="p">,</span>
+                                        <span class="n">elements</span><span class="p">,</span>
+                                        <span class="n">aggr_state</span><span class="p">,</span>
+                                        <span class="n">T_limit_low</span><span class="p">,</span>
+                                        <span class="n">T_limit_high</span><span class="p">,</span>
+                                        <span class="n">calc_quality</span><span class="p">,</span>
+                                        <span class="n">mm</span><span class="p">,</span>
+                                        <span class="n">low_coefs</span><span class="p">,</span>
+                                        <span class="n">high_coefs</span><span class="p">,</span>
+                                        <span class="n">h_formation</span><span class="p">)</span>
+                    <span class="k">except</span><span class="p">:</span>
+                        <span class="k">pass</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="k">pass</span>
+        <span class="k">return</span> <span class="bp">None</span></div></div>
+
+
+<span class="c1"># inherits from Elementdb so there is no need to slow down reading</span>
+<span class="c1"># burcat.xml all the time</span>
+<div class="viewcode-block" id="Reaction"><a class="viewcode-back" href="../../thermopy.html#thermopy.burcat.Reaction">[docs]</a><span class="k">class</span> <span class="nc">Reaction</span><span class="p">(</span><span class="n">Database</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Models a simple reaction. Example:\n</span>
+<span class="sd">    1 N2 + 3 H2 &lt;-&gt; 2 NH3\n</span>
+<span class="sd">    reaction1 = burcat.Reaction(None, 600, [&#39;n2 ref element&#39;,</span>
+<span class="sd">    &#39;h2 ref element&#39;], [&#39;nh3 anharmonic&#39;], [1, 3], [2])&quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">p</span><span class="p">,</span> <span class="n">T</span><span class="p">,</span> <span class="n">reagents</span><span class="p">,</span> <span class="n">products</span><span class="p">,</span> <span class="n">rcoefs</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">pcoefs</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="n">Elementdb</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">T</span> <span class="o">=</span> <span class="n">T</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">p</span> <span class="o">=</span> <span class="n">p</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">reagents</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">products</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_rcoefs</span> <span class="o">=</span> <span class="p">[</span><span class="nb">abs</span><span class="p">(</span><span class="n">z</span><span class="p">)</span> <span class="k">for</span> <span class="n">z</span> <span class="ow">in</span> <span class="n">rcoefs</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_pcoefs</span> <span class="o">=</span> <span class="p">[</span><span class="nb">abs</span><span class="p">(</span><span class="n">z</span><span class="p">)</span> <span class="k">for</span> <span class="n">z</span> <span class="ow">in</span> <span class="n">pcoefs</span><span class="p">]</span>
+
+        <span class="c1"># error checking</span>
+        <span class="n">elements_in_reagents</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">compound</span> <span class="ow">in</span> <span class="n">reagents</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">compound</span><span class="p">,</span> <span class="n">Element</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">reagents</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">compound</span><span class="p">)</span>
+                <span class="n">elements_in_reagents</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="nb">tuple</span><span class="p">(</span><span class="n">compound</span><span class="o">.</span><span class="n">_elements</span><span class="p">))</span>
+            <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">compound</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">reagents</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">set_compound</span><span class="p">(</span><span class="n">compound</span><span class="p">))</span>
+                <span class="n">elements_in_reagents</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="nb">tuple</span><span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">set_compound</span><span class="p">(</span><span class="n">compound</span><span class="p">)</span><span class="o">.</span><span class="n">_elements</span><span class="p">))</span>
+        <span class="n">elements_in_products</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">compound</span> <span class="ow">in</span> <span class="n">products</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">compound</span><span class="p">,</span> <span class="n">Element</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">products</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">compound</span><span class="p">)</span>
+                <span class="n">elements_in_products</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="nb">tuple</span><span class="p">(</span><span class="n">compound</span><span class="o">.</span><span class="n">_elements</span><span class="p">))</span>
+            <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">compound</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">products</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">set_compound</span><span class="p">(</span><span class="n">compound</span><span class="p">))</span>
+                <span class="n">elements_in_products</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="nb">tuple</span><span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">set_compound</span><span class="p">(</span><span class="n">compound</span><span class="p">)</span><span class="o">.</span><span class="n">_elements</span><span class="p">))</span>
+
+        <span class="k">if</span> <span class="nb">set</span><span class="p">([</span><span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">comp</span> <span class="ow">in</span> <span class="n">elements_in_products</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">comp</span><span class="p">])</span> <span class="o">!=</span>      \
+           <span class="nb">set</span><span class="p">([</span><span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">comp</span> <span class="ow">in</span> <span class="n">elements_in_reagents</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">comp</span><span class="p">]):</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;Cannot balance equation with different&#39;</span>
+                            <span class="s1">&#39;elements in reagents and products&#39;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">deltah</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_delta_enthalpy</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">deltag</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_delta_gibbs_energy</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">equilibrium_constant</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">equilibrium_constant</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">_delta_enthalpy</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">T</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Reaction deltaH in J/mol&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">T</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">T</span> <span class="o">=</span> <span class="n">T</span>
+        <span class="n">delta_h</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">for</span> <span class="p">(</span><span class="n">coefficient</span><span class="p">,</span> <span class="n">compound</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_rcoefs</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">reagents</span><span class="p">):</span>
+            <span class="n">delta_h</span> <span class="o">=</span> <span class="n">delta_h</span> <span class="o">-</span> <span class="n">coefficient</span> <span class="o">*</span> <span class="n">compound</span><span class="o">.</span><span class="n">enthalpy_engineering</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">T</span><span class="p">)</span>
+        <span class="k">for</span> <span class="p">(</span><span class="n">coefficient</span><span class="p">,</span> <span class="n">compound</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_pcoefs</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">products</span><span class="p">):</span>
+            <span class="n">delta_h</span> <span class="o">=</span> <span class="n">delta_h</span> <span class="o">+</span> <span class="n">coefficient</span> <span class="o">*</span> <span class="n">compound</span><span class="o">.</span><span class="n">enthalpy_engineering</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">T</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">delta_h</span>
+
+    <span class="k">def</span> <span class="nf">_delta_gibbs_energy</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">T</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Reaction deltaG in J/mol&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">T</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">T</span> <span class="o">=</span> <span class="n">T</span>
+        <span class="n">deltag</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">for</span> <span class="p">(</span><span class="n">coef</span><span class="p">,</span> <span class="n">comp</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_rcoefs</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">reagents</span><span class="p">):</span>
+            <span class="n">deltag</span> <span class="o">=</span> <span class="n">deltag</span> <span class="o">-</span> <span class="n">coef</span> <span class="o">*</span> <span class="n">comp</span><span class="o">.</span><span class="n">gibbs_energy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">T</span><span class="p">)</span>
+        <span class="k">for</span> <span class="p">(</span><span class="n">coef</span><span class="p">,</span> <span class="n">comp</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_pcoefs</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">products</span><span class="p">):</span>
+            <span class="n">deltag</span> <span class="o">=</span> <span class="n">deltag</span> <span class="o">+</span> <span class="n">coef</span> <span class="o">*</span> <span class="n">comp</span><span class="o">.</span><span class="n">gibbs_energy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">T</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">deltag</span>
+
+<div class="viewcode-block" id="Reaction.equilibrium_constant"><a class="viewcode-back" href="../../thermopy.html#thermopy.burcat.Reaction.equilibrium_constant">[docs]</a>    <span class="k">def</span> <span class="nf">equilibrium_constant</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">T</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;The equilibrium constant: K_eq = exp( - deltaG / (R * T))&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">T</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">T</span> <span class="o">=</span> <span class="n">T</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">deltag</span> <span class="o">/</span> <span class="p">(</span><span class="n">_R</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">T</span><span class="p">))</span></div>
+
+    <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">r</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+        <span class="k">for</span> <span class="p">(</span><span class="n">reag</span><span class="p">,</span> <span class="n">coef</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">reagents</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_rcoefs</span><span class="p">):</span>
+            <span class="n">r</span> <span class="o">=</span> <span class="n">r</span> <span class="o">+</span> <span class="s1">&#39;+&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">coef</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39; &#39;</span> <span class="o">+</span> <span class="n">reag</span><span class="o">.</span><span class="n">inp_name</span> <span class="o">+</span> <span class="s1">&#39; &#39;</span>
+        <span class="n">r</span> <span class="o">=</span> <span class="n">r</span> <span class="o">+</span> <span class="s1">&#39; -&gt; &#39;</span>
+        <span class="k">for</span> <span class="p">(</span><span class="n">reag</span><span class="p">,</span> <span class="n">coef</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">products</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pcoefs</span><span class="p">):</span>
+            <span class="n">r</span> <span class="o">=</span> <span class="n">r</span> <span class="o">+</span> <span class="s1">&#39;+&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">coef</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39; &#39;</span> <span class="o">+</span> <span class="n">reag</span><span class="o">.</span><span class="n">inp_name</span> <span class="o">+</span> <span class="s1">&#39; &#39;</span>
+        <span class="k">return</span> <span class="s2">&quot;&quot;&quot;&lt;reaction&gt; {0}&quot;&quot;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">r</span><span class="p">)</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">thermopy  documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2016, Author.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.4.
+    </div>
+  </body>
+</html>

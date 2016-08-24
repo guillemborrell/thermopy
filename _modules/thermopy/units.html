@@ -1,0 +1,552 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>thermopy.units &mdash; thermopy  documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="top" title="thermopy  documentation" href="../../index.html" />
+    <link rel="up" title="Module code" href="../index.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">thermopy  documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for thermopy.units</h1><div class="highlight"><pre>
+<span></span><span class="sd">u&quot;&quot;&quot;</span>
+<span class="sd">Units conversion module.</span>
+
+<span class="sd">Classes:</span>
+
+<span class="sd">    Temperature: temperature object.</span>
+
+<span class="sd">    Pressure: pressure object.</span>
+
+<span class="sd">    Enthalpy: enthalpy object.</span>
+
+<span class="sd">    Length: length object.</span>
+
+<span class="sd">    Massflow: mass flow object.</span>
+
+<span class="sd">    Massflowrate: massflowrate object.</span>
+
+<span class="sd">    Energy: energy object.</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">thermopy.constants</span> <span class="kn">as</span> <span class="nn">constants</span>
+
+
+<div class="viewcode-block" id="Temperature"><a class="viewcode-back" href="../../thermopy.html#thermopy.iapws.Temperature">[docs]</a><span class="k">class</span> <span class="nc">Temperature</span><span class="p">(</span><span class="nb">float</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Class that models a temperature measure with conversion utilities</span>
+
+<span class="sd">    Supported units are</span>
+
+<span class="sd">    * Kelvin</span>
+
+<span class="sd">    * Celsius</span>
+
+<span class="sd">    * Fahrenheit</span>
+
+<span class="sd">    Normal instantiation is a temperature in Kelvin</span>
+
+<span class="sd">    &gt;&gt;&gt; T = Temperature(100)</span>
+<span class="sd">    &gt;&gt;&gt; T</span>
+<span class="sd">    100.0</span>
+
+<span class="sd">    But you can instantiate and specify if unit is Celsius or</span>
+<span class="sd">    Fahrenheit</span>
+
+<span class="sd">    &gt;&gt;&gt; T = Temperature(100).unit(&#39;F&#39;)</span>
+<span class="sd">    &gt;&gt;&gt; T</span>
+<span class="sd">    310.92777777777775</span>
+
+<span class="sd">    Unit conversion is as easy as it gets.</span>
+
+<span class="sd">    &gt;&gt;&gt; T.C</span>
+<span class="sd">    37.777777777777...</span>
+<span class="sd">    &gt;&gt;&gt; T.F</span>
+<span class="sd">    99.999999999999...</span>
+
+<span class="sd">    You can compute with temperatures because inherits from the float</span>
+<span class="sd">    built-in</span>
+
+<span class="sd">    &gt;&gt;&gt; T1 = Temperature(200)</span>
+<span class="sd">    &gt;&gt;&gt; T2 = Temperature(0).unit(&#39;C&#39;)</span>
+<span class="sd">    &gt;&gt;&gt; round(T1+T2, 2)</span>
+<span class="sd">    473.15</span>
+
+<span class="sd">    If you don&#39;t want to use the class&#39; attribute you can use the</span>
+<span class="sd">    function `getattr` to get a value using the unit code.</span>
+
+<span class="sd">    &gt;&gt;&gt; getattr(T,&#39;C&#39;)</span>
+<span class="sd">    37.77777777777...</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+        <span class="sd">u&quot;&quot;&quot;Initialize temperature object.&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">__factory</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This factory makes that any returned value is a measure</span>
+<span class="sd">        instead of a float.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">cls</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+
+<div class="viewcode-block" id="Temperature.unit"><a class="viewcode-back" href="../../thermopy.html#thermopy.iapws.Temperature.unit">[docs]</a>    <span class="k">def</span> <span class="nf">unit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">units</span><span class="o">=</span><span class="s1">&#39;K&#39;</span><span class="p">):</span>
+        <span class="sd">u&quot;&quot;&quot;Set unit for temperature.&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">units</span> <span class="o">==</span> <span class="s1">&#39;K&#39;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__factory</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">units</span> <span class="o">==</span> <span class="s1">&#39;C&#39;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__factory</span><span class="p">(</span><span class="n">constants</span><span class="o">.</span><span class="n">C2K</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">))</span>
+        <span class="k">elif</span> <span class="n">units</span> <span class="o">==</span> <span class="s1">&#39;F&#39;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__factory</span><span class="p">(</span><span class="n">constants</span><span class="o">.</span><span class="n">F2K</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Wrong temperature input code&quot;</span><span class="p">)</span></div>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">C</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">u&quot;&quot;&quot;Property of Celsius temperature unit.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__factory</span><span class="p">(</span><span class="n">constants</span><span class="o">.</span><span class="n">K2C</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">))</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">F</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">u&quot;&quot;&quot;Property of Fahrenheit temperature unit.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__factory</span><span class="p">(</span><span class="n">constants</span><span class="o">.</span><span class="n">K2F</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">))</span></div>
+
+
+<div class="viewcode-block" id="Pressure"><a class="viewcode-back" href="../../thermopy.html#thermopy.iapws.Pressure">[docs]</a><span class="k">class</span> <span class="nc">Pressure</span><span class="p">(</span><span class="nb">float</span><span class="p">):</span>
+
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Class that models a Pressure measure with conversion utilities</span>
+
+<span class="sd">    Suported units are</span>
+
+<span class="sd">    * Pascal (Pa)</span>
+
+<span class="sd">    * Mega Pascal (MPa)</span>
+
+<span class="sd">    * Bar (bar)</span>
+
+<span class="sd">    * Pound per square inch (psi)</span>
+
+<span class="sd">    * Atmosphere (atm)</span>
+
+<span class="sd">    * Millimeters of water column (mmwc)</span>
+
+<span class="sd">    * Torricelli (torr)</span>
+
+<span class="sd">    Normal instantiation is pressure in Pa. How much is an athmosphere?</span>
+
+<span class="sd">    &gt;&gt;&gt; p = Pressure(1.0).unit(&#39;atm&#39;)</span>
+<span class="sd">    &gt;&gt;&gt; p</span>
+<span class="sd">    101325.0</span>
+<span class="sd">    &gt;&gt;&gt; p.torr</span>
+<span class="sd">    760.0</span>
+<span class="sd">    &gt;&gt;&gt; p.mmwc</span>
+<span class="sd">    10285.839999999998</span>
+<span class="sd">    &gt;&gt;&gt; p.psi</span>
+<span class="sd">    14.69594877551345</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+        <span class="sd">u&quot;&quot;&quot;Initialize pressure object.&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">__factory</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This factory makes that any returned value is a Measure</span>
+<span class="sd">        instead of a float.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">cls</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+
+<div class="viewcode-block" id="Pressure.unit"><a class="viewcode-back" href="../../thermopy.html#thermopy.iapws.Pressure.unit">[docs]</a>    <span class="k">def</span> <span class="nf">unit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">units</span><span class="o">=</span><span class="s1">&#39;Pa&#39;</span><span class="p">):</span>
+        <span class="sd">u&quot;&quot;&quot;Set unit for pressure.&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">units</span> <span class="o">==</span> <span class="s1">&#39;Pa&#39;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__factory</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">units</span> <span class="o">==</span> <span class="s1">&#39;MPa&#39;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__factory</span><span class="p">(</span><span class="n">constants</span><span class="o">.</span><span class="n">mega</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">units</span> <span class="o">==</span> <span class="s1">&#39;bar&#39;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__factory</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">*</span> <span class="n">constants</span><span class="o">.</span><span class="n">bar</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">units</span> <span class="o">==</span> <span class="s1">&#39;psi&#39;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__factory</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">*</span> <span class="n">constants</span><span class="o">.</span><span class="n">psi</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">units</span> <span class="o">==</span> <span class="s1">&#39;atm&#39;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__factory</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">*</span> <span class="n">constants</span><span class="o">.</span><span class="n">atm</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">units</span> <span class="o">==</span> <span class="s1">&#39;mmwc&#39;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__factory</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">*</span> <span class="p">(</span><span class="n">constants</span><span class="o">.</span><span class="n">torr</span> <span class="o">*</span> <span class="mi">1000</span> <span class="o">/</span> <span class="mi">13534</span><span class="p">))</span>
+        <span class="k">elif</span> <span class="n">units</span> <span class="o">==</span> <span class="s1">&#39;torr&#39;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__factory</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">*</span> <span class="n">constants</span><span class="o">.</span><span class="n">torr</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;wrong pressure unit input code&quot;</span><span class="p">)</span></div>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">MPa</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">u&quot;&quot;&quot;Property of MPa pressure unit.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__factory</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">/</span> <span class="n">constants</span><span class="o">.</span><span class="n">mega</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">bar</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">u&quot;&quot;&quot;Property of bar pressure unit.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__factory</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">/</span> <span class="n">constants</span><span class="o">.</span><span class="n">bar</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">psi</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">u&quot;&quot;&quot;Property of psi pressure unit.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__factory</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">/</span> <span class="n">constants</span><span class="o">.</span><span class="n">psi</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">atm</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">u&quot;&quot;&quot;Property of atm pressure unit.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__factory</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">/</span> <span class="n">constants</span><span class="o">.</span><span class="n">atm</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">mmwc</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">u&quot;&quot;&quot;Property of mmwc pressure unit.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__factory</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">/</span> <span class="p">(</span><span class="n">constants</span><span class="o">.</span><span class="n">torr</span> <span class="o">*</span> <span class="mi">1000</span> <span class="o">/</span> <span class="mi">13534</span><span class="p">))</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">torr</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">u&quot;&quot;&quot;Property of torr pressure unit.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__factory</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">/</span> <span class="n">constants</span><span class="o">.</span><span class="n">torr</span><span class="p">)</span></div>
+
+<span class="c1"># HUNITS = [&#39;si&#39;, &#39;kJkg&#39;, &#39;kcalkg&#39;, &#39;Btulb&#39;]</span>
+
+
+<div class="viewcode-block" id="Enthalpy"><a class="viewcode-back" href="../../thermopy.html#thermopy.iapws.Enthalpy">[docs]</a><span class="k">class</span> <span class="nc">Enthalpy</span><span class="p">(</span><span class="nb">float</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Class that models an enthalpy measure with conversion utilities</span>
+
+<span class="sd">    Supported units are</span>
+
+<span class="sd">    * Joule per kg (default)</span>
+
+<span class="sd">    * Kilojoule per kg (kJkg)</span>
+
+<span class="sd">    * Kilocalorie per kg (kcalkg)</span>
+
+<span class="sd">    * BTU per pound (Btulb)</span>
+
+<span class="sd">    &gt;&gt;&gt; h = Enthalpy(1000)</span>
+<span class="sd">    &gt;&gt;&gt; h.kJkg</span>
+<span class="sd">    1.0</span>
+<span class="sd">    &gt;&gt;&gt; h.kcalkg</span>
+<span class="sd">    0.2390057361376...</span>
+<span class="sd">    &gt;&gt;&gt; h.Btulb</span>
+<span class="sd">    0.42992261392949266</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+        <span class="sd">u&quot;&quot;&quot;Initialize enthalpy object.&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">__factory</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This factory makes that any returned value is a measure</span>
+<span class="sd">        instead of a float.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">cls</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+
+<div class="viewcode-block" id="Enthalpy.unit"><a class="viewcode-back" href="../../thermopy.html#thermopy.iapws.Enthalpy.unit">[docs]</a>    <span class="k">def</span> <span class="nf">unit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">units</span><span class="o">=</span><span class="s1">&#39;si&#39;</span><span class="p">):</span>
+        <span class="sd">u&quot;&quot;&quot;Set unit for Enthalpy.&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">units</span> <span class="o">==</span> <span class="s1">&#39;si&#39;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__factory</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">units</span> <span class="o">==</span> <span class="s1">&#39;kJkg&#39;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__factory</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">*</span> <span class="n">constants</span><span class="o">.</span><span class="n">kilo</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">units</span> <span class="o">==</span> <span class="s1">&#39;kcalkg&#39;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__factory</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">*</span> <span class="n">constants</span><span class="o">.</span><span class="n">calorie</span> <span class="o">*</span>
+                                  <span class="n">constants</span><span class="o">.</span><span class="n">kilo</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">units</span> <span class="o">==</span> <span class="s1">&#39;Btulb&#39;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__factory</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">*</span> <span class="n">constants</span><span class="o">.</span><span class="n">Btu</span> <span class="o">/</span> <span class="n">constants</span><span class="o">.</span><span class="n">lb</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;wrong enthalpy unit input code&quot;</span><span class="p">)</span></div>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">kJkg</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">u&quot;&quot;&quot;Property of KJkg pressure unit.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__factory</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">/</span> <span class="n">constants</span><span class="o">.</span><span class="n">kilo</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">kcalkg</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">u&quot;&quot;&quot;Property of kcalkg pressure unit.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__factory</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">/</span> <span class="n">constants</span><span class="o">.</span><span class="n">kilo</span> <span class="o">/</span> <span class="n">constants</span><span class="o">.</span><span class="n">calorie</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">Btulb</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">u&quot;&quot;&quot;Property of Btulb pressure unit.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__factory</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">*</span> <span class="n">constants</span><span class="o">.</span><span class="n">lb</span> <span class="o">/</span> <span class="n">constants</span><span class="o">.</span><span class="n">Btu</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="Length"><a class="viewcode-back" href="../../thermopy.html#thermopy.iapws.Length">[docs]</a><span class="k">class</span> <span class="nc">Length</span><span class="p">(</span><span class="nb">float</span><span class="p">):</span>
+
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Class that models a length measure with conversion utilities</span>
+
+<span class="sd">    Supported units are</span>
+
+<span class="sd">    * meter (default)</span>
+
+<span class="sd">    * millimeter (mm)</span>
+
+<span class="sd">    * inch (inch)</span>
+
+<span class="sd">    * foot (ft)</span>
+
+<span class="sd">    &gt;&gt;&gt; l = Length(1).unit(&#39;inch&#39;)</span>
+<span class="sd">    &gt;&gt;&gt; round(l.mm, 1)</span>
+<span class="sd">    25.4</span>
+<span class="sd">    &gt;&gt;&gt; l.ft</span>
+<span class="sd">    0.0833333333333...</span>
+<span class="sd">    &gt;&gt;&gt; round(l, 4)</span>
+<span class="sd">    0.0254</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+        <span class="sd">u&quot;&quot;&quot;Initialize length object.&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">__factory</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This factory makes that any returned value is a measure</span>
+<span class="sd">        instead of a float.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">cls</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+
+<div class="viewcode-block" id="Length.unit"><a class="viewcode-back" href="../../thermopy.html#thermopy.iapws.Length.unit">[docs]</a>    <span class="k">def</span> <span class="nf">unit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">units</span><span class="o">=</span><span class="s1">&#39;m&#39;</span><span class="p">):</span>
+        <span class="sd">u&quot;&quot;&quot;Set unit for length.&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">units</span> <span class="o">==</span> <span class="s1">&#39;m&#39;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__factory</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">units</span> <span class="o">==</span> <span class="s1">&#39;mm&#39;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__factory</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">*</span> <span class="n">constants</span><span class="o">.</span><span class="n">milli</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">units</span> <span class="o">==</span> <span class="s1">&#39;inch&#39;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__factory</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">*</span> <span class="n">constants</span><span class="o">.</span><span class="n">inch</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">units</span> <span class="o">==</span> <span class="s1">&#39;ft&#39;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__factory</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">*</span> <span class="n">constants</span><span class="o">.</span><span class="n">foot</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;wrong length unit input code&quot;</span><span class="p">)</span></div>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">mm</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">u&quot;&quot;&quot;Property of mm unit.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__factory</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">/</span> <span class="n">constants</span><span class="o">.</span><span class="n">milli</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">inch</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">u&quot;&quot;&quot;Property of inch unit.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__factory</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">/</span> <span class="n">constants</span><span class="o">.</span><span class="n">inch</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">ft</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">u&quot;&quot;&quot;Property of feet unit.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__factory</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">/</span> <span class="n">constants</span><span class="o">.</span><span class="n">foot</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="Massflow"><a class="viewcode-back" href="../../thermopy.html#thermopy.iapws.Massflow">[docs]</a><span class="k">class</span> <span class="nc">Massflow</span><span class="p">(</span><span class="nb">float</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Class that models a mass flow measure with conversion utilities</span>
+
+<span class="sd">    Supported units are</span>
+
+<span class="sd">    * kg per second (default)</span>
+
+<span class="sd">    * kg per hour (kgh)</span>
+
+<span class="sd">    * pounds per second (lbs)</span>
+
+<span class="sd">    * pounds per hour (lbh)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+        <span class="sd">u&quot;&quot;&quot;Initialize massflow object.&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">__factory</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This factory makes that any returned value is a measure</span>
+<span class="sd">        instead of a float.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">cls</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+
+<div class="viewcode-block" id="Massflow.unit"><a class="viewcode-back" href="../../thermopy.html#thermopy.iapws.Massflow.unit">[docs]</a>    <span class="k">def</span> <span class="nf">unit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">units</span><span class="o">=</span><span class="s1">&#39;kgs&#39;</span><span class="p">):</span>
+        <span class="sd">u&quot;&quot;&quot;Set unit for massflow.&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">units</span> <span class="o">==</span> <span class="s1">&#39;kgs&#39;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__factory</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">units</span> <span class="o">==</span> <span class="s1">&#39;kgh&#39;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__factory</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">/</span> <span class="n">constants</span><span class="o">.</span><span class="n">hour</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">units</span> <span class="o">==</span> <span class="s1">&#39;lbs&#39;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__factory</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">*</span> <span class="n">constants</span><span class="o">.</span><span class="n">lb</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">units</span> <span class="o">==</span> <span class="s1">&#39;lbh&#39;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__factory</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">*</span> <span class="n">constants</span><span class="o">.</span><span class="n">lb</span> <span class="o">/</span> <span class="n">constants</span><span class="o">.</span><span class="n">hour</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;wrong massflow unit input code&quot;</span><span class="p">)</span></div>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">kgh</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">u&quot;&quot;&quot;Property of kgh unit.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__factory</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">*</span> <span class="n">constants</span><span class="o">.</span><span class="n">hour</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">lbs</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">u&quot;&quot;&quot;Property of lbs unit.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__factory</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">/</span> <span class="n">constants</span><span class="o">.</span><span class="n">lb</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">lbh</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">u&quot;&quot;&quot;Property of lbh unit.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__factory</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">*</span> <span class="n">constants</span><span class="o">.</span><span class="n">hour</span> <span class="o">/</span> <span class="n">constants</span><span class="o">.</span><span class="n">lb</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="Massflowrate"><a class="viewcode-back" href="../../thermopy.html#thermopy.iapws.Massflowrate">[docs]</a><span class="k">class</span> <span class="nc">Massflowrate</span><span class="p">(</span><span class="nb">float</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Class that models a mass flow measure with conversion utilities</span>
+
+<span class="sd">    Supported units are</span>
+
+<span class="sd">    * :math:`\\frac{kg}{s\ m^2}` (default)</span>
+
+<span class="sd">    * :math:`\\frac{lb}{s\ ft^2}` (Btu)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+        <span class="sd">u&quot;&quot;&quot;Initialize massflowrate object.&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">__factory</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This factory makes that any returned value is a measure</span>
+<span class="sd">        instead of a float.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">cls</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+
+<div class="viewcode-block" id="Massflowrate.unit"><a class="viewcode-back" href="../../thermopy.html#thermopy.iapws.Massflowrate.unit">[docs]</a>    <span class="k">def</span> <span class="nf">unit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">units</span><span class="o">=</span><span class="s1">&#39;default&#39;</span><span class="p">):</span>
+        <span class="sd">u&quot;&quot;&quot;Set unit for massflowrate.&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">units</span> <span class="o">==</span> <span class="s1">&#39;default&#39;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__factory</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">units</span> <span class="o">==</span> <span class="s1">&#39;Btu&#39;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__factory</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">*</span> <span class="n">constants</span><span class="o">.</span><span class="n">lb</span> <span class="o">/</span>
+                                  <span class="n">constants</span><span class="o">.</span><span class="n">foot</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;wrong massflow unit input code&quot;</span><span class="p">)</span></div>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">Btu</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">u&quot;&quot;&quot;Property of Btu unit.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__factory</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">*</span> <span class="n">constants</span><span class="o">.</span><span class="n">foot</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">/</span> <span class="n">constants</span><span class="o">.</span><span class="n">lb</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="Energy"><a class="viewcode-back" href="../../thermopy.html#thermopy.iapws.Energy">[docs]</a><span class="k">class</span> <span class="nc">Energy</span><span class="p">(</span><span class="nb">float</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Energy in J, Btu, cal, kWh&quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+        <span class="sd">u&quot;&quot;&quot;Initialize energy object.&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">__factory</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This factory makes that any returned value is a measure</span>
+<span class="sd">        instead of a float.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">cls</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+
+<div class="viewcode-block" id="Energy.unit"><a class="viewcode-back" href="../../thermopy.html#thermopy.iapws.Energy.unit">[docs]</a>    <span class="k">def</span> <span class="nf">unit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">units</span><span class="o">=</span><span class="s1">&#39;J&#39;</span><span class="p">):</span>
+        <span class="sd">u&quot;&quot;&quot;Set unit for energy.&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">units</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;BTU&#39;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__factory</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">*</span> <span class="n">constants</span><span class="o">.</span><span class="n">Btu</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">units</span> <span class="o">==</span> <span class="s1">&#39;cal&#39;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__factory</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">*</span> <span class="n">constants</span><span class="o">.</span><span class="n">calorie</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">units</span> <span class="o">==</span> <span class="s1">&#39;kWh&#39;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__factory</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">*</span> <span class="n">constants</span><span class="o">.</span><span class="n">kWh</span><span class="p">)</span></div>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">Btu</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">u&quot;&quot;&quot;Property of Btu unit.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__factory</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">/</span> <span class="n">constants</span><span class="o">.</span><span class="n">Btu</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">cal</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">u&quot;&quot;&quot;Property of cal unit.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__factory</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">/</span> <span class="n">constants</span><span class="o">.</span><span class="n">calorie</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">kWh</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">u&quot;&quot;&quot;Property of KWh unit.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__factory</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">/</span> <span class="n">constants</span><span class="o">.</span><span class="n">kWh</span><span class="p">)</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">thermopy  documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2016, Author.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.4.
+    </div>
+  </body>
+</html>

@@ -1,0 +1,821 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>thermopy.iapws &mdash; thermopy  documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="top" title="thermopy  documentation" href="../../index.html" />
+    <link rel="up" title="Module code" href="../index.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">thermopy  documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for thermopy.iapws</h1><div class="highlight"><pre>
+<span></span><span class="sd">u&quot;&quot;&quot;</span>
+<span class="sd">Calculates water and steam properties.</span>
+
+<span class="sd">Classes:</span>
+
+<span class="sd">    Water: water object.</span>
+
+<span class="sd">References: [1] The International Association for the Properties of Water and</span>
+<span class="sd">Steam. Revised Release on the IAPWS Industrial Formulation 1997 for the</span>
+<span class="sd">Thermodynamic Properties of Water and Steam. August 2007.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">from</span> <span class="nn">thermopy.units</span> <span class="kn">import</span> <span class="n">Pressure</span><span class="p">,</span> <span class="n">Temperature</span><span class="p">,</span> <span class="n">Enthalpy</span>
+<span class="kn">from</span> <span class="nn">numpy</span> <span class="kn">import</span> <span class="n">array</span><span class="p">,</span> <span class="nb">sum</span><span class="p">,</span> <span class="n">sqrt</span><span class="p">,</span> <span class="n">log</span>
+<span class="kn">from</span> <span class="nn">thermopy.constants</span> <span class="kn">import</span> <span class="n">ideal_gas_constant</span><span class="p">,</span>                            \
+    <span class="n">ideal_gas_constant_massic_basis</span>
+<span class="kn">import</span> <span class="nn">scipy.optimize</span>
+
+
+<div class="viewcode-block" id="Water"><a class="viewcode-back" href="../../thermopy.html#thermopy.iapws.Water">[docs]</a><span class="k">class</span> <span class="nc">Water</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Taken from The International Association for the Properties of Water and</span>
+<span class="sd">    Steam. Lucerne, Switzerland. August 2007. Revised Release on the IAPWS</span>
+<span class="sd">    Industrial Formulation 1997 for the Thermodynamic Properties of Water and</span>
+<span class="sd">    Steam. Reference document: IAPWS-IF97.</span>
+
+<span class="sd">    All units in SI and default</span>
+<span class="sd">    is molar basis.&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">p</span><span class="p">,</span> <span class="n">T</span><span class="p">,</span> <span class="n">massic_basis</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+        <span class="sd">u&quot;&quot;&quot;Initializes a Water object.&quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">p</span> <span class="o">=</span> <span class="n">Pressure</span><span class="p">(</span><span class="n">p</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">T</span> <span class="o">=</span> <span class="n">Temperature</span><span class="p">(</span><span class="n">T</span><span class="p">)</span>
+        <span class="c1"># check if water is specified by IAPWS-IF97 for these values</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">T</span> <span class="o">&lt;</span> <span class="n">Temperature</span><span class="p">(</span><span class="mf">273.15</span><span class="p">)</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">T</span> <span class="o">&gt;</span> <span class="n">Temperature</span><span class="p">(</span><span class="mf">2273.15</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Temperature &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">T</span><span class="p">)</span> <span class="o">+</span>
+                             <span class="s1">&#39; out of range (273.15 - 2273.15K)&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">p</span> <span class="o">&gt;</span> <span class="n">Pressure</span><span class="p">(</span><span class="mi">100</span><span class="p">)</span><span class="o">.</span><span class="n">unit</span><span class="p">(</span><span class="s1">&#39;MPa&#39;</span><span class="p">)</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">p</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Pressure &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">p</span><span class="p">)</span> <span class="o">+</span>
+                             <span class="s1">&#39; out of range (0 - 100 MPa)&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">T</span> <span class="o">&gt;</span> <span class="mf">1073.15</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">p</span> <span class="o">&gt;</span> <span class="n">Pressure</span><span class="p">(</span><span class="mi">50</span><span class="p">)</span><span class="o">.</span><span class="n">unit</span><span class="p">(</span><span class="s1">&#39;MPa&#39;</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;p or T value out of range&#39;</span><span class="p">)</span>
+
+        <span class="c1"># adjust R to mass or molar basis</span>
+        <span class="k">if</span> <span class="n">massic_basis</span> <span class="ow">is</span> <span class="bp">True</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">R</span> <span class="o">=</span> <span class="n">ideal_gas_constant_massic_basis</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>  <span class="c1"># kJ/(kg K);</span>
+        <span class="k">elif</span> <span class="n">massic_basis</span> <span class="ow">is</span> <span class="bp">False</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">R</span> <span class="o">=</span> <span class="n">ideal_gas_constant</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+    <span class="c1"># constants</span>
+    <span class="c1"># ideal gas constant was already instantiated</span>
+    <span class="n">Tc</span> <span class="o">=</span> <span class="mf">647.096</span>    <span class="c1"># Critical point temperature (K)</span>
+    <span class="n">pc</span> <span class="o">=</span> <span class="n">Pressure</span><span class="p">(</span><span class="mf">22.064</span><span class="p">)</span><span class="o">.</span><span class="n">unit</span><span class="p">(</span><span class="s1">&#39;MPa&#39;</span><span class="p">)</span>     <span class="c1"># Critical point pressure (MPa)</span>
+    <span class="n">rhoc</span> <span class="o">=</span> <span class="mi">322</span>        <span class="c1"># Critical point density kg/m3</span>
+    <span class="n">Tt</span> <span class="o">=</span> <span class="mf">273.16</span>     <span class="c1"># Triple point temperature (K)</span>
+    <span class="n">pt</span> <span class="o">=</span> <span class="mf">611.657</span>    <span class="c1"># Triple point pressure (Pa)</span>
+    <span class="n">ht</span> <span class="o">=</span> <span class="mf">0.611783</span>    <span class="c1"># Enthalpy at triple point (J/kg)</span>
+
+<div class="viewcode-block" id="Water.temperature_saturation"><a class="viewcode-back" href="../../thermopy.html#thermopy.iapws.Water.temperature_saturation">[docs]</a>    <span class="k">def</span> <span class="nf">temperature_saturation</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">p</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Yields Tsat given a pressure p.&quot;&quot;&quot;</span>
+        <span class="c1"># module deals with pressure in MPa</span>
+        <span class="k">if</span> <span class="n">p</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">p</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">p</span><span class="o">.</span><span class="n">MPa</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">p</span> <span class="o">=</span> <span class="n">Pressure</span><span class="p">(</span><span class="n">p</span><span class="p">)</span><span class="o">.</span><span class="n">MPa</span>
+
+        <span class="k">if</span> <span class="n">p</span> <span class="o">&lt;</span> <span class="n">Pressure</span><span class="p">(</span><span class="mf">611.213</span><span class="p">)</span><span class="o">.</span><span class="n">unit</span><span class="p">(</span><span class="s1">&#39;Pa&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">MPa</span> <span class="ow">or</span> <span class="n">p</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">pc</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Pressure out of range.&#39;</span><span class="p">)</span>
+
+        <span class="c1"># table 34</span>
+        <span class="n">ni</span> <span class="o">=</span> <span class="n">array</span><span class="p">([</span><span class="mf">1167.0521452767</span><span class="p">,</span>
+                    <span class="o">-</span><span class="mf">724213.16703206</span><span class="p">,</span>
+                    <span class="o">-</span><span class="mf">17.073846940092</span><span class="p">,</span>
+                    <span class="mf">12020.82470247</span><span class="p">,</span>
+                    <span class="o">-</span><span class="mf">3232555.0322333</span><span class="p">,</span>
+                    <span class="mf">14.91510861353</span><span class="p">,</span>
+                    <span class="o">-</span><span class="mf">4823.2657361591</span><span class="p">,</span>
+                    <span class="mf">405113.40542057</span><span class="p">,</span>
+                    <span class="o">-</span><span class="mf">0.23855557567849</span><span class="p">,</span>
+                    <span class="mf">650.17534844798</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;d&#39;</span><span class="p">)</span>
+
+        <span class="n">beta</span> <span class="o">=</span> <span class="n">p</span> <span class="o">**</span> <span class="mf">0.25</span>
+
+        <span class="n">E</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">*</span> <span class="n">beta</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">+</span> <span class="n">ni</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">*</span> <span class="n">beta</span> <span class="o">+</span> <span class="n">ni</span><span class="p">[</span><span class="mi">5</span><span class="p">]</span>
+        <span class="n">F</span> <span class="o">=</span> <span class="n">ni</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">beta</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">+</span> <span class="n">ni</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">*</span> <span class="n">beta</span> <span class="o">+</span> <span class="n">ni</span><span class="p">[</span><span class="mi">6</span><span class="p">]</span>
+        <span class="n">G</span> <span class="o">=</span> <span class="n">ni</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">beta</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">+</span> <span class="n">ni</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span> <span class="o">*</span> <span class="n">beta</span> <span class="o">+</span> <span class="n">ni</span><span class="p">[</span><span class="mi">7</span><span class="p">]</span>
+        <span class="n">D</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">G</span> <span class="o">/</span> <span class="p">(</span><span class="o">-</span><span class="n">F</span> <span class="o">-</span> <span class="p">(</span><span class="n">F</span><span class="o">**</span><span class="mi">2</span> <span class="o">-</span> <span class="mi">4</span> <span class="o">*</span> <span class="n">E</span> <span class="o">*</span> <span class="n">G</span><span class="p">)</span><span class="o">**</span><span class="mf">0.5</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">Temperature</span><span class="p">((</span><span class="n">ni</span><span class="p">[</span><span class="mi">9</span><span class="p">]</span> <span class="o">+</span> <span class="n">D</span> <span class="o">-</span> <span class="p">((</span><span class="n">ni</span><span class="p">[</span><span class="mi">9</span><span class="p">]</span> <span class="o">+</span> <span class="n">D</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">-</span> <span class="mi">4</span> <span class="o">*</span>
+                                         <span class="p">(</span><span class="n">ni</span><span class="p">[</span><span class="mi">8</span><span class="p">]</span> <span class="o">+</span> <span class="n">ni</span><span class="p">[</span><span class="mi">9</span><span class="p">]</span> <span class="o">*</span> <span class="n">D</span><span class="p">))</span> <span class="o">**</span> <span class="mf">0.5</span><span class="p">)</span> <span class="o">*</span> <span class="mf">0.5</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Water.pressure_saturation"><a class="viewcode-back" href="../../thermopy.html#thermopy.iapws.Water.pressure_saturation">[docs]</a>    <span class="k">def</span> <span class="nf">pressure_saturation</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">T</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Yields Psat given a temperature T&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">T</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">T</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">T</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">T</span> <span class="o">=</span> <span class="n">Temperature</span><span class="p">(</span><span class="n">T</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">T</span> <span class="o">&lt;</span> <span class="mf">273.15</span> <span class="ow">or</span> <span class="n">T</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">Tc</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Temperature out of range.&#39;</span><span class="p">)</span>
+
+        <span class="c1"># table 34</span>
+        <span class="n">ni</span> <span class="o">=</span> <span class="n">array</span><span class="p">([</span><span class="mf">1167.0521452767</span><span class="p">,</span>
+                    <span class="o">-</span><span class="mf">724213.16703206</span><span class="p">,</span>
+                    <span class="o">-</span><span class="mf">17.073846940092</span><span class="p">,</span>
+                    <span class="mf">12020.82470247</span><span class="p">,</span>
+                    <span class="o">-</span><span class="mf">3232555.0322333</span><span class="p">,</span>
+                    <span class="mf">14.91510861353</span><span class="p">,</span>
+                    <span class="o">-</span><span class="mf">4823.2657361591</span><span class="p">,</span>
+                    <span class="mf">405113.40542057</span><span class="p">,</span>
+                    <span class="o">-</span><span class="mf">0.23855557567849</span><span class="p">,</span>
+                    <span class="mf">650.17534844798</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;d&#39;</span><span class="p">)</span>
+
+        <span class="n">v</span> <span class="o">=</span> <span class="n">T</span> <span class="o">+</span> <span class="n">ni</span><span class="p">[</span><span class="mi">8</span><span class="p">]</span> <span class="o">/</span> <span class="p">(</span><span class="n">T</span> <span class="o">-</span> <span class="n">ni</span><span class="p">[</span><span class="mi">9</span><span class="p">])</span>
+        <span class="n">A</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">*</span> <span class="n">v</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">+</span> <span class="n">ni</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">v</span> <span class="o">+</span> <span class="n">ni</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">B</span> <span class="o">=</span> <span class="n">ni</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">*</span> <span class="n">v</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">+</span> <span class="n">ni</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">*</span> <span class="n">v</span> <span class="o">+</span> <span class="n">ni</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span>
+        <span class="n">C</span> <span class="o">=</span> <span class="n">ni</span><span class="p">[</span><span class="mi">5</span><span class="p">]</span> <span class="o">*</span> <span class="n">v</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">+</span> <span class="n">ni</span><span class="p">[</span><span class="mi">6</span><span class="p">]</span> <span class="o">*</span> <span class="n">v</span> <span class="o">+</span> <span class="n">ni</span><span class="p">[</span><span class="mi">7</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">Pressure</span><span class="p">((</span><span class="mi">2</span> <span class="o">*</span> <span class="n">C</span> <span class="o">/</span> <span class="p">(</span><span class="o">-</span><span class="n">B</span> <span class="o">+</span> <span class="p">(</span><span class="n">B</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">-</span> <span class="mi">4</span> <span class="o">*</span> <span class="n">A</span> <span class="o">*</span> <span class="n">C</span><span class="p">)</span> <span class="o">**</span> <span class="mf">0.5</span><span class="p">))</span> <span class="o">**</span> <span class="mi">4</span>
+                        <span class="p">)</span><span class="o">.</span><span class="n">unit</span><span class="p">(</span><span class="s1">&#39;MPa&#39;</span><span class="p">)</span></div>
+
+    <span class="k">def</span> <span class="nf">_is_in_region</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Finds a region for the (T, p) point (see IAPWS-IF97 for details).</span>
+<span class="sd">        The usefulness of these regions are to divide the physical properties</span>
+<span class="sd">        of water into different sets of coefficients and equations.&quot;&quot;&quot;</span>
+
+        <span class="c1"># for the 2 - 3 boundary line</span>
+        <span class="n">ni</span> <span class="o">=</span> <span class="n">array</span><span class="p">([</span><span class="mf">348.05185628969</span><span class="p">,</span>
+                    <span class="o">-</span><span class="mf">1.1671859879975</span><span class="p">,</span>
+                    <span class="mf">0.0010192970039326</span><span class="p">,</span>
+                    <span class="mf">572.54459862746</span><span class="p">,</span>
+                    <span class="mf">13.91883977887</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;d&#39;</span><span class="p">)</span>
+
+        <span class="n">theta</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">T</span>
+        <span class="n">pressure23</span> <span class="o">=</span> <span class="n">Pressure</span><span class="p">(</span><span class="n">ni</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">ni</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">theta</span> <span class="o">+</span> <span class="n">ni</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">*</span>
+                              <span class="n">theta</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">unit</span><span class="p">(</span><span class="s1">&#39;MPa&#39;</span><span class="p">)</span>
+        <span class="c1"># exceptional cases</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">T</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">Tt</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">p</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">pt</span><span class="p">:</span>
+            <span class="k">return</span> <span class="mi">1</span>
+        <span class="c1"># regular cases</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">T</span> <span class="o">&gt;=</span> <span class="n">Temperature</span><span class="p">(</span><span class="mf">273.15</span><span class="p">)</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">T</span> <span class="o">&lt;=</span> <span class="n">Temperature</span><span class="p">(</span><span class="mf">623.15</span><span class="p">):</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">T</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">temperature_saturation</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">p</span><span class="p">):</span>
+                <span class="k">return</span> <span class="mi">1</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">return</span> <span class="mi">2</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">T</span> <span class="o">&gt;</span> <span class="n">Temperature</span><span class="p">(</span><span class="mf">623.15</span><span class="p">)</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">T</span> <span class="o">&lt;=</span> <span class="n">Temperature</span><span class="p">(</span><span class="mf">1073.15</span><span class="p">):</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">p</span> <span class="o">&gt;</span> <span class="n">pressure23</span><span class="p">:</span>
+                <span class="k">return</span> <span class="mi">3</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">return</span> <span class="mi">2</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">T</span> <span class="o">&gt;=</span> <span class="n">Temperature</span><span class="p">(</span><span class="mf">1073.15</span><span class="p">)</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">T</span> <span class="o">&lt;=</span> <span class="n">Temperature</span><span class="p">(</span><span class="mf">2273.15</span><span class="p">):</span>
+            <span class="k">return</span> <span class="mi">5</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;Cannot assign region to the parameters p = &#39;</span> <span class="o">+</span>
+                            <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">p</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;T = &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">T</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;given.&#39;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_basic_equation1</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="s1">&#39;gamma&#39;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Returns basic equation 1 and its derivatives, ex: &#39;gamma&#39;,</span>
+<span class="sd">        &#39;gamma_tau&#39;, &#39;gamma_tau_pi&#39;, etc.&quot;&quot;&quot;</span>
+        <span class="c1"># region1</span>
+        <span class="n">Ii</span> <span class="o">=</span> <span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span>
+                    <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span>
+                    <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span>
+                    <span class="mi">8</span><span class="p">,</span> <span class="mi">21</span><span class="p">,</span> <span class="mi">23</span><span class="p">,</span> <span class="mi">29</span><span class="p">,</span> <span class="mi">30</span><span class="p">,</span> <span class="mi">31</span><span class="p">,</span> <span class="mi">32</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;int&#39;</span><span class="p">)</span>
+        <span class="n">Ji</span> <span class="o">=</span> <span class="n">array</span><span class="p">([</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span>
+                    <span class="o">-</span><span class="mi">9</span><span class="p">,</span> <span class="o">-</span><span class="mi">7</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="o">-</span><span class="mi">3</span><span class="p">,</span>
+                    <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">17</span><span class="p">,</span> <span class="o">-</span><span class="mi">4</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="o">-</span><span class="mi">5</span><span class="p">,</span>
+                    <span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="o">-</span><span class="mi">8</span><span class="p">,</span> <span class="o">-</span><span class="mi">11</span><span class="p">,</span> <span class="o">-</span><span class="mi">6</span><span class="p">,</span> <span class="o">-</span><span class="mi">29</span><span class="p">,</span>
+                    <span class="o">-</span><span class="mi">31</span><span class="p">,</span> <span class="o">-</span><span class="mi">38</span><span class="p">,</span> <span class="o">-</span><span class="mi">39</span><span class="p">,</span> <span class="o">-</span><span class="mi">40</span><span class="p">,</span> <span class="o">-</span><span class="mi">41</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;int&#39;</span><span class="p">)</span>
+        <span class="n">ni</span> <span class="o">=</span> <span class="n">array</span><span class="p">([</span><span class="mf">0.14632971213167</span><span class="p">,</span>
+                    <span class="o">-</span><span class="mf">0.84548187169114</span><span class="p">,</span>
+                    <span class="o">-</span><span class="mf">3.756360367204</span><span class="p">,</span>
+                    <span class="mf">3.3855169168385</span><span class="p">,</span>
+                    <span class="o">-</span><span class="mf">0.95791963387872</span><span class="p">,</span>
+                    <span class="mf">0.15772038513228</span><span class="p">,</span>
+                    <span class="o">-</span><span class="mf">0.016616417199501</span><span class="p">,</span>
+                    <span class="mf">0.00081214629983568</span><span class="p">,</span>
+                    <span class="mf">0.00028319080123804</span><span class="p">,</span>
+                    <span class="o">-</span><span class="mf">0.00060706301565874</span><span class="p">,</span>
+                    <span class="o">-</span><span class="mf">0.018990068218419</span><span class="p">,</span>
+                    <span class="o">-</span><span class="mf">0.032529748770505</span><span class="p">,</span>
+                    <span class="o">-</span><span class="mf">0.021841717175414</span><span class="p">,</span>
+                    <span class="o">-</span><span class="mf">5.283835796993e-05</span><span class="p">,</span>
+                    <span class="o">-</span><span class="mf">0.00047184321073267</span><span class="p">,</span>
+                    <span class="o">-</span><span class="mf">0.00030001780793026</span><span class="p">,</span>
+                    <span class="mf">4.7661393906987e-05</span><span class="p">,</span>
+                    <span class="o">-</span><span class="mf">4.4141845330846e-06</span><span class="p">,</span>
+                    <span class="o">-</span><span class="mf">7.2694996297594e-16</span><span class="p">,</span>
+                    <span class="o">-</span><span class="mf">3.1679644845054e-05</span><span class="p">,</span>
+                    <span class="o">-</span><span class="mf">2.8270797985312e-06</span><span class="p">,</span>
+                    <span class="o">-</span><span class="mf">8.5205128120103e-10</span><span class="p">,</span>
+                    <span class="o">-</span><span class="mf">2.2425281908e-06</span><span class="p">,</span>
+                    <span class="o">-</span><span class="mf">6.5171222895601e-07</span><span class="p">,</span>
+                    <span class="o">-</span><span class="mf">1.4341729937924e-13</span><span class="p">,</span>
+                    <span class="o">-</span><span class="mf">4.0516996860117e-07</span><span class="p">,</span>
+                    <span class="o">-</span><span class="mf">1.2734301741641e-09</span><span class="p">,</span>
+                    <span class="o">-</span><span class="mf">1.7424871230634e-10</span><span class="p">,</span>
+                    <span class="o">-</span><span class="mf">6.8762131295531e-19</span><span class="p">,</span>
+                    <span class="mf">1.4478307828521e-20</span><span class="p">,</span>
+                    <span class="mf">2.6335781662795e-23</span><span class="p">,</span>
+                    <span class="o">-</span><span class="mf">1.1947622640071e-23</span><span class="p">,</span>
+                    <span class="mf">1.8228094581404e-24</span><span class="p">,</span>
+                    <span class="o">-</span><span class="mf">9.3537087292458e-26</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;d&#39;</span><span class="p">)</span>
+        <span class="n">pi</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">p</span> <span class="o">/</span> <span class="n">Pressure</span><span class="p">(</span><span class="mf">16.53</span><span class="p">)</span><span class="o">.</span><span class="n">unit</span><span class="p">(</span><span class="s1">&#39;MPa&#39;</span><span class="p">)</span>
+        <span class="n">tau</span> <span class="o">=</span> <span class="n">Temperature</span><span class="p">(</span><span class="mi">1386</span><span class="p">)</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">T</span>
+
+        <span class="k">if</span> <span class="n">value</span> <span class="o">==</span> <span class="s1">&#39;gamma&#39;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="nb">sum</span><span class="p">(</span><span class="n">ni</span> <span class="o">*</span> <span class="p">((</span><span class="mf">7.1</span> <span class="o">-</span> <span class="n">pi</span><span class="p">)</span> <span class="o">**</span> <span class="n">Ii</span><span class="p">)</span> <span class="o">*</span>
+                       <span class="p">((</span><span class="n">tau</span> <span class="o">-</span> <span class="mf">1.222</span><span class="p">)</span> <span class="o">**</span> <span class="n">Ji</span><span class="p">))</span>
+        <span class="k">elif</span> <span class="n">value</span> <span class="o">==</span> <span class="s1">&#39;gamma_tau&#39;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="nb">sum</span><span class="p">(</span><span class="n">ni</span> <span class="o">*</span> <span class="p">((</span><span class="mf">7.1</span> <span class="o">-</span> <span class="n">pi</span><span class="p">)</span> <span class="o">**</span> <span class="n">Ii</span><span class="p">)</span> <span class="o">*</span> <span class="n">Ji</span> <span class="o">*</span>
+                       <span class="p">((</span><span class="n">tau</span> <span class="o">-</span> <span class="mf">1.222</span><span class="p">)</span> <span class="o">**</span> <span class="p">(</span><span class="n">Ji</span><span class="o">-</span><span class="mi">1</span><span class="p">)))</span>
+        <span class="k">elif</span> <span class="n">value</span> <span class="o">==</span> <span class="s1">&#39;gamma_tau_tau&#39;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="nb">sum</span><span class="p">(</span><span class="n">ni</span> <span class="o">*</span> <span class="p">((</span><span class="mf">7.1</span> <span class="o">-</span> <span class="n">pi</span><span class="p">)</span> <span class="o">**</span> <span class="n">Ii</span><span class="p">)</span> <span class="o">*</span> <span class="n">Ji</span> <span class="o">*</span> <span class="p">(</span><span class="n">Ji</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span>
+                       <span class="p">((</span><span class="n">tau</span> <span class="o">-</span> <span class="mf">1.222</span><span class="p">)</span> <span class="o">**</span> <span class="p">(</span><span class="n">Ji</span> <span class="o">-</span> <span class="mi">2</span><span class="p">)))</span>
+        <span class="k">elif</span> <span class="n">value</span> <span class="o">==</span> <span class="s1">&#39;gamma_pi&#39;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="o">-</span><span class="mi">1</span> <span class="o">*</span> <span class="nb">sum</span><span class="p">(</span><span class="n">ni</span> <span class="o">*</span> <span class="n">Ii</span> <span class="o">*</span> <span class="p">((</span><span class="mf">7.1</span> <span class="o">-</span> <span class="n">pi</span><span class="p">)</span> <span class="o">**</span> <span class="p">(</span><span class="n">Ii</span> <span class="o">-</span> <span class="mi">1</span><span class="p">))</span> <span class="o">*</span>
+                            <span class="p">(</span><span class="n">tau</span> <span class="o">-</span> <span class="mf">1.222</span><span class="p">)</span> <span class="o">**</span> <span class="n">Ji</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">value</span> <span class="o">==</span> <span class="s1">&#39;gamma_pi_pi&#39;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="nb">sum</span><span class="p">(</span><span class="n">ni</span> <span class="o">*</span> <span class="n">Ii</span> <span class="o">*</span> <span class="p">(</span><span class="n">Ii</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="mf">7.1</span> <span class="o">-</span> <span class="n">pi</span><span class="p">)</span> <span class="o">**</span> <span class="p">(</span><span class="n">Ii</span> <span class="o">-</span> <span class="mi">2</span><span class="p">)</span> <span class="o">*</span>
+                       <span class="p">(</span><span class="n">tau</span> <span class="o">-</span> <span class="mf">1.222</span><span class="p">)</span> <span class="o">**</span> <span class="n">Ji</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">value</span> <span class="o">==</span> <span class="s1">&#39;gamma_pi_tau&#39;</span> <span class="ow">or</span> <span class="n">value</span> <span class="o">==</span> <span class="s1">&#39;gamma_tau_pi&#39;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="o">-</span><span class="mi">1</span> <span class="o">*</span> <span class="nb">sum</span><span class="p">(</span><span class="n">ni</span> <span class="o">*</span> <span class="n">Ii</span> <span class="o">*</span> <span class="p">(</span><span class="mf">7.1</span> <span class="o">-</span> <span class="n">pi</span><span class="p">)</span> <span class="o">**</span> <span class="p">(</span><span class="n">Ii</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span>
+                            <span class="n">Ji</span> <span class="o">*</span> <span class="p">(</span><span class="n">tau</span> <span class="o">-</span> <span class="mf">1.222</span><span class="p">)</span> <span class="o">**</span> <span class="p">(</span><span class="n">Ji</span> <span class="o">-</span> <span class="mi">1</span><span class="p">))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;Function not assigned in _basic_equation1()&#39;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_basic_equation2</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="s1">&#39;gamma&#39;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Returns equation 1 and its derivatives, ex: &#39;gamma&#39;, &#39;gamma_tau&#39;,</span>
+<span class="sd">        &#39;gamma_tau_pi&#39;, etc.&quot;&quot;&quot;</span>
+        <span class="c1"># region2; ideal part</span>
+        <span class="n">J0</span> <span class="o">=</span> <span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">5</span><span class="p">,</span> <span class="o">-</span><span class="mi">4</span><span class="p">,</span> <span class="o">-</span><span class="mi">3</span><span class="p">,</span> <span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span>
+                    <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;d&#39;</span><span class="p">)</span>
+        <span class="n">n0</span> <span class="o">=</span> <span class="n">array</span><span class="p">([</span><span class="o">-</span><span class="mf">9.6927686500217</span><span class="p">,</span>
+                    <span class="mf">10.086655968018</span><span class="p">,</span>
+                    <span class="o">-</span><span class="mf">0.005608791128302</span><span class="p">,</span>
+                    <span class="mf">0.071452738081455</span><span class="p">,</span>
+                    <span class="o">-</span><span class="mf">0.40710498223928</span><span class="p">,</span>
+                    <span class="mf">1.4240819171444</span><span class="p">,</span>
+                    <span class="o">-</span><span class="mf">4.383951131945</span><span class="p">,</span>
+                    <span class="o">-</span><span class="mf">0.28408632460772</span><span class="p">,</span>
+                    <span class="mf">0.021268463753307</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;d&#39;</span><span class="p">)</span>
+        <span class="c1"># region2; real part</span>
+        <span class="n">Ii</span> <span class="o">=</span> <span class="n">array</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span>
+                    <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span>
+                    <span class="mi">5</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span>
+                    <span class="mi">9</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">16</span><span class="p">,</span> <span class="mi">16</span><span class="p">,</span> <span class="mi">18</span><span class="p">,</span>
+                    <span class="mi">20</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="mi">21</span><span class="p">,</span> <span class="mi">22</span><span class="p">,</span> <span class="mi">23</span><span class="p">,</span>
+                    <span class="mi">24</span><span class="p">,</span> <span class="mi">24</span><span class="p">,</span> <span class="mi">24</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;d&#39;</span><span class="p">)</span>
+        <span class="n">Ji</span> <span class="o">=</span> <span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span>
+                    <span class="mi">36</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">35</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span>
+                    <span class="mi">3</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">16</span><span class="p">,</span> <span class="mi">35</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">11</span><span class="p">,</span>
+                    <span class="mi">25</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">36</span><span class="p">,</span> <span class="mi">13</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">14</span><span class="p">,</span>
+                    <span class="mi">29</span><span class="p">,</span> <span class="mi">50</span><span class="p">,</span> <span class="mi">57</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="mi">35</span><span class="p">,</span> <span class="mi">48</span><span class="p">,</span>
+                    <span class="mi">21</span><span class="p">,</span> <span class="mi">53</span><span class="p">,</span> <span class="mi">39</span><span class="p">,</span> <span class="mi">26</span><span class="p">,</span> <span class="mi">40</span><span class="p">,</span> <span class="mi">58</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;d&#39;</span><span class="p">)</span>
+        <span class="n">ni</span> <span class="o">=</span> <span class="n">array</span><span class="p">([</span><span class="o">-</span><span class="mf">0.0017731742473213</span><span class="p">,</span>
+                    <span class="o">-</span><span class="mf">0.017834862292358</span><span class="p">,</span>
+                    <span class="o">-</span><span class="mf">0.045996013696365</span><span class="p">,</span>
+                    <span class="o">-</span><span class="mf">0.057581259083432</span><span class="p">,</span>
+                    <span class="o">-</span><span class="mf">0.05032527872793</span><span class="p">,</span>
+                    <span class="o">-</span><span class="mf">3.3032641670203e-05</span><span class="p">,</span>
+                    <span class="o">-</span><span class="mf">0.00018948987516315</span><span class="p">,</span>
+                    <span class="o">-</span><span class="mf">0.0039392777243355</span><span class="p">,</span>
+                    <span class="o">-</span><span class="mf">0.043797295650573</span><span class="p">,</span>
+                    <span class="o">-</span><span class="mf">2.6674547914087e-05</span><span class="p">,</span>
+                    <span class="mf">2.0481737692309e-08</span><span class="p">,</span>
+                    <span class="mf">4.3870667284435e-07</span><span class="p">,</span>
+                    <span class="o">-</span><span class="mf">3.227767723857e-05</span><span class="p">,</span>
+                    <span class="o">-</span><span class="mf">0.0015033924542148</span><span class="p">,</span>
+                    <span class="o">-</span><span class="mf">0.040668253562649</span><span class="p">,</span>
+                    <span class="o">-</span><span class="mf">7.8847309559367e-10</span><span class="p">,</span>
+                    <span class="mf">1.2790717852285e-08</span><span class="p">,</span>
+                    <span class="mf">4.8225372718507e-07</span><span class="p">,</span>
+                    <span class="mf">2.2922076337661e-06</span><span class="p">,</span>
+                    <span class="o">-</span><span class="mf">1.6714766451061e-11</span><span class="p">,</span>
+                    <span class="o">-</span><span class="mf">0.0021171472321355</span><span class="p">,</span>
+                    <span class="o">-</span><span class="mf">23.895741934104</span><span class="p">,</span>
+                    <span class="o">-</span><span class="mf">5.905956432427e-18</span><span class="p">,</span>
+                    <span class="o">-</span><span class="mf">1.2621808899101e-06</span><span class="p">,</span>
+                    <span class="o">-</span><span class="mf">0.038946842435739</span><span class="p">,</span>
+                    <span class="mf">1.1256211360459e-11</span><span class="p">,</span>
+                    <span class="o">-</span><span class="mf">8.2311340897998</span><span class="p">,</span>
+                    <span class="mf">1.9809712802088e-08</span><span class="p">,</span>
+                    <span class="mf">1.0406965210174e-19</span><span class="p">,</span>
+                    <span class="o">-</span><span class="mf">1.0234747095929e-13</span><span class="p">,</span>
+                    <span class="o">-</span><span class="mf">1.0018179379511e-09</span><span class="p">,</span>
+                    <span class="o">-</span><span class="mf">8.0882908646985e-11</span><span class="p">,</span>
+                    <span class="mf">0.10693031879409</span><span class="p">,</span>
+                    <span class="o">-</span><span class="mf">0.33662250574171</span><span class="p">,</span>
+                    <span class="mf">8.9185845355421e-25</span><span class="p">,</span>
+                    <span class="mf">3.0629316876232e-13</span><span class="p">,</span>
+                    <span class="o">-</span><span class="mf">4.2002467698208e-06</span><span class="p">,</span>
+                    <span class="o">-</span><span class="mf">5.9056029685639e-26</span><span class="p">,</span>
+                    <span class="mf">3.7826947613457e-06</span><span class="p">,</span>
+                    <span class="o">-</span><span class="mf">1.2768608934681e-15</span><span class="p">,</span>
+                    <span class="mf">7.3087610595061e-29</span><span class="p">,</span>
+                    <span class="mf">5.5414715350778e-17</span><span class="p">,</span>
+                    <span class="o">-</span><span class="mf">9.436970724121e-07</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;d&#39;</span><span class="p">)</span>
+
+        <span class="n">pi</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">p</span> <span class="o">/</span> <span class="n">Pressure</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">unit</span><span class="p">(</span><span class="s1">&#39;MPa&#39;</span><span class="p">)</span>
+        <span class="n">tau</span> <span class="o">=</span> <span class="mi">540</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">T</span>
+        <span class="c1"># arrays</span>
+        <span class="k">if</span> <span class="n">value</span> <span class="o">==</span> <span class="s1">&#39;gamma&#39;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_basic_equation2</span><span class="p">(</span><span class="s1">&#39;gamma_0&#39;</span><span class="p">)</span> <span class="o">+</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_basic_equation2</span><span class="p">(</span><span class="s1">&#39;gamma_r&#39;</span><span class="p">))</span>
+        <span class="k">elif</span> <span class="n">value</span> <span class="o">==</span> <span class="s1">&#39;gamma_0&#39;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">log</span><span class="p">(</span><span class="n">pi</span><span class="p">)</span> <span class="o">+</span> <span class="nb">sum</span><span class="p">(</span><span class="n">n0</span> <span class="o">*</span> <span class="p">(</span><span class="n">tau</span> <span class="o">**</span> <span class="n">J0</span><span class="p">))</span>
+        <span class="k">elif</span> <span class="n">value</span> <span class="o">==</span> <span class="s1">&#39;gamma_r&#39;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="nb">sum</span><span class="p">(</span><span class="n">ni</span> <span class="o">*</span> <span class="p">(</span><span class="n">pi</span> <span class="o">**</span> <span class="n">Ii</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">tau</span> <span class="o">-</span> <span class="mf">0.5</span><span class="p">)</span> <span class="o">**</span> <span class="n">Ji</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">value</span> <span class="o">==</span> <span class="s1">&#39;gamma_0_pi&#39;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="mi">1</span><span class="o">/</span><span class="n">pi</span>
+        <span class="k">elif</span> <span class="n">value</span> <span class="o">==</span> <span class="s1">&#39;gamme_0_pi_pi&#39;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="o">-</span><span class="mi">1</span><span class="o">/</span><span class="p">(</span><span class="n">pi</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">value</span> <span class="o">==</span> <span class="s1">&#39;gamma_0_tau&#39;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="mi">0</span> <span class="o">+</span> <span class="nb">sum</span><span class="p">(</span><span class="n">n0</span> <span class="o">*</span> <span class="n">J0</span> <span class="o">*</span> <span class="p">(</span><span class="n">tau</span> <span class="o">**</span> <span class="p">(</span><span class="n">J0</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)))</span>
+        <span class="k">elif</span> <span class="n">value</span> <span class="o">==</span> <span class="s1">&#39;gamma_0_tau_tau&#39;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="mi">0</span> <span class="o">+</span> <span class="nb">sum</span><span class="p">(</span><span class="n">n0</span> <span class="o">*</span> <span class="n">J0</span> <span class="o">*</span> <span class="p">(</span><span class="n">J0</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">tau</span> <span class="o">**</span> <span class="p">(</span><span class="n">J0</span> <span class="o">-</span> <span class="mi">2</span><span class="p">))</span>
+        <span class="k">elif</span> <span class="n">value</span> <span class="o">==</span> <span class="s1">&#39;gamma_0_pi_tau&#39;</span> <span class="ow">or</span> <span class="n">value</span> <span class="o">==</span> <span class="s1">&#39;gamma_0_tau_pi&#39;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="mi">0</span>
+        <span class="k">elif</span> <span class="n">value</span> <span class="o">==</span> <span class="s1">&#39;gamma_r_pi&#39;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="nb">sum</span><span class="p">(</span><span class="n">ni</span> <span class="o">*</span> <span class="n">Ii</span> <span class="o">*</span> <span class="p">(</span><span class="n">pi</span> <span class="o">**</span> <span class="p">(</span><span class="n">Ii</span> <span class="o">-</span> <span class="mi">1</span><span class="p">))</span> <span class="o">*</span> <span class="p">((</span><span class="n">tau</span> <span class="o">-</span> <span class="mf">0.5</span><span class="p">)</span> <span class="o">**</span> <span class="n">Ji</span><span class="p">))</span>
+        <span class="k">elif</span> <span class="n">value</span> <span class="o">==</span> <span class="s1">&#39;gamma_r_tau&#39;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="nb">sum</span><span class="p">(</span><span class="n">ni</span> <span class="o">*</span> <span class="p">(</span><span class="n">pi</span> <span class="o">**</span> <span class="n">Ii</span><span class="p">)</span> <span class="o">*</span> <span class="n">Ji</span> <span class="o">*</span> <span class="p">(</span><span class="n">tau</span> <span class="o">-</span> <span class="mf">0.5</span><span class="p">)</span> <span class="o">**</span> <span class="p">(</span><span class="n">Ji</span> <span class="o">-</span> <span class="mi">1</span><span class="p">))</span>
+        <span class="k">elif</span> <span class="n">value</span> <span class="o">==</span> <span class="s1">&#39;gamma_r_pi_pi&#39;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="nb">sum</span><span class="p">(</span><span class="n">ni</span> <span class="o">*</span> <span class="n">Ii</span> <span class="o">*</span> <span class="p">(</span><span class="n">Ii</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">pi</span> <span class="o">**</span> <span class="p">(</span><span class="n">Ii</span> <span class="o">-</span> <span class="mi">2</span><span class="p">))</span>
+                       <span class="p">(</span><span class="n">tau</span> <span class="o">-</span> <span class="mf">0.5</span><span class="p">)</span> <span class="o">**</span> <span class="n">Ji</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">value</span> <span class="o">==</span> <span class="s1">&#39;gamma_r_tau_tau&#39;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="nb">sum</span><span class="p">(</span><span class="n">ni</span> <span class="o">*</span> <span class="p">(</span><span class="n">pi</span> <span class="o">**</span> <span class="n">Ii</span><span class="p">)</span> <span class="o">*</span> <span class="n">Ji</span> <span class="o">*</span> <span class="p">(</span><span class="n">Ji</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">tau</span> <span class="o">-</span> <span class="mf">0.5</span><span class="p">)</span> <span class="o">**</span>
+                       <span class="p">(</span><span class="n">Ji</span> <span class="o">-</span> <span class="mi">2</span><span class="p">))</span>
+        <span class="k">elif</span> <span class="n">value</span> <span class="o">==</span> <span class="s1">&#39;gamma_pi_tau&#39;</span> <span class="ow">or</span> <span class="n">value</span> <span class="o">==</span> <span class="s1">&#39;gamma_tau_pi&#39;</span><span class="p">:</span>
+            <span class="k">pass</span>
+
+    <span class="k">def</span> <span class="nf">_basic_equation3</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="s1">&#39;PHI&#39;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Returns equation 3 and its derivatives, ex: &#39;gamma&#39;,</span>
+<span class="sd">        &#39;gamma_tau&#39;, &#39;gamma_tau_pi&#39;, etc.&quot;&quot;&quot;</span>
+        <span class="c1"># do not forget that the first term is not used</span>
+        <span class="n">Ii</span> <span class="o">=</span> <span class="n">array</span><span class="p">([</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span>
+                    <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span>
+                    <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span>
+                    <span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span>
+                    <span class="mi">9</span><span class="p">,</span> <span class="mi">9</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">11</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;d&#39;</span><span class="p">)</span>
+        <span class="c1"># do not forget that the first term is not used</span>
+        <span class="n">Ji</span> <span class="o">=</span> <span class="n">array</span><span class="p">([</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">12</span><span class="p">,</span>
+                    <span class="mi">23</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">15</span><span class="p">,</span> <span class="mi">17</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span>
+                    <span class="mi">7</span><span class="p">,</span> <span class="mi">22</span><span class="p">,</span> <span class="mi">26</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">16</span><span class="p">,</span>
+                    <span class="mi">26</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">26</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">26</span><span class="p">,</span>
+                    <span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">26</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">26</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">26</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span>
+                    <span class="mi">1</span><span class="p">,</span> <span class="mi">26</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;d&#39;</span><span class="p">)</span>
+        <span class="n">ni</span> <span class="o">=</span> <span class="n">array</span><span class="p">([</span><span class="mf">1.0658070028513</span><span class="p">,</span>
+                    <span class="o">-</span><span class="mf">15.732845290239</span><span class="p">,</span>
+                    <span class="mf">20.944396974307</span><span class="p">,</span>
+                    <span class="o">-</span><span class="mf">7.6867707878716</span><span class="p">,</span>
+                    <span class="mf">2.6185947787954</span><span class="p">,</span>
+                    <span class="o">-</span><span class="mf">2.808078114862</span><span class="p">,</span>
+                    <span class="mf">1.2053369696517</span><span class="p">,</span>
+                    <span class="o">-</span><span class="mf">0.0084566812812502</span><span class="p">,</span>
+                    <span class="o">-</span><span class="mf">1.2654315477714</span><span class="p">,</span>
+                    <span class="o">-</span><span class="mf">1.1524407806681</span><span class="p">,</span>
+                    <span class="mf">0.88521043984318</span><span class="p">,</span>
+                    <span class="o">-</span><span class="mf">0.64207765181607</span><span class="p">,</span>
+                    <span class="mf">0.38493460186671</span><span class="p">,</span>
+                    <span class="o">-</span><span class="mf">0.85214708824206</span><span class="p">,</span>
+                    <span class="mf">4.8972281541877</span><span class="p">,</span>
+                    <span class="o">-</span><span class="mf">3.0502617256965</span><span class="p">,</span>
+                    <span class="mf">0.039420536879154</span><span class="p">,</span>
+                    <span class="mf">0.12558408424308</span><span class="p">,</span>
+                    <span class="o">-</span><span class="mf">0.2799932969871</span><span class="p">,</span>
+                    <span class="mf">1.389979956946</span><span class="p">,</span>
+                    <span class="o">-</span><span class="mf">2.018991502357</span><span class="p">,</span>
+                    <span class="o">-</span><span class="mf">0.0082147637173963</span><span class="p">,</span>
+                    <span class="o">-</span><span class="mf">0.47596035734923</span><span class="p">,</span>
+                    <span class="mf">0.0439840744735</span><span class="p">,</span>
+                    <span class="o">-</span><span class="mf">0.44476435428739</span><span class="p">,</span>
+                    <span class="mf">0.90572070719733</span><span class="p">,</span>
+                    <span class="mf">0.70522450087967</span><span class="p">,</span>
+                    <span class="mf">0.10770512626332</span><span class="p">,</span>
+                    <span class="o">-</span><span class="mf">0.32913623258954</span><span class="p">,</span>
+                    <span class="o">-</span><span class="mf">0.50871062041158</span><span class="p">,</span>
+                    <span class="o">-</span><span class="mf">0.022175400873096</span><span class="p">,</span>
+                    <span class="mf">0.094260751665092</span><span class="p">,</span>
+                    <span class="mf">0.16436278447961</span><span class="p">,</span>
+                    <span class="o">-</span><span class="mf">0.013503372241348</span><span class="p">,</span>
+                    <span class="o">-</span><span class="mf">0.014834345352472</span><span class="p">,</span>
+                    <span class="mf">0.00057922953628084</span><span class="p">,</span>
+                    <span class="mf">0.0032308904703711</span><span class="p">,</span>
+                    <span class="mf">8.0964802996215e-05</span><span class="p">,</span>
+                    <span class="o">-</span><span class="mf">0.00016557679795037</span><span class="p">,</span>
+                    <span class="o">-</span><span class="mf">4.4923899061815e-05</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;d&#39;</span><span class="p">)</span>
+        <span class="c1"># it looks like the first term is never used</span>
+        <span class="c1"># except in the PHI equations</span>
+        <span class="n">Ii</span> <span class="o">=</span> <span class="n">Ii</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
+        <span class="n">Ji</span> <span class="o">=</span> <span class="n">Ji</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
+        <span class="n">ni</span> <span class="o">=</span> <span class="n">ni</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
+        <span class="n">n1</span> <span class="o">=</span> <span class="mf">1.0658070028513</span>
+
+        <span class="n">tau</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Tc</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">T</span>
+        <span class="c1"># from equations 28 and p given as input,</span>
+        <span class="c1"># calculate rho to be used in PHI</span>
+
+        <span class="k">def</span> <span class="nf">obj</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+            <span class="k">return</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">p</span> <span class="o">-</span> <span class="mi">1000</span> <span class="o">*</span> <span class="n">x</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">R</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">T</span> <span class="o">*</span> <span class="p">(</span><span class="n">x</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">rhoc</span><span class="p">)</span> <span class="o">*</span>
+                    <span class="p">(</span><span class="n">n1</span> <span class="o">/</span> <span class="p">(</span><span class="n">x</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">rhoc</span><span class="p">)</span> <span class="o">+</span> <span class="nb">sum</span><span class="p">(</span>
+                        <span class="n">ni</span> <span class="o">*</span> <span class="n">Ii</span> <span class="o">*</span> <span class="p">(</span><span class="n">x</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">rhoc</span><span class="p">)</span> <span class="o">**</span> <span class="p">(</span><span class="n">Ii</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">tau</span> <span class="o">**</span> <span class="n">Ji</span><span class="p">)))</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">580</span><span class="p">,</span> <span class="mi">1</span><span class="p">):</span>
+            <span class="n">a</span> <span class="o">=</span> <span class="n">i</span>
+            <span class="n">b</span> <span class="o">=</span> <span class="n">a</span> <span class="o">+</span> <span class="mi">1</span>
+            <span class="k">if</span> <span class="n">obj</span><span class="p">(</span><span class="n">a</span><span class="p">)</span> <span class="o">*</span> <span class="n">obj</span><span class="p">(</span><span class="n">b</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="k">break</span>
+        <span class="n">rho</span> <span class="o">=</span> <span class="n">scipy</span><span class="o">.</span><span class="n">optimize</span><span class="o">.</span><span class="n">bisect</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">xtol</span><span class="o">=</span><span class="mf">1e-10</span><span class="p">)</span>
+        <span class="n">delta</span> <span class="o">=</span> <span class="n">rho</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">rhoc</span>
+
+        <span class="c1"># returns PHI and found rho as tuple (PHI, rho)</span>
+        <span class="k">if</span> <span class="n">value</span> <span class="o">==</span> <span class="s1">&#39;PHI&#39;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">(</span><span class="n">n1</span> <span class="o">*</span> <span class="n">log</span><span class="p">(</span><span class="n">delta</span><span class="p">)</span> <span class="o">+</span> <span class="nb">sum</span><span class="p">(</span><span class="n">ni</span> <span class="o">*</span> <span class="n">delta</span> <span class="o">**</span> <span class="n">Ii</span> <span class="o">*</span> <span class="n">tau</span> <span class="o">**</span> <span class="n">Ji</span><span class="p">),</span>
+                    <span class="n">rho</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">value</span> <span class="o">==</span> <span class="s1">&#39;PHI_delta&#39;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">(</span><span class="n">n1</span> <span class="o">/</span> <span class="n">delta</span> <span class="o">+</span> <span class="nb">sum</span><span class="p">(</span><span class="n">ni</span> <span class="o">*</span> <span class="n">Ii</span> <span class="o">*</span> <span class="n">delta</span> <span class="o">**</span> <span class="p">(</span><span class="n">Ii</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">tau</span> <span class="o">**</span> <span class="n">Ji</span><span class="p">),</span>
+                    <span class="n">rho</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">value</span> <span class="o">==</span> <span class="s1">&#39;PHI_delta_delta&#39;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">(</span><span class="o">-</span><span class="n">n1</span> <span class="o">/</span> <span class="p">(</span><span class="n">delta</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span> <span class="o">+</span> <span class="nb">sum</span><span class="p">(</span><span class="n">ni</span> <span class="o">*</span> <span class="n">Ii</span> <span class="o">*</span> <span class="p">(</span><span class="n">Ii</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">delta</span> <span class="o">**</span>
+                                             <span class="p">(</span><span class="n">Ii</span> <span class="o">-</span> <span class="mi">2</span><span class="p">)</span> <span class="o">*</span> <span class="n">tau</span> <span class="o">**</span> <span class="n">Ji</span><span class="p">),</span>
+                    <span class="n">rho</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">value</span> <span class="o">==</span> <span class="s1">&#39;PHI_tau&#39;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">(</span><span class="nb">sum</span><span class="p">(</span><span class="n">ni</span> <span class="o">*</span> <span class="n">delta</span> <span class="o">**</span> <span class="n">Ii</span> <span class="o">*</span> <span class="n">Ji</span> <span class="o">*</span> <span class="n">tau</span> <span class="o">**</span> <span class="p">(</span><span class="n">Ji</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)),</span>
+                    <span class="n">rho</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">value</span> <span class="o">==</span> <span class="s1">&#39;PHI_tau_tau&#39;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">(</span><span class="nb">sum</span><span class="p">(</span><span class="n">ni</span> <span class="o">*</span> <span class="n">delta</span> <span class="o">**</span> <span class="n">Ii</span> <span class="o">*</span> <span class="n">Ji</span> <span class="o">*</span> <span class="p">(</span><span class="n">Ji</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">tau</span> <span class="o">**</span> <span class="p">(</span><span class="n">Ji</span> <span class="o">-</span> <span class="mi">2</span><span class="p">)),</span>
+                    <span class="n">rho</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">value</span> <span class="o">==</span> <span class="s1">&#39;PHI_delta_tau&#39;</span> <span class="ow">or</span> <span class="n">value</span> <span class="o">==</span> <span class="s1">&#39;PHI_tau_delta&#39;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">(</span><span class="nb">sum</span><span class="p">(</span><span class="n">ni</span> <span class="o">*</span> <span class="n">Ii</span> <span class="o">*</span> <span class="n">delta</span> <span class="o">**</span> <span class="p">(</span><span class="n">Ii</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">Ji</span> <span class="o">*</span> <span class="n">tau</span> <span class="o">**</span> <span class="p">(</span><span class="n">Ji</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)),</span>
+                    <span class="n">rho</span><span class="p">)</span>
+
+    <span class="c1"># there is no region 4; region 4 is the saturation line of water/vapor</span>
+
+    <span class="k">def</span> <span class="nf">_basic_equation5</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="s1">&#39;gamma&#39;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Returns equation 1 and its derivatives, ex: &#39;gamma&#39;,</span>
+<span class="sd">        &#39;gamma_tau&#39;, &#39;gamma_tau_pi&#39;, etc.&quot;&quot;&quot;</span>
+        <span class="n">J0</span> <span class="o">=</span> <span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">3</span><span class="p">,</span> <span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;d&#39;</span><span class="p">)</span>
+        <span class="n">n0</span> <span class="o">=</span> <span class="n">array</span><span class="p">([</span><span class="o">-</span><span class="mf">13.179983674201</span><span class="p">,</span>
+                    <span class="mf">6.8540841634434</span><span class="p">,</span>
+                    <span class="o">-</span><span class="mf">0.024805148933466</span><span class="p">,</span>
+                    <span class="mf">0.36901534980333</span><span class="p">,</span>
+                    <span class="o">-</span><span class="mf">3.1161318213925</span><span class="p">,</span>
+                    <span class="o">-</span><span class="mf">0.32961626538917</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;d&#39;</span><span class="p">)</span>
+        <span class="n">Ii</span> <span class="o">=</span> <span class="n">array</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;d&#39;</span><span class="p">)</span>
+        <span class="n">Ji</span> <span class="o">=</span> <span class="n">array</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">9</span><span class="p">,</span> <span class="mi">7</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;d&#39;</span><span class="p">)</span>
+        <span class="n">ni</span> <span class="o">=</span> <span class="n">array</span><span class="p">([</span><span class="mf">0.0015736404855259</span><span class="p">,</span>
+                    <span class="mf">0.00090153761673944</span><span class="p">,</span>
+                    <span class="o">-</span><span class="mf">0.0050270077677648</span><span class="p">,</span>
+                    <span class="mf">2.2440037409485e-06</span><span class="p">,</span>
+                    <span class="o">-</span><span class="mf">4.1163275453471e-06</span><span class="p">,</span>
+                    <span class="mf">3.7919454822955e-08</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;d&#39;</span><span class="p">)</span>
+        <span class="n">pi</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">p</span> <span class="o">/</span> <span class="n">Pressure</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">unit</span><span class="p">(</span><span class="s1">&#39;MPa&#39;</span><span class="p">)</span>
+        <span class="n">tau</span> <span class="o">=</span> <span class="n">Temperature</span><span class="p">(</span><span class="mi">1000</span><span class="p">)</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">T</span>
+
+        <span class="k">if</span> <span class="n">value</span> <span class="o">==</span> <span class="s1">&#39;gamma&#39;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_basic_equation5</span><span class="p">(</span><span class="s1">&#39;gamma_0&#39;</span><span class="p">)</span>
+                    <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">_basic_equation5</span><span class="p">(</span><span class="s1">&#39;gamma_r&#39;</span><span class="p">))</span>
+        <span class="k">elif</span> <span class="n">value</span> <span class="o">==</span> <span class="s1">&#39;gamma_0&#39;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">log</span><span class="p">(</span><span class="n">pi</span><span class="p">)</span> <span class="o">+</span> <span class="nb">sum</span><span class="p">(</span><span class="n">n0</span> <span class="o">*</span> <span class="p">(</span><span class="n">tau</span> <span class="o">**</span> <span class="n">J0</span><span class="p">))</span>
+        <span class="k">elif</span> <span class="n">value</span> <span class="o">==</span> <span class="s1">&#39;gamma_r&#39;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="nb">sum</span><span class="p">(</span><span class="n">ni</span> <span class="o">*</span> <span class="p">(</span><span class="n">pi</span> <span class="o">**</span> <span class="n">Ii</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">tau</span> <span class="o">**</span> <span class="n">Ji</span><span class="p">))</span>
+        <span class="k">elif</span> <span class="n">value</span> <span class="o">==</span> <span class="s1">&#39;gamma_0_pi&#39;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="mi">1</span> <span class="o">/</span> <span class="n">pi</span>
+        <span class="k">elif</span> <span class="n">value</span> <span class="o">==</span> <span class="s1">&#39;gamma_0_pi_pi&#39;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="o">-</span><span class="mi">1</span> <span class="o">/</span> <span class="p">(</span><span class="n">pi</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">value</span> <span class="o">==</span> <span class="s1">&#39;gamma_0_tau&#39;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="nb">sum</span><span class="p">(</span><span class="n">n0</span> <span class="o">*</span> <span class="n">J0</span> <span class="o">*</span> <span class="p">(</span><span class="n">tau</span> <span class="o">**</span> <span class="p">(</span><span class="n">J0</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)))</span>
+        <span class="k">elif</span> <span class="n">value</span> <span class="o">==</span> <span class="s1">&#39;gamma_0_tau_tau&#39;</span><span class="p">:</span>
+            <span class="nb">sum</span><span class="p">(</span><span class="n">n0</span> <span class="o">*</span> <span class="n">J0</span> <span class="o">*</span> <span class="p">(</span><span class="n">J0</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">tau</span> <span class="o">**</span> <span class="p">(</span><span class="n">J0</span> <span class="o">-</span> <span class="mi">2</span><span class="p">)))</span>
+        <span class="k">elif</span> <span class="n">value</span> <span class="o">==</span> <span class="s1">&#39;gamma_0_tau_pi&#39;</span> <span class="ow">or</span> <span class="n">value</span> <span class="o">==</span> <span class="s1">&#39;gamma_0_pi_tau&#39;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="mi">0</span> <span class="o">+</span> <span class="mi">0</span>
+        <span class="k">elif</span> <span class="n">value</span> <span class="o">==</span> <span class="s1">&#39;gamma_r_pi&#39;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="nb">sum</span><span class="p">(</span><span class="n">ni</span> <span class="o">*</span> <span class="n">Ii</span> <span class="o">*</span> <span class="p">(</span><span class="n">pi</span> <span class="o">**</span> <span class="p">(</span><span class="n">Ii</span> <span class="o">-</span> <span class="mi">1</span><span class="p">))</span> <span class="o">*</span> <span class="p">(</span><span class="n">tau</span> <span class="o">**</span> <span class="n">Ji</span><span class="p">))</span>
+        <span class="k">elif</span> <span class="n">value</span> <span class="o">==</span> <span class="s1">&#39;gamma_r_tau&#39;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="nb">sum</span><span class="p">(</span><span class="n">ni</span> <span class="o">*</span> <span class="p">(</span><span class="n">pi</span> <span class="o">**</span> <span class="n">Ii</span><span class="p">)</span> <span class="o">*</span> <span class="n">Ji</span> <span class="o">*</span> <span class="p">(</span><span class="n">tau</span> <span class="o">**</span> <span class="p">(</span><span class="n">Ji</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)))</span>
+        <span class="k">elif</span> <span class="n">value</span> <span class="o">==</span> <span class="s1">&#39;gamma_r_pi_pi&#39;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="nb">sum</span><span class="p">(</span><span class="n">ni</span> <span class="o">*</span> <span class="n">Ii</span> <span class="o">*</span> <span class="p">(</span><span class="n">Ii</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">pi</span> <span class="o">**</span> <span class="p">(</span><span class="n">Ii</span> <span class="o">-</span> <span class="mi">2</span><span class="p">))</span> <span class="o">*</span> <span class="p">(</span><span class="n">tau</span> <span class="o">**</span> <span class="n">Ji</span><span class="p">))</span>
+        <span class="k">elif</span> <span class="n">value</span> <span class="o">==</span> <span class="s1">&#39;gamma_r_tau_tau&#39;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="nb">sum</span><span class="p">(</span><span class="n">ni</span> <span class="o">*</span> <span class="p">(</span><span class="n">pi</span> <span class="o">**</span> <span class="n">Ii</span><span class="p">)</span> <span class="o">*</span> <span class="n">Ji</span> <span class="o">*</span> <span class="p">(</span><span class="n">Ji</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">tau</span> <span class="o">**</span> <span class="p">(</span><span class="n">Ji</span> <span class="o">-</span> <span class="mi">2</span><span class="p">)))</span>
+        <span class="k">elif</span> <span class="n">value</span> <span class="o">==</span> <span class="s1">&#39;gamma_r_tau_pi&#39;</span> <span class="ow">or</span> <span class="s1">&#39;gamma_r_pi_tau&#39;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="nb">sum</span><span class="p">(</span><span class="n">ni</span> <span class="o">*</span> <span class="n">Ii</span> <span class="o">*</span> <span class="p">(</span><span class="n">pi</span> <span class="o">**</span> <span class="p">(</span><span class="n">Ii</span> <span class="o">-</span> <span class="mi">1</span><span class="p">))</span> <span class="o">*</span> <span class="n">Ji</span> <span class="o">*</span> <span class="p">(</span><span class="n">tau</span> <span class="o">**</span> <span class="p">(</span><span class="n">Ji</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)))</span>
+
+<div class="viewcode-block" id="Water.gibbs_energy"><a class="viewcode-back" href="../../thermopy.html#thermopy.iapws.Water.gibbs_energy">[docs]</a>    <span class="k">def</span> <span class="nf">gibbs_energy</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">p</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">T</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Returns the Gibbs Energy given p and T in kJ/kg.&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">p</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">p</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">p</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">p</span> <span class="o">=</span> <span class="n">Pressure</span><span class="p">(</span><span class="n">p</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">T</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">T</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">T</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">T</span> <span class="o">=</span> <span class="n">Temperature</span><span class="p">(</span><span class="n">T</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_in_region</span><span class="p">()</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_basic_equation1</span><span class="p">(</span><span class="s1">&#39;gamma&#39;</span><span class="p">)</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">R</span> <span class="o">*</span> <span class="n">T</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_in_region</span><span class="p">()</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_basic_equation2</span><span class="p">(</span><span class="s1">&#39;gamma&#39;</span><span class="p">)</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">R</span> <span class="o">*</span> <span class="n">T</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_in_region</span><span class="p">()</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
+            <span class="k">pass</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_in_region</span><span class="p">()</span> <span class="o">==</span> <span class="mi">4</span><span class="p">:</span>
+            <span class="k">pass</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_in_region</span><span class="p">()</span> <span class="o">==</span> <span class="mi">5</span><span class="p">:</span>
+            <span class="k">pass</span></div>
+
+<div class="viewcode-block" id="Water.specific_volume"><a class="viewcode-back" href="../../thermopy.html#thermopy.iapws.Water.specific_volume">[docs]</a>    <span class="k">def</span> <span class="nf">specific_volume</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">p</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">T</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Returns the specific volume in m³/kg&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">p</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">p</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">p</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">p</span> <span class="o">=</span> <span class="n">Pressure</span><span class="p">(</span><span class="n">p</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">T</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">T</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">T</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">T</span> <span class="o">=</span> <span class="n">Temperature</span><span class="p">(</span><span class="n">T</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_in_region</span><span class="p">()</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">pi</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">p</span> <span class="o">/</span> <span class="n">Pressure</span><span class="p">(</span><span class="mf">16.53</span><span class="p">)</span><span class="o">.</span><span class="n">unit</span><span class="p">(</span><span class="s1">&#39;MPa&#39;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_basic_equation1</span><span class="p">(</span><span class="s1">&#39;gamma_pi&#39;</span><span class="p">)</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">R</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">T</span> <span class="o">*</span> <span class="n">pi</span>
+                    <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">p</span> <span class="o">*</span> <span class="mf">1e3</span><span class="p">)</span>  <span class="c1"># because of kJ in R</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_in_region</span><span class="p">()</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="n">pi</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">p</span> <span class="o">/</span> <span class="n">Pressure</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">unit</span><span class="p">(</span><span class="s1">&#39;MPa&#39;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="p">(</span><span class="n">pi</span> <span class="o">*</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_basic_equation2</span><span class="p">(</span><span class="s1">&#39;gamma_0_pi&#39;</span><span class="p">)</span> <span class="o">+</span>
+                          <span class="bp">self</span><span class="o">.</span><span class="n">_basic_equation2</span><span class="p">(</span><span class="s1">&#39;gamma_r_pi&#39;</span><span class="p">))</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">R</span>
+                    <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">T</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">p</span> <span class="o">*</span> <span class="mf">1e3</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_in_region</span><span class="p">()</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">None</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_in_region</span><span class="p">()</span> <span class="o">==</span> <span class="mi">4</span><span class="p">:</span>
+            <span class="k">pass</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_in_region</span><span class="p">()</span> <span class="o">==</span> <span class="mi">5</span><span class="p">:</span>
+            <span class="k">pass</span>
+
+        <span class="k">return</span> <span class="o">-</span><span class="mi">1</span></div>
+
+<div class="viewcode-block" id="Water.internal_energy"><a class="viewcode-back" href="../../thermopy.html#thermopy.iapws.Water.internal_energy">[docs]</a>    <span class="k">def</span> <span class="nf">internal_energy</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">p</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">T</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;NOT IMPLEMENTED&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">p</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">p</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">p</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">p</span> <span class="o">=</span> <span class="n">Pressure</span><span class="p">(</span><span class="n">p</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">T</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">T</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">T</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">T</span> <span class="o">=</span> <span class="n">Temperature</span><span class="p">(</span><span class="n">T</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_in_region</span><span class="p">()</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">pi</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">p</span> <span class="o">/</span> <span class="n">Pressure</span><span class="p">(</span><span class="mf">16.53</span><span class="p">)</span><span class="o">.</span><span class="n">unit</span><span class="p">(</span><span class="s1">&#39;MPa&#39;</span><span class="p">)</span>
+            <span class="n">tau</span> <span class="o">=</span> <span class="n">Temperature</span><span class="p">(</span><span class="mi">1386</span><span class="p">)</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">T</span>
+            <span class="k">return</span> <span class="p">(</span><span class="n">tau</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">_basic_equation1</span><span class="p">(</span><span class="s1">&#39;gamma_tau&#39;</span><span class="p">)</span> <span class="o">-</span> <span class="n">pi</span> <span class="o">*</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_basic_equation1</span><span class="p">(</span><span class="s1">&#39;gamma_pi&#39;</span><span class="p">))</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">R</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">T</span>
+
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_in_region</span><span class="p">()</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="n">pi</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">p</span> <span class="o">/</span> <span class="n">Pressure</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">unit</span><span class="p">(</span><span class="s1">&#39;MPa&#39;</span><span class="p">)</span>
+            <span class="n">tau</span> <span class="o">=</span> <span class="mi">540</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">T</span>
+            <span class="k">return</span> <span class="p">(</span><span class="n">tau</span> <span class="o">*</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_basic_equation2</span><span class="p">(</span><span class="s1">&#39;gamma_0_tau&#39;</span><span class="p">)</span> <span class="o">+</span>
+                           <span class="bp">self</span><span class="o">.</span><span class="n">_basic_equation2</span><span class="p">(</span><span class="s1">&#39;gamma_r_tau&#39;</span><span class="p">))</span> <span class="o">-</span> <span class="n">pi</span> <span class="o">*</span>
+                    <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_basic_equation2</span><span class="p">(</span><span class="s1">&#39;gamma_0_pi&#39;</span><span class="p">)</span> <span class="o">+</span>
+                     <span class="bp">self</span><span class="o">.</span><span class="n">_basic_equation2</span><span class="p">(</span><span class="s1">&#39;gamma_r_pi&#39;</span><span class="p">)))</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">R</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">T</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_in_region</span><span class="p">()</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
+            <span class="k">pass</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_in_region</span><span class="p">()</span> <span class="o">==</span> <span class="mi">4</span><span class="p">:</span>
+            <span class="k">pass</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_in_region</span><span class="p">()</span> <span class="o">==</span> <span class="mi">5</span><span class="p">:</span>
+            <span class="k">pass</span>
+
+        <span class="k">return</span> <span class="o">-</span><span class="mi">1</span></div>
+
+<div class="viewcode-block" id="Water.entropy"><a class="viewcode-back" href="../../thermopy.html#thermopy.iapws.Water.entropy">[docs]</a>    <span class="k">def</span> <span class="nf">entropy</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">p</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">T</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;NOT IMPLEMENTED&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">p</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">p</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">p</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">p</span> <span class="o">=</span> <span class="n">Pressure</span><span class="p">(</span><span class="n">p</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">T</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">T</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">T</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">T</span> <span class="o">=</span> <span class="n">Temperature</span><span class="p">(</span><span class="n">T</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_in_region</span><span class="p">()</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">pi</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">p</span> <span class="o">/</span> <span class="n">Pressure</span><span class="p">(</span><span class="mf">16.53</span><span class="p">)</span><span class="o">.</span><span class="n">unit</span><span class="p">(</span><span class="s1">&#39;MPa&#39;</span><span class="p">)</span>
+            <span class="n">tau</span> <span class="o">=</span> <span class="n">Temperature</span><span class="p">(</span><span class="mi">1386</span><span class="p">)</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">T</span>
+            <span class="k">return</span> <span class="p">(</span><span class="n">tau</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">_basic_equation1</span><span class="p">(</span><span class="s1">&#39;gamma_tau&#39;</span><span class="p">)</span> <span class="o">-</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_basic_equation1</span><span class="p">(</span><span class="s1">&#39;gamma&#39;</span><span class="p">))</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">R</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_in_region</span><span class="p">()</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="n">pi</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">p</span> <span class="o">/</span> <span class="n">Pressure</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">unit</span><span class="p">(</span><span class="s1">&#39;MPa&#39;</span><span class="p">)</span>
+            <span class="n">tau</span> <span class="o">=</span> <span class="mi">540</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">T</span>
+            <span class="k">return</span> <span class="p">((</span><span class="n">tau</span> <span class="o">*</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_basic_equation2</span><span class="p">(</span><span class="s1">&#39;gamma_0_tau&#39;</span><span class="p">)</span> <span class="o">+</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">_basic_equation2</span><span class="p">(</span><span class="s1">&#39;gamma_r_tau&#39;</span><span class="p">))</span> <span class="o">-</span>
+                     <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_basic_equation2</span><span class="p">(</span><span class="s1">&#39;gamma_0&#39;</span><span class="p">)</span> <span class="o">+</span>
+                      <span class="bp">self</span><span class="o">.</span><span class="n">_basic_equation2</span><span class="p">(</span><span class="s1">&#39;gamma_r&#39;</span><span class="p">)))</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">R</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_in_region</span><span class="p">()</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
+            <span class="k">pass</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_in_region</span><span class="p">()</span> <span class="o">==</span> <span class="mi">4</span><span class="p">:</span>
+            <span class="k">pass</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_in_region</span><span class="p">()</span> <span class="o">==</span> <span class="mi">5</span><span class="p">:</span>
+            <span class="k">pass</span>
+
+        <span class="k">return</span> <span class="o">-</span><span class="mi">1</span></div>
+
+<div class="viewcode-block" id="Water.enthalpy"><a class="viewcode-back" href="../../thermopy.html#thermopy.iapws.Water.enthalpy">[docs]</a>    <span class="k">def</span> <span class="nf">enthalpy</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">p</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">T</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Returns the enthalpy given p and T in kJ/kg.&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">p</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">p</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">p</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">p</span> <span class="o">=</span> <span class="n">Pressure</span><span class="p">(</span><span class="n">p</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">T</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">T</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">T</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">T</span> <span class="o">=</span> <span class="n">Temperature</span><span class="p">(</span><span class="n">T</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_in_region</span><span class="p">()</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">Enthalpy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_basic_equation1</span><span class="p">(</span><span class="s1">&#39;gamma_tau&#39;</span><span class="p">)</span>
+                            <span class="o">*</span> <span class="mi">1386</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">R</span><span class="p">)</span>
+
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_in_region</span><span class="p">()</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">Enthalpy</span><span class="p">(</span><span class="mi">540</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">R</span> <span class="o">*</span> <span class="p">(</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">_basic_equation2</span><span class="p">(</span><span class="s1">&#39;gamma_0_tau&#39;</span><span class="p">)</span> <span class="o">+</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">_basic_equation2</span><span class="p">(</span><span class="s1">&#39;gamma_r_tau&#39;</span><span class="p">)))</span>
+
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_in_region</span><span class="p">()</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
+            <span class="c1"># for region 3 rho needs to be solved numerically</span>
+            <span class="n">reg3_solved</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_basic_equation3</span><span class="p">(</span><span class="s1">&#39;PHI_delta&#39;</span><span class="p">)</span>
+            <span class="n">delta</span> <span class="o">=</span> <span class="n">reg3_solved</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">rhoc</span>
+            <span class="n">tau</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Tc</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">T</span>
+            <span class="k">return</span> <span class="n">Enthalpy</span><span class="p">((</span><span class="n">tau</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">_basic_equation3</span><span class="p">(</span><span class="s1">&#39;PHI_tau&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+                             <span class="o">+</span> <span class="n">delta</span> <span class="o">*</span> <span class="n">reg3_solved</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">R</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">T</span><span class="p">)</span>
+
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_in_region</span><span class="p">()</span> <span class="o">==</span> <span class="mi">4</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">None</span>
+
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_in_region</span><span class="p">()</span> <span class="o">==</span> <span class="mi">5</span><span class="p">:</span>
+            <span class="n">pi</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">p</span> <span class="o">/</span> <span class="n">Pressure</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">unit</span><span class="p">(</span><span class="s1">&#39;MPa&#39;</span><span class="p">)</span>
+            <span class="n">tau</span> <span class="o">=</span> <span class="n">Temperature</span><span class="p">(</span><span class="mi">1000</span><span class="p">)</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">T</span>
+            <span class="k">return</span> <span class="p">(</span><span class="n">tau</span> <span class="o">*</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_basic_equation5</span><span class="p">(</span><span class="s1">&#39;gamma_0_tau&#39;</span><span class="p">)</span> <span class="o">+</span>
+                           <span class="bp">self</span><span class="o">.</span><span class="n">_basic_equation5</span><span class="p">(</span><span class="s1">&#39;gamma_r_tau&#39;</span><span class="p">))</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">R</span> <span class="o">*</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">T</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Water.heat_capacity"><a class="viewcode-back" href="../../thermopy.html#thermopy.iapws.Water.heat_capacity">[docs]</a>    <span class="k">def</span> <span class="nf">heat_capacity</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">p</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">T</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Returns the isobaric heat capacity given p and T in kJ/(kg K).&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">p</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">p</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">p</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">p</span> <span class="o">=</span> <span class="n">Pressure</span><span class="p">(</span><span class="n">p</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">T</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">T</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">T</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">T</span> <span class="o">=</span> <span class="n">Temperature</span><span class="p">(</span><span class="n">T</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_in_region</span><span class="p">()</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">tau</span> <span class="o">=</span> <span class="mi">1386</span> <span class="o">/</span> <span class="n">T</span>
+            <span class="k">return</span> <span class="p">(</span><span class="o">-</span><span class="mi">1</span> <span class="o">*</span> <span class="n">tau</span> <span class="o">*</span> <span class="n">tau</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">R</span> <span class="o">*</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_basic_equation1</span><span class="p">(</span><span class="s1">&#39;gamma_tau_tau&#39;</span><span class="p">))</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_in_region</span><span class="p">()</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="k">pass</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_in_region</span><span class="p">()</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
+            <span class="n">delta</span> <span class="o">=</span> <span class="n">rho</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">rhoc</span>
+            <span class="n">tau</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Tc</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">T</span>
+            <span class="k">return</span> <span class="p">(</span><span class="o">-</span> <span class="n">tau</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">_basic_equation3</span><span class="p">(</span><span class="s1">&#39;PHI_tau_tau&#39;</span><span class="p">)</span> <span class="o">+</span>
+                    <span class="p">(</span><span class="n">delta</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">_basic_equation3</span><span class="p">(</span><span class="s1">&#39;PHI_delta&#39;</span><span class="p">)</span> <span class="o">-</span>
+                     <span class="n">delta</span> <span class="o">*</span> <span class="n">tau</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">_basic_equation3</span><span class="p">(</span><span class="s1">&#39;PHI_tau_delta&#39;</span><span class="p">))</span>
+                    <span class="o">**</span> <span class="mi">2</span> <span class="o">/</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">delta</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">_basic_equation3</span><span class="p">(</span><span class="s1">&#39;PHI_delta&#39;</span><span class="p">)</span> <span class="o">+</span>
+                            <span class="n">delta</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">_basic_equation3</span><span class="p">(</span>
+                                <span class="s1">&#39;PHI_delta_delta&#39;</span><span class="p">))</span>
+                    <span class="p">)</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">R</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_in_region</span><span class="p">()</span> <span class="o">==</span> <span class="mi">4</span><span class="p">:</span>
+            <span class="k">pass</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_in_region</span><span class="p">()</span> <span class="o">==</span> <span class="mi">5</span><span class="p">:</span>
+            <span class="k">pass</span>
+
+        <span class="k">return</span> <span class="o">-</span><span class="mi">1</span></div>
+
+<div class="viewcode-block" id="Water.heat_capacity_constant_v"><a class="viewcode-back" href="../../thermopy.html#thermopy.iapws.Water.heat_capacity_constant_v">[docs]</a>    <span class="k">def</span> <span class="nf">heat_capacity_constant_v</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">p</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">T</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;NOT IMPLEMENTED&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">p</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">p</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">p</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">p</span> <span class="o">=</span> <span class="n">Pressure</span><span class="p">(</span><span class="n">p</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">T</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">T</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">T</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">T</span> <span class="o">=</span> <span class="n">Temperature</span><span class="p">(</span><span class="n">T</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_in_region</span><span class="p">()</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">pi</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">p</span> <span class="o">/</span> <span class="n">Pressure</span><span class="p">(</span><span class="mf">16.53</span><span class="p">)</span><span class="o">.</span><span class="n">unit</span><span class="p">(</span><span class="s1">&#39;MPa&#39;</span><span class="p">)</span>
+            <span class="n">tau</span> <span class="o">=</span> <span class="n">Temperature</span><span class="p">(</span><span class="mi">1386</span><span class="p">)</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">T</span>
+            <span class="k">return</span> <span class="p">(</span><span class="o">-</span> <span class="p">(</span><span class="n">tau</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">_basic_equation1</span><span class="p">(</span><span class="s1">&#39;gamma_tau_tau&#39;</span><span class="p">)</span> <span class="o">+</span>
+                    <span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">_basic_equation1</span><span class="p">(</span><span class="s1">&#39;gamma_pi&#39;</span><span class="p">)</span> <span class="o">-</span> <span class="n">tau</span> <span class="o">*</span>
+                      <span class="bp">self</span><span class="o">.</span><span class="n">_basic_equation1</span><span class="p">(</span><span class="s1">&#39;gamma_pi_tau&#39;</span><span class="p">))</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span> <span class="o">/</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_basic_equation1</span><span class="p">(</span><span class="s1">&#39;gamma_pi_pi&#39;</span><span class="p">))</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">R</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_in_region</span><span class="p">()</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="k">pass</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_in_region</span><span class="p">()</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
+            <span class="k">pass</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_in_region</span><span class="p">()</span> <span class="o">==</span> <span class="mi">4</span><span class="p">:</span>
+            <span class="k">pass</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_in_region</span><span class="p">()</span> <span class="o">==</span> <span class="mi">5</span><span class="p">:</span>
+            <span class="k">pass</span>
+
+        <span class="k">return</span> <span class="o">-</span><span class="mi">1</span></div>
+
+<div class="viewcode-block" id="Water.speed_of_sound"><a class="viewcode-back" href="../../thermopy.html#thermopy.iapws.Water.speed_of_sound">[docs]</a>    <span class="k">def</span> <span class="nf">speed_of_sound</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">p</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">T</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;NOT IMPLEMENTED&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">p</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">p</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">p</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">p</span> <span class="o">=</span> <span class="n">Pressure</span><span class="p">(</span><span class="n">p</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">T</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">T</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">T</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">T</span> <span class="o">=</span> <span class="n">Temperature</span><span class="p">(</span><span class="n">T</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_in_region</span><span class="p">()</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">pi</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">p</span> <span class="o">/</span> <span class="n">Pressure</span><span class="p">(</span><span class="mf">16.53</span><span class="p">)</span><span class="o">.</span><span class="n">unit</span><span class="p">(</span><span class="s1">&#39;MPa&#39;</span><span class="p">)</span>
+            <span class="n">tau</span> <span class="o">=</span> <span class="n">Temperature</span><span class="p">(</span><span class="mi">1386</span><span class="p">)</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">T</span>
+            <span class="n">inside_frac</span> <span class="o">=</span> <span class="p">(((</span><span class="bp">self</span><span class="o">.</span><span class="n">_basic_equation1</span><span class="p">(</span><span class="s1">&#39;gamma_pi&#39;</span><span class="p">)</span> <span class="o">-</span> <span class="n">tau</span> <span class="o">*</span>
+                             <span class="bp">self</span><span class="o">.</span><span class="n">_basic_equation1</span><span class="p">(</span><span class="s1">&#39;gamma_tau_pi&#39;</span><span class="p">))</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span> <span class="o">/</span>
+                           <span class="p">((</span><span class="n">tau</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span> <span class="o">*</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">_basic_equation1</span><span class="p">(</span><span class="s1">&#39;gamma_tau_tau&#39;</span><span class="p">)</span>
+                            <span class="p">))</span>
+            <span class="k">return</span> <span class="n">sqrt</span><span class="p">(((</span><span class="bp">self</span><span class="o">.</span><span class="n">_basic_equation1</span><span class="p">(</span><span class="s1">&#39;gamma_pi&#39;</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span>
+                          <span class="n">inside_frac</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">_basic_equation1</span><span class="p">(</span><span class="s1">&#39;gamma_pi_pi&#39;</span><span class="p">))</span>
+                         <span class="p">)</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">R</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">T</span> <span class="o">*</span> <span class="mi">1000</span><span class="p">)</span>
+
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_in_region</span><span class="p">()</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="k">pass</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_in_region</span><span class="p">()</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
+            <span class="k">pass</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_in_region</span><span class="p">()</span> <span class="o">==</span> <span class="mi">4</span><span class="p">:</span>
+            <span class="k">pass</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_in_region</span><span class="p">()</span> <span class="o">==</span> <span class="mi">5</span><span class="p">:</span>
+            <span class="k">pass</span>
+        <span class="k">return</span> <span class="o">-</span><span class="mi">1</span></div></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">thermopy  documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2016, Author.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.4.
+    </div>
+  </body>
+</html>

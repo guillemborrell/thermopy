@@ -1,0 +1,210 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>&lt;no title&gt; &mdash; thermopy  documentation</title>
+    
+    <link rel="stylesheet" href="../_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="top" title="thermopy  documentation" href="../index.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">thermopy  documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <p># thermopy</p>
+<p>Python library for thermodynamics and other handy tools. Only python3 is
+supported.</p>
+<p>Thermodynamics (all these properties as function of temperature for thousands of compounds):</p>
+<blockquote>
+<div><ul class="simple">
+<li>Specific heat capacity</li>
+<li>Enthalpy</li>
+<li>Entropy</li>
+</ul>
+</div></blockquote>
+<p>Temperature independent data:</p>
+<blockquote>
+<div><ul class="simple">
+<li>Molecular weight</li>
+<li>Enthalpy of formation</li>
+</ul>
+</div></blockquote>
+<p>and much more.</p>
+<p>For water, pressure is also an input (higher accuracy using IAPWS).</p>
+<p>Modelling of chemical reactions is also present. Main features:</p>
+<blockquote>
+<div><ul class="simple">
+<li>Equilibrium constant as a function of temperature</li>
+<li>Heat of reaction as a function of temperature</li>
+</ul>
+</div></blockquote>
+<p>Handy tools:</p>
+<blockquote>
+<div><ul class="simple">
+<li>Units conversion module</li>
+<li>Hundreds of physical constants</li>
+</ul>
+</div></blockquote>
+<p>See the documentation for further details and examples.</p>
+<p>## Installing
+Make sure you have both <cite>numpy</cite> and <cite>scipy</cite> installed.</p>
+<p>Then install it:
+<code class="docutils literal"><span class="pre">`</span>
+<span class="pre">python3</span> <span class="pre">thermopy/setup.py</span> <span class="pre">install</span>
+<span class="pre">`</span></code>
+## Testing</p>
+<p>Inside thermopy directory execute:
+<code class="docutils literal"><span class="pre">`</span>
+<span class="pre">python3</span> <span class="pre">thermopy/setup.py</span> <span class="pre">test</span>
+<span class="pre">`</span></code></p>
+<p>## Changelog:</p>
+<p>v0.5.4:</p>
+<blockquote>
+<div><ul class="simple">
+<li>Merge with old &#8216;thermopy3&#8217; complete. The only name from now on is
+thermopy.</li>
+<li>Documentation now using sphinx instead of pdf files.</li>
+<li>Code compliance and readability improved.</li>
+<li>Code and logic uniformized.</li>
+</ul>
+</div></blockquote>
+<p>v0.5.3:</p>
+<blockquote>
+<div><ul class="simple">
+<li>Merged with original thermopy and discarded the &#8216;thermopy3&#8217; name.</li>
+<li>Added meaningful docstrings to every package, module, class, method and function.</li>
+<li>Uniformized docstrings to comply with google docstrings style.</li>
+<li>Improved compliance with PEP 257 and PEP 8.</li>
+<li>Migrated documentation to sphinx (pdf will no longer be available).</li>
+</ul>
+</div></blockquote>
+<p>v0.5.2:</p>
+<blockquote>
+<div><ul class="simple">
+<li>Changed the names from thermopy to thermopy3 because the former was already in use in pypi.</li>
+<li>IAPWS is now on SI and (molar basis) instead of its native kJ, kg units.</li>
+</ul>
+</div></blockquote>
+<p>v0.5.1:</p>
+<blockquote>
+<div><ul class="simple">
+<li>Fix error with relative import of xml databases.</li>
+</ul>
+</div></blockquote>
+<p>v0.5.0:</p>
+<blockquote>
+<div><ul class="simple">
+<li>First release from v0.4.0.</li>
+<li>Ported from python2.7 to python3.4.</li>
+</ul>
+</div></blockquote>
+<p>## TODO</p>
+<blockquote>
+<div><ul>
+<li><p class="first">Despite burcat was supersed with nasa9polynomials update its
+documentation.</p>
+<blockquote>
+<div><ul>
+<li><p class="first">Transform IAPWS module into molar basis to be consistent with burcat and nasa9polynomials.</p>
+</li>
+<li><dl class="first docutils">
+<dt>Fix the setting of a compound when it is ambiguous:</dt>
+<dd><div class="first last highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">csbr</span> <span class="o">=</span> <span class="n">db</span><span class="o">.</span><span class="n">set_compound</span><span class="p">(</span><span class="s1">&#39;LYQFWZFBNBDLEO-UHFFFAOYSA-M&#39;</span><span class="p">)</span>
+<span class="gt">Traceback (most recent call last):</span>
+  File <span class="nb">&quot;&lt;stdin&gt;&quot;</span>, line <span class="m">1</span>, in <span class="n">&lt;module&gt;</span>
+  File <span class="nb">&quot;/home/monteiro/cloud/cloud_work/fmv1992_github/thermopy/thermopy/nasa9polynomials.py&quot;</span>, line <span class="m">501</span>, in <span class="n">set_compound</span>
+        <span class="p">(</span><span class="s1">&#39;Ga2O&#39;</span><span class="p">,</span> <span class="s1">&#39;gallium;oxygen(2-)&#39;</span><span class="p">)</span>
+<span class="gr">Exception</span>: <span class="n">(&quot;The compound &#39;LYQFWZFBNBDLEO-UHFFFAOYSA-M&#39; you are trying to set is not unique: CsBr&quot;, &#39;CsBr(cr)&#39;)</span>
+</pre></div>
+</div>
+</dd>
+</dl>
+</li>
+<li><p class="first">Increase the testing coverage.</p>
+</li>
+</ul>
+</div></blockquote>
+</li>
+<li><p class="first">Implement units for every output so output is not a number but a dimension (e.g. 1 J/kg instead of 1).</p>
+</li>
+</ul>
+</div></blockquote>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/source/includeme.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">thermopy  documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2016, Author.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.4.
+    </div>
+  </body>
+</html>

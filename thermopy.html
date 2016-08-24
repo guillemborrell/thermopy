@@ -1,0 +1,1564 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>thermopy package &mdash; thermopy  documentation</title>
+    
+    <link rel="stylesheet" href="_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="thermopy  documentation" href="index.html" />
+    <link rel="prev" title="Welcome to thermopy’s documentation!" href="index.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="index.html" title="Welcome to thermopy’s documentation!"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">thermopy  documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="thermopy-package">
+<h1>thermopy package<a class="headerlink" href="#thermopy-package" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-thermopy.burcat">
+<span id="thermopy-burcat-module"></span><h2>thermopy.burcat module<a class="headerlink" href="#module-thermopy.burcat" title="Permalink to this headline">¶</a></h2>
+<p>Burcat module is intended to give access to the Burcat&#8217;s Database [1].</p>
+<p>This database contains coefficients for thousands of chemicals to be used in
+polynomial form. Therefore it allows the user to calculate different
+thermodynamic properties for various compounds. Some of these properties are: 1.
+Specific heat capacity at constant pressure 2. Enthalpy 3. Entropy 4. Gibbs
+energy all of them as functions of temperature for a given compound.</p>
+<p>Intended audience from [1]: The database is used by scientists, educators,
+engineers and students at all levels, dealing primarily with combustion and air
+pollution, jet engines, rocket propulsion, fireworks, but also by researchers
+involved in upper atmosphere kinetics, astrophysics, abrasion metallurgy, etc.</p>
+<p>This file is deprecated and shall not be maintained. Use the nasa9polynomials
+instead.</p>
+<dl class="class">
+<dt id="thermopy.burcat.Compound">
+<em class="property">class </em><code class="descclassname">thermopy.burcat.</code><code class="descname">Compound</code><span class="sig-paren">(</span><em>cas</em>, <em>description</em>, <em>reference</em>, <em>formula</em>, <em>elements</em>, <em>aggr_state</em>, <em>T_limit_low</em>, <em>T_limit_high</em>, <em>calc_quality</em>, <em>mm</em>, <em>low_coefs</em>, <em>high_coefs</em>, <em>h_formation</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/thermopy/burcat.html#Compound"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#thermopy.burcat.Compound" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>Create chemical compounds.</p>
+<p>It is intended to be created via an Elementdb object but you can use it by
+your own. Take a look at Elementdb class.</p>
+<dl class="attribute">
+<dt id="thermopy.burcat.Compound.description">
+<code class="descname">description</code><a class="headerlink" href="#thermopy.burcat.Compound.description" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>??</em> &#8211; ?</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="thermopy.burcat.Compound.formula">
+<code class="descname">formula</code><a class="headerlink" href="#thermopy.burcat.Compound.formula" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>??</em> &#8211; ?</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="thermopy.burcat.Compound.aggr_state">
+<code class="descname">aggr_state</code><a class="headerlink" href="#thermopy.burcat.Compound.aggr_state" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>??</em> &#8211; ?</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="thermopy.burcat.Compound.mm">
+<code class="descname">mm</code><a class="headerlink" href="#thermopy.burcat.Compound.mm" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>??</em> &#8211; molar mass of the compound.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="thermopy.burcat.Compound.h_formation">
+<code class="descname">h_formation</code><a class="headerlink" href="#thermopy.burcat.Compound.h_formation" title="Permalink to this definition">¶</a></dt>
+<dd><p>heat of formation.</p>
+</dd></dl>
+
+<p>Units are in SI on a molar basis.</p>
+<dl class="method">
+<dt id="thermopy.burcat.Compound.density_ideal_gas">
+<code class="descname">density_ideal_gas</code><span class="sig-paren">(</span><em>p</em>, <em>T</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/thermopy/burcat.html#Compound.density_ideal_gas"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#thermopy.burcat.Compound.density_ideal_gas" title="Permalink to this definition">¶</a></dt>
+<dd><p>Density in kg/m³.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="thermopy.burcat.Compound.enthalpy">
+<code class="descname">enthalpy</code><span class="sig-paren">(</span><em>T</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/thermopy/burcat.html#Compound.enthalpy"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#thermopy.burcat.Compound.enthalpy" title="Permalink to this definition">¶</a></dt>
+<dd><p>Computes the sensible enthalpy in J/mol.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="thermopy.burcat.Compound.enthalpy_engineering">
+<code class="descname">enthalpy_engineering</code><span class="sig-paren">(</span><em>T</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/thermopy/burcat.html#Compound.enthalpy_engineering"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#thermopy.burcat.Compound.enthalpy_engineering" title="Permalink to this definition">¶</a></dt>
+<dd><blockquote>
+<div>Computes the total enthalpy in J/mol: h = h_formation +
+integral cp(T) dT.</div></blockquote>
+<dl class="docutils">
+<dt>Useful for heating reacting systems such as:</dt>
+<dd>MgO + Cl2 -&gt; MgCl2 + 0.5 O2
+from Tref to 500 K.</dd>
+<dt>deltaH total = (sum (h_form product) -</dt>
+<dd>sum (h_form react)) + sum ( enthalpy(500) * prod)_each_product</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="thermopy.burcat.Compound.enthalpy_massic">
+<code class="descname">enthalpy_massic</code><span class="sig-paren">(</span><em>T</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/thermopy/burcat.html#Compound.enthalpy_massic"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#thermopy.burcat.Compound.enthalpy_massic" title="Permalink to this definition">¶</a></dt>
+<dd><p>Computes the sensible enthalpy in J/kg.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="thermopy.burcat.Compound.entropy">
+<code class="descname">entropy</code><span class="sig-paren">(</span><em>T</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/thermopy/burcat.html#Compound.entropy"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#thermopy.burcat.Compound.entropy" title="Permalink to this definition">¶</a></dt>
+<dd><p>Computes enthropy in J/mol K.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="thermopy.burcat.Compound.gibbs_energy">
+<code class="descname">gibbs_energy</code><span class="sig-paren">(</span><em>T</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/thermopy/burcat.html#Compound.gibbs_energy"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#thermopy.burcat.Compound.gibbs_energy" title="Permalink to this definition">¶</a></dt>
+<dd><p>Computes the Gibbs free energy from the sensible enthalpy in
+J/mol.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="thermopy.burcat.Compound.heat_capacity">
+<code class="descname">heat_capacity</code><span class="sig-paren">(</span><em>T</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/thermopy/burcat.html#Compound.heat_capacity"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#thermopy.burcat.Compound.heat_capacity" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculates the specific heat capacity in J/(mol K).</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="thermopy.burcat.Compound.heat_capacity_massic">
+<code class="descname">heat_capacity_massic</code><span class="sig-paren">(</span><em>T</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/thermopy/burcat.html#Compound.heat_capacity_massic"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#thermopy.burcat.Compound.heat_capacity_massic" title="Permalink to this definition">¶</a></dt>
+<dd><p>Computes the specific heat capacity in J/(kg K)
+for a given temperature.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="thermopy.burcat.Database">
+<em class="property">class </em><code class="descclassname">thermopy.burcat.</code><code class="descname">Database</code><a class="reference internal" href="_modules/thermopy/burcat.html#Database"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#thermopy.burcat.Database" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>Class that reads the Alexander Burcat&#8217;s thermochemical database
+for combustion.</p>
+<dl class="method">
+<dt id="thermopy.burcat.Database.list_compound">
+<code class="descname">list_compound</code><span class="sig-paren">(</span><em>cas_or_formula</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/thermopy/burcat.html#Database.list_compound"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#thermopy.burcat.Database.list_compound" title="Permalink to this definition">¶</a></dt>
+<dd><p>Takes a string or a CAS number as input and output all
+matching results. Helpful for interactive use of the database.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="thermopy.burcat.Database.set_compound">
+<code class="descname">set_compound</code><span class="sig-paren">(</span><em>formula</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/thermopy/burcat.html#Database.set_compound"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#thermopy.burcat.Database.set_compound" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns an Element instance given the name of the element.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="thermopy.burcat.Reaction">
+<em class="property">class </em><code class="descclassname">thermopy.burcat.</code><code class="descname">Reaction</code><span class="sig-paren">(</span><em>p</em>, <em>T</em>, <em>reagents</em>, <em>products</em>, <em>rcoefs=None</em>, <em>pcoefs=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/thermopy/burcat.html#Reaction"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#thermopy.burcat.Reaction" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#thermopy.burcat.Database" title="thermopy.burcat.Database"><code class="xref py py-class docutils literal"><span class="pre">thermopy.burcat.Database</span></code></a></p>
+<p>Models a simple reaction. Example:</p>
+<p>1 N2 + 3 H2 &lt;-&gt; 2 NH3</p>
+<p>reaction1 = burcat.Reaction(None, 600, [&#8216;n2 ref element&#8217;,
+&#8216;h2 ref element&#8217;], [&#8216;nh3 anharmonic&#8217;], [1, 3], [2])</p>
+<dl class="method">
+<dt id="thermopy.burcat.Reaction.equilibrium_constant">
+<code class="descname">equilibrium_constant</code><span class="sig-paren">(</span><em>T=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/thermopy/burcat.html#Reaction.equilibrium_constant"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#thermopy.burcat.Reaction.equilibrium_constant" title="Permalink to this definition">¶</a></dt>
+<dd><p>The equilibrium constant: K_eq = exp( - deltaG / (R * T))</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-thermopy.constants">
+<span id="thermopy-constants-module"></span><h2>thermopy.constants module<a class="headerlink" href="#module-thermopy.constants" title="Permalink to this headline">¶</a></h2>
+<p>Collection of physical constants and conversion factors.</p>
+<p>Most constants are in SI units, so you can do
+print(&#8216;10 mile per minute is&#8217;, 10*mile/minute, &#8216;m/s or&#8217;,</p>
+<blockquote>
+<div>10*mile/(minute*knot), &#8216;knots&#8217;)</div></blockquote>
+<p>The list is not meant to be comprehensive, but just a convenient list for
+everyday use.</p>
+<dl class="function">
+<dt id="thermopy.constants.C2F">
+<code class="descclassname">thermopy.constants.</code><code class="descname">C2F</code><span class="sig-paren">(</span><em>C</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/thermopy/constants.html#C2F"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#thermopy.constants.C2F" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert Celcius to Fahrenheit</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="thermopy.constants.C2K">
+<code class="descclassname">thermopy.constants.</code><code class="descname">C2K</code><span class="sig-paren">(</span><em>C</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/thermopy/constants.html#C2K"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#thermopy.constants.C2K" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert Celcius to Kelvin</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="thermopy.constants.F2C">
+<code class="descclassname">thermopy.constants.</code><code class="descname">F2C</code><span class="sig-paren">(</span><em>F</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/thermopy/constants.html#F2C"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#thermopy.constants.F2C" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert Fahrenheit to Celcius</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="thermopy.constants.F2K">
+<code class="descclassname">thermopy.constants.</code><code class="descname">F2K</code><span class="sig-paren">(</span><em>F</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/thermopy/constants.html#F2K"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#thermopy.constants.F2K" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert Fahrenheit to Kelvin</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="thermopy.constants.K2C">
+<code class="descclassname">thermopy.constants.</code><code class="descname">K2C</code><span class="sig-paren">(</span><em>K</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/thermopy/constants.html#K2C"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#thermopy.constants.K2C" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert Kelvin to Celcius</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="thermopy.constants.K2F">
+<code class="descclassname">thermopy.constants.</code><code class="descname">K2F</code><span class="sig-paren">(</span><em>K</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/thermopy/constants.html#K2F"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#thermopy.constants.K2F" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert Kelvin to Fahrenheit</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="thermopy.constants.lambda2nu">
+<code class="descclassname">thermopy.constants.</code><code class="descname">lambda2nu</code><span class="sig-paren">(</span><em>lambda_</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/thermopy/constants.html#lambda2nu"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#thermopy.constants.lambda2nu" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert wavelength to optical frequency</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="thermopy.constants.nu2lambda">
+<code class="descclassname">thermopy.constants.</code><code class="descname">nu2lambda</code><span class="sig-paren">(</span><em>nu</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/thermopy/constants.html#nu2lambda"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#thermopy.constants.nu2lambda" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert optical frequency to wavelength</p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-thermopy.iapws">
+<span id="thermopy-iapws-module"></span><h2>thermopy.iapws module<a class="headerlink" href="#module-thermopy.iapws" title="Permalink to this headline">¶</a></h2>
+<p>Calculates water and steam properties.</p>
+<p>Classes:</p>
+<blockquote>
+<div>Water: water object.</div></blockquote>
+<p>References: [1] The International Association for the Properties of Water and
+Steam. Revised Release on the IAPWS Industrial Formulation 1997 for the
+Thermodynamic Properties of Water and Steam. August 2007.</p>
+<dl class="class">
+<dt id="thermopy.iapws.Water">
+<em class="property">class </em><code class="descclassname">thermopy.iapws.</code><code class="descname">Water</code><span class="sig-paren">(</span><em>p</em>, <em>T</em>, <em>massic_basis=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/thermopy/iapws.html#Water"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#thermopy.iapws.Water" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>Taken from The International Association for the Properties of Water and
+Steam. Lucerne, Switzerland. August 2007. Revised Release on the IAPWS
+Industrial Formulation 1997 for the Thermodynamic Properties of Water and
+Steam. Reference document: IAPWS-IF97.</p>
+<p>All units in SI and default
+is molar basis.</p>
+<dl class="attribute">
+<dt id="thermopy.iapws.Water.Tc">
+<code class="descname">Tc</code><em class="property"> = 647.096</em><a class="headerlink" href="#thermopy.iapws.Water.Tc" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="thermopy.iapws.Water.Tt">
+<code class="descname">Tt</code><em class="property"> = 273.16</em><a class="headerlink" href="#thermopy.iapws.Water.Tt" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="thermopy.iapws.Water.enthalpy">
+<code class="descname">enthalpy</code><span class="sig-paren">(</span><em>p=None</em>, <em>T=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/thermopy/iapws.html#Water.enthalpy"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#thermopy.iapws.Water.enthalpy" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the enthalpy given p and T in kJ/kg.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="thermopy.iapws.Water.entropy">
+<code class="descname">entropy</code><span class="sig-paren">(</span><em>p=None</em>, <em>T=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/thermopy/iapws.html#Water.entropy"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#thermopy.iapws.Water.entropy" title="Permalink to this definition">¶</a></dt>
+<dd><p>NOT IMPLEMENTED</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="thermopy.iapws.Water.gibbs_energy">
+<code class="descname">gibbs_energy</code><span class="sig-paren">(</span><em>p=None</em>, <em>T=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/thermopy/iapws.html#Water.gibbs_energy"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#thermopy.iapws.Water.gibbs_energy" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the Gibbs Energy given p and T in kJ/kg.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="thermopy.iapws.Water.heat_capacity">
+<code class="descname">heat_capacity</code><span class="sig-paren">(</span><em>p=None</em>, <em>T=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/thermopy/iapws.html#Water.heat_capacity"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#thermopy.iapws.Water.heat_capacity" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the isobaric heat capacity given p and T in kJ/(kg K).</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="thermopy.iapws.Water.heat_capacity_constant_v">
+<code class="descname">heat_capacity_constant_v</code><span class="sig-paren">(</span><em>p=None</em>, <em>T=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/thermopy/iapws.html#Water.heat_capacity_constant_v"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#thermopy.iapws.Water.heat_capacity_constant_v" title="Permalink to this definition">¶</a></dt>
+<dd><p>NOT IMPLEMENTED</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="thermopy.iapws.Water.ht">
+<code class="descname">ht</code><em class="property"> = 0.611783</em><a class="headerlink" href="#thermopy.iapws.Water.ht" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="thermopy.iapws.Water.internal_energy">
+<code class="descname">internal_energy</code><span class="sig-paren">(</span><em>p=None</em>, <em>T=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/thermopy/iapws.html#Water.internal_energy"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#thermopy.iapws.Water.internal_energy" title="Permalink to this definition">¶</a></dt>
+<dd><p>NOT IMPLEMENTED</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="thermopy.iapws.Water.pc">
+<code class="descname">pc</code><em class="property"> = 22064000.0</em><a class="headerlink" href="#thermopy.iapws.Water.pc" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="thermopy.iapws.Water.pressure_saturation">
+<code class="descname">pressure_saturation</code><span class="sig-paren">(</span><em>T=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/thermopy/iapws.html#Water.pressure_saturation"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#thermopy.iapws.Water.pressure_saturation" title="Permalink to this definition">¶</a></dt>
+<dd><p>Yields Psat given a temperature T</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="thermopy.iapws.Water.pt">
+<code class="descname">pt</code><em class="property"> = 611.657</em><a class="headerlink" href="#thermopy.iapws.Water.pt" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="thermopy.iapws.Water.rhoc">
+<code class="descname">rhoc</code><em class="property"> = 322</em><a class="headerlink" href="#thermopy.iapws.Water.rhoc" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="thermopy.iapws.Water.specific_volume">
+<code class="descname">specific_volume</code><span class="sig-paren">(</span><em>p=None</em>, <em>T=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/thermopy/iapws.html#Water.specific_volume"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#thermopy.iapws.Water.specific_volume" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the specific volume in m³/kg</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="thermopy.iapws.Water.speed_of_sound">
+<code class="descname">speed_of_sound</code><span class="sig-paren">(</span><em>p=None</em>, <em>T=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/thermopy/iapws.html#Water.speed_of_sound"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#thermopy.iapws.Water.speed_of_sound" title="Permalink to this definition">¶</a></dt>
+<dd><p>NOT IMPLEMENTED</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="thermopy.iapws.Water.temperature_saturation">
+<code class="descname">temperature_saturation</code><span class="sig-paren">(</span><em>p=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/thermopy/iapws.html#Water.temperature_saturation"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#thermopy.iapws.Water.temperature_saturation" title="Permalink to this definition">¶</a></dt>
+<dd><p>Yields Tsat given a pressure p.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-thermopy.nasa9polynomials">
+<span id="thermopy-nasa9polynomials-module"></span><h2>thermopy.nasa9polynomials module<a class="headerlink" href="#module-thermopy.nasa9polynomials" title="Permalink to this headline">¶</a></h2>
+<p>Enable the NASA 9 term polynomials to create chemical compound objects.</p>
+<p>This module allows the user to use the NASA9 term polynomials (abbreviated as
+NASA 9) to model chemical compounds and reactions. It is worth noting that all
+the output is stripped of any phyisical unit, that is, results are returned as
+numpy floats. <em>Therefore to end any form of ambiguity we reinstate that all the
+results are in SI units using molar basis</em>. It is up to the user to beware of
+any physical unit conversion concerning his problem.</p>
+<p>Classes:</p>
+<blockquote>
+<div><p>Compound: chemical compound present in the NASA9 term polynomials
+database.</p>
+<p>CompoundIdealGas: chemical compound as an ideal gas present in the NASA9
+term polynomials database. It inherits from Compound.</p>
+<p>Reaction: model of a chemical reaction.</p>
+</div></blockquote>
+<p class="rubric">Example</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">thermopy</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">thermopy</span> <span class="k">import</span> <span class="n">nasa9polynomials</span> <span class="k">as</span> <span class="n">nasa9</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">db</span> <span class="o">=</span> <span class="n">nasa9</span><span class="o">.</span><span class="n">Database</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">caf2</span> <span class="o">=</span> <span class="n">db</span><span class="o">.</span><span class="n">set_compound</span><span class="p">(</span><span class="s1">&#39;caf2&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">caf2</span><span class="o">.</span><span class="n">elements</span><span class="p">)</span>
+<span class="go">[(&#39;C&#39;, 1), (&#39;F&#39;, 2)]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">caf2</span><span class="o">.</span><span class="n">inchikey</span><span class="p">)</span>
+<span class="go">WUKWITHWXAAZEY-UHFFFAOYSA-L</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">caf2</span><span class="o">.</span><span class="n">enthalpy_of_formation</span><span class="p">)</span>
+<span class="go">-790828.409</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">caf2</span><span class="o">.</span><span class="n">heat_capacity</span><span class="p">(</span><span class="mi">300</span><span class="p">))</span>
+<span class="go">51.2707324499</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">caf2</span><span class="o">.</span><span class="n">molecular_weight</span><span class="p">)</span>
+<span class="go">0.0780748064</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">water</span> <span class="o">=</span> <span class="n">db</span><span class="o">.</span><span class="n">set_compound</span><span class="p">(</span><span class="s1">&#39;h2o(l)&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">water</span><span class="o">.</span><span class="n">entropy</span><span class="p">(</span><span class="mi">300</span><span class="p">))</span>
+<span class="go">69.633703</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">water</span><span class="o">.</span><span class="n">elements</span><span class="p">)</span>
+<span class="go">[(&#39;H&#39;, 2), (&#39;O&#39;, 1)]</span>
+</pre></div>
+</div>
+<p>References: [1] Bonnie J. McBride, Michael J. Zehe, and Sanford Gordon. NASA
+Glenn Coefficients for Calculating Thermodynamic Properties of Individual
+Species. September 2002.</p>
+<dl class="class">
+<dt id="thermopy.nasa9polynomials.Compound">
+<em class="property">class </em><code class="descclassname">thermopy.nasa9polynomials.</code><code class="descname">Compound</code><span class="sig-paren">(</span><em>xml_compound</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/thermopy/nasa9polynomials.html#Compound"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#thermopy.nasa9polynomials.Compound" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>Chemical compound present in the NASA9 term polynomials database.</p>
+<p>It is usually set by nasa9polyniomials.Database.set_compound(&#8216;identifier&#8217;).
+If set this way this method already instantiates either a Compound or a
+CompoundIdealGas based on the phase of the chemical compound specified by
+the identifier (see note below).</p>
+<p>Note: <em>The default phase for compounds in this database is gas.</em> Thus if
+instantiating with the name &#8216;H2O&#8217; one would get steam. For liquid water and
+ice one would rather look for &#8216;H2O(L)&#8217; or &#8216;H2O(cr)&#8217;. The same is valid for
+a lot of compounds expected to be in the condensed form (such as NaCl,
+Tungsten, etc).</p>
+<p>It has all the thermodynamic functions listed in [1] as methods which take
+temperature as their sole argument. Those were expanded to include
+gibbs_energy that could be defined by the given functions.</p>
+<dl class="attribute">
+<dt id="thermopy.nasa9polynomials.Compound.canonical_smiles">
+<code class="descname">canonical_smiles</code><a class="headerlink" href="#thermopy.nasa9polynomials.Compound.canonical_smiles" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>str</em> &#8211; Canonical SMILES
+(Simplified molecular-input line-entry system) of the compound.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="thermopy.nasa9polynomials.Compound.cas_number">
+<code class="descname">cas_number</code><a class="headerlink" href="#thermopy.nasa9polynomials.Compound.cas_number" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>str</em> &#8211; CAS (Chemical Abstract Service) number of the
+compound.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="thermopy.nasa9polynomials.Compound.comment">
+<code class="descname">comment</code><a class="headerlink" href="#thermopy.nasa9polynomials.Compound.comment" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>str</em> &#8211; Comment found in the xml database. Usually references.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="thermopy.nasa9polynomials.Compound.condensed">
+<code class="descname">condensed</code><a class="headerlink" href="#thermopy.nasa9polynomials.Compound.condensed" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>bool</em> &#8211; True if the compound is condensed, False if not.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="thermopy.nasa9polynomials.Compound.xml_compounds">
+<code class="descname">xml_compounds</code><a class="headerlink" href="#thermopy.nasa9polynomials.Compound.xml_compounds" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>list</em> &#8211; List containing tuples of two entries. The first
+is the xml_compound and the second is the proportion of the
+xml_compound in the molecule. Both values are strings.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="thermopy.nasa9polynomials.Compound.enthalpy_of_formation">
+<code class="descname">enthalpy_of_formation</code><a class="headerlink" href="#thermopy.nasa9polynomials.Compound.enthalpy_of_formation" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>float</em> &#8211; Enthalpy of formation of the compound.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="thermopy.nasa9polynomials.Compound.inchikey">
+<code class="descname">inchikey</code><a class="headerlink" href="#thermopy.nasa9polynomials.Compound.inchikey" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>str</em> &#8211; InChI (International Chemical Identifier) key
+for the compound.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="thermopy.nasa9polynomials.Compound.inp_name">
+<code class="descname">inp_name</code><a class="headerlink" href="#thermopy.nasa9polynomials.Compound.inp_name" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>str</em> &#8211; Name as per the original &#8216;inp&#8217; file.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="thermopy.nasa9polynomials.Compound.iupac_name">
+<code class="descname">iupac_name</code><a class="headerlink" href="#thermopy.nasa9polynomials.Compound.iupac_name" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>str</em> &#8211; IUPAC (International Union of Pure and Applied
+Chemistry) name of the compound.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="thermopy.nasa9polynomials.Compound.molecular_weight">
+<code class="descname">molecular_weight</code><a class="headerlink" href="#thermopy.nasa9polynomials.Compound.molecular_weight" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>float</em> &#8211; Molecular
+weight of the compound.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="thermopy.nasa9polynomials.Compound.reference">
+<code class="descname">reference</code><a class="headerlink" href="#thermopy.nasa9polynomials.Compound.reference" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>str</em> &#8211; Reference for the compound. See [1] for details.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="thermopy.nasa9polynomials.Compound.enthalpy">
+<code class="descname">enthalpy</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/thermopy/nasa9polynomials.html#Compound.enthalpy"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#thermopy.nasa9polynomials.Compound.enthalpy" title="Permalink to this definition">¶</a></dt>
+<dd><p>calculates the enthalpy for a Compound object.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="thermopy.nasa9polynomials.Compound.entropy">
+<code class="descname">entropy</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/thermopy/nasa9polynomials.html#Compound.entropy"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#thermopy.nasa9polynomials.Compound.entropy" title="Permalink to this definition">¶</a></dt>
+<dd><p>calculates the entropy for a Compound object.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="thermopy.nasa9polynomials.Compound.gibbs_energy">
+<code class="descname">gibbs_energy</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/thermopy/nasa9polynomials.html#Compound.gibbs_energy"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#thermopy.nasa9polynomials.Compound.gibbs_energy" title="Permalink to this definition">¶</a></dt>
+<dd><p>calculates the Gibbs energy for a Compound object.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="thermopy.nasa9polynomials.Compound.heat_capacity">
+<code class="descname">heat_capacity</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/thermopy/nasa9polynomials.html#Compound.heat_capacity"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#thermopy.nasa9polynomials.Compound.heat_capacity" title="Permalink to this definition">¶</a></dt>
+<dd><p>calculates the heat capacity for a Compound object.</p>
+</dd></dl>
+
+<dl class="docutils">
+<dt>Subclasses:</dt>
+<dd>CompoundIdealGas: chemical compound as an ideal gas present in
+the NASA9 term polynomials database. It inherits from Compound.</dd>
+</dl>
+<p class="rubric">Examples</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">thermopy</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">thermopy</span> <span class="k">import</span> <span class="n">nasa9polynomials</span> <span class="k">as</span> <span class="n">nasa9</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">db</span> <span class="o">=</span> <span class="n">nasa9</span><span class="o">.</span><span class="n">Database</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">uf6</span> <span class="o">=</span> <span class="n">db</span><span class="o">.</span><span class="n">set_compound</span><span class="p">(</span><span class="s1">&#39;uf6(cr)&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">uf6</span><span class="p">)</span>
+<span class="go">hexafluorouranium: UF6(cr)</span>
+</pre></div>
+</div>
+<dl class="method">
+<dt>
+<code class="descname">enthalpy</code><span class="sig-paren">(</span><em>T</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/thermopy/nasa9polynomials.html#Compound.enthalpy"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Calculate molar enthalpy at constant pressure for the compound for
+a given temperature.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>T</strong> (<em>float</em>) &#8211; temperature.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">The molar enthalpy for the compound for a given
+temperature.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">numpy_float</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Examples</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">thermopy</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">thermopy</span> <span class="k">import</span> <span class="n">nasa9polynomials</span> <span class="k">as</span> <span class="n">nasa9</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">db</span> <span class="o">=</span> <span class="n">nasa9</span><span class="o">.</span><span class="n">Database</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">magnesium_hydroxide</span> <span class="o">=</span> <span class="n">db</span><span class="o">.</span><span class="n">set_compound</span><span class="p">(</span><span class="s1">&#39;Mg(OH)2(cr)&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">magnesium_hydroxide</span><span class="p">,</span> <span class="s1">&#39;-&#39;</span><span class="p">,</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">magnesium_hydroxide</span><span class="o">.</span><span class="n">enthalpy</span><span class="p">(</span><span class="mi">500</span><span class="p">))</span>  <span class="c1"># J/mol</span>
+<span class="go">Mg(OH)2(cr) - -906097.801815</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt>
+<code class="descname">entropy</code><span class="sig-paren">(</span><em>T</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/thermopy/nasa9polynomials.html#Compound.entropy"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Calculate molar entropy at constant pressure for the compound for
+a given temperature.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>T</strong> (<em>float</em>) &#8211; temperature.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">The molar entropy for the compound for a given
+temperature.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">numpy_float</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Examples</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">thermopy</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">thermopy</span> <span class="k">import</span> <span class="n">nasa9polynomials</span> <span class="k">as</span> <span class="n">nasa9</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">db</span> <span class="o">=</span> <span class="n">nasa9</span><span class="o">.</span><span class="n">Database</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">argon</span> <span class="o">=</span> <span class="n">db</span><span class="o">.</span><span class="n">set_compound</span><span class="p">(</span><span class="s1">&#39;ar&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">argon</span><span class="p">,</span> <span class="s1">&#39;-&#39;</span><span class="p">,</span> <span class="n">argon</span><span class="o">.</span><span class="n">entropy</span><span class="p">(</span><span class="mi">200</span><span class="p">))</span>
+<span class="go">argon: Ar - 146.546470215</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt>
+<code class="descname">gibbs_energy</code><span class="sig-paren">(</span><em>T</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/thermopy/nasa9polynomials.html#Compound.gibbs_energy"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Calculate molar Gibbs energy at constant pressure for the compound
+for a given temperature.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>T</strong> (<em>float</em>) &#8211; temperature.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">The molar entropy for the compound for a given
+temperature.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">numpy_float</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Examples</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">thermopy</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">thermopy</span> <span class="k">import</span> <span class="n">nasa9polynomials</span> <span class="k">as</span> <span class="n">nasa9</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">db</span> <span class="o">=</span> <span class="n">nasa9</span><span class="o">.</span><span class="n">Database</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">csbr</span> <span class="o">=</span> <span class="n">db</span><span class="o">.</span><span class="n">set_compound</span><span class="p">(</span><span class="s1">&#39;csbr(cr)&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">csbr</span><span class="p">,</span> <span class="s1">&#39;-&#39;</span><span class="p">,</span> <span class="n">csbr</span><span class="o">.</span><span class="n">gibbs_energy</span><span class="p">(</span><span class="mf">273.15</span><span class="p">))</span>
+<span class="go">cesium;bromide: CsBr(cr) - -436504.410044</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt>
+<code class="descname">heat_capacity</code><span class="sig-paren">(</span><em>T</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/thermopy/nasa9polynomials.html#Compound.heat_capacity"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Calculate molar heat capacity at constant pressure for standard
+state.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>T</strong> (<em>float</em>) &#8211; temperature.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">The molar heat capacity for the compound for a</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">numpy_float</td>
+</tr>
+</tbody>
+</table>
+<p>given temperature.</p>
+<p class="rubric">Examples</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">thermopy</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">thermopy</span> <span class="k">import</span> <span class="n">nasa9polynomials</span> <span class="k">as</span> <span class="n">nasa9</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">db</span> <span class="o">=</span> <span class="n">nasa9</span><span class="o">.</span><span class="n">Database</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">libr</span> <span class="o">=</span> <span class="n">db</span><span class="o">.</span><span class="n">set_compound</span><span class="p">(</span><span class="s1">&#39;LiBr&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">libr</span><span class="p">,</span> <span class="s1">&#39;-&#39;</span><span class="p">,</span> <span class="n">libr</span><span class="o">.</span><span class="n">heat_capacity</span><span class="p">(</span><span class="mi">2700</span><span class="p">))</span>
+<span class="go">lithium;bromide: LiBr - 39.6593057506</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="thermopy.nasa9polynomials.CompoundIdealGas">
+<em class="property">class </em><code class="descclassname">thermopy.nasa9polynomials.</code><code class="descname">CompoundIdealGas</code><span class="sig-paren">(</span><em>xml_compound</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/thermopy/nasa9polynomials.html#CompoundIdealGas"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#thermopy.nasa9polynomials.CompoundIdealGas" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#thermopy.nasa9polynomials.Compound" title="thermopy.nasa9polynomials.Compound"><code class="xref py py-class docutils literal"><span class="pre">thermopy.nasa9polynomials.Compound</span></code></a></p>
+<p>Chemical compound as an ideal gas present in the NASA9 term
+polynomials database.</p>
+<p>It is usually set by nasa9polyniomials.Database.set_compound(&#8216;identifier&#8217;).
+If set this way this method already instantiates either a Compound or a
+CompoundIdealGas based on the phase of the chemical compound specified by
+the identifier (see note below).</p>
+<p>Note: <em>The default phase for compounds in this database is gas.</em> Thus if
+instantiating with the name &#8216;H2O&#8217; one would get steam. For liquid water and
+ice one would rather look for &#8216;H2O(L)&#8217; or &#8216;H2O(cr)&#8217;. The same is valid for
+a lot of compounds expected to be in the condensed form (such as NaCl,
+Tungsten, etc).</p>
+<p>It adds two extra methods which come from the thermodynamics of Ideal
+Gases.</p>
+<p>Inherits from Compound.</p>
+<dl class="method">
+<dt id="thermopy.nasa9polynomials.CompoundIdealGas.heat_capacity_constant_v">
+<code class="descname">heat_capacity_constant_v</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/thermopy/nasa9polynomials.html#CompoundIdealGas.heat_capacity_constant_v"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#thermopy.nasa9polynomials.CompoundIdealGas.heat_capacity_constant_v" title="Permalink to this definition">¶</a></dt>
+<dd><p>calculates the heat capacity at a</p>
+</dd></dl>
+
+<dl class="method">
+<dt>
+<code class="descname">constant volume for a CompoundIdealGas object.</code></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="thermopy.nasa9polynomials.CompoundIdealGas.internal_energy">
+<code class="descname">internal_energy</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/thermopy/nasa9polynomials.html#CompoundIdealGas.internal_energy"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#thermopy.nasa9polynomials.CompoundIdealGas.internal_energy" title="Permalink to this definition">¶</a></dt>
+<dd><p>calculates</p>
+</dd></dl>
+
+<dl class="method">
+<dt>
+<code class="descname">the internal energy for a CompoundIdealGas object.</code></dt>
+<dd></dd></dl>
+
+<p class="rubric">Examples</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Instantiating a Compound whose condensed attributed is False</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># automatically sets it as an Ideal Gas:</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">thermopy</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">thermopy</span> <span class="k">import</span> <span class="n">nasa9polynomials</span> <span class="k">as</span> <span class="n">nasa9</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">db</span> <span class="o">=</span> <span class="n">nasa9</span><span class="o">.</span><span class="n">Database</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">co2</span> <span class="o">=</span> <span class="n">db</span><span class="o">.</span><span class="n">set_compound</span><span class="p">(</span><span class="s1">&#39;CO2&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">co2</span><span class="p">,</span> <span class="nb">type</span><span class="p">(</span><span class="n">co2</span><span class="p">))</span>
+<span class="go">carbon dioxide: CO2 &lt;class</span>
+<span class="go">&#39;thermopy.nasa9polynomials.CompoundIdealGas&#39;&gt;</span>
+</pre></div>
+</div>
+<dl class="method">
+<dt>
+<code class="descname">heat_capacity_constant_v</code><span class="sig-paren">(</span><em>T</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/thermopy/nasa9polynomials.html#CompoundIdealGas.heat_capacity_constant_v"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Calculate molar heat capacity at constant volume for standard
+state.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>T</strong> (<em>float</em>) &#8211; temperature.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">The molar heat capacity for the compound for a
+given temperature.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">numpy_float</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Examples</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">thermopy</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">thermopy</span> <span class="k">import</span> <span class="n">nasa9polynomials</span> <span class="k">as</span> <span class="n">nasa9</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">db</span> <span class="o">=</span> <span class="n">nasa9</span><span class="o">.</span><span class="n">Database</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">xenon</span> <span class="o">=</span> <span class="n">db</span><span class="o">.</span><span class="n">set_compound</span><span class="p">(</span><span class="s1">&#39;Xe&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">xenon</span><span class="p">,</span> <span class="s1">&#39;-&#39;</span><span class="p">,</span> <span class="n">xenon</span><span class="o">.</span><span class="n">heat_capacity</span><span class="p">(</span><span class="mf">298.15</span><span class="p">))</span>
+<span class="go">xenon: Xe - 20.78618</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">xenon</span><span class="p">,</span> <span class="s1">&#39;-&#39;</span><span class="p">,</span> <span class="n">xenon</span><span class="o">.</span><span class="n">heat_capacity_constant_v</span><span class="p">(</span><span class="mf">298.15</span><span class="p">))</span>
+<span class="go">xenon: Xe - 12.471708</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="s1">&#39;subtracting both hc:&#39;</span><span class="p">,</span>
+<span class="gp">... </span>      <span class="n">xenon</span><span class="o">.</span><span class="n">heat_capacity</span><span class="p">(</span><span class="mf">298.15</span><span class="p">)</span>
+<span class="gp">... </span>      <span class="o">-</span> <span class="n">xenon</span><span class="o">.</span><span class="n">heat_capacity_constant_v</span><span class="p">(</span><span class="mf">298.15</span><span class="p">))</span>
+<span class="go">subtracting both hc: 8.314472</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt>
+<code class="descname">internal_energy</code><span class="sig-paren">(</span><em>T</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/thermopy/nasa9polynomials.html#CompoundIdealGas.internal_energy"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Calculate molar internal energy at constant pressure for standard
+state.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>T</strong> (<em>float</em>) &#8211; temperature.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">The molar internal energy for the compound for a
+given temperature.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">numpy_float</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Examples</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">thermopy</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">thermopy</span> <span class="k">import</span> <span class="n">nasa9polynomials</span> <span class="k">as</span> <span class="n">nasa9</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">db</span> <span class="o">=</span> <span class="n">nasa9</span><span class="o">.</span><span class="n">Database</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">hcn</span> <span class="o">=</span> <span class="n">db</span><span class="o">.</span><span class="n">set_compound</span><span class="p">(</span><span class="s1">&#39;hcn&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">hcn</span><span class="p">,</span> <span class="s1">&#39;-&#39;</span><span class="p">,</span> <span class="n">hcn</span><span class="o">.</span><span class="n">internal_energy</span><span class="p">(</span><span class="mi">500</span><span class="p">))</span>
+<span class="go">formonitrile: HCN - 136809.830971</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="thermopy.nasa9polynomials.Database">
+<em class="property">class </em><code class="descclassname">thermopy.nasa9polynomials.</code><code class="descname">Database</code><a class="reference internal" href="_modules/thermopy/nasa9polynomials.html#Database"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#thermopy.nasa9polynomials.Database" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>Nasa 9 term polynomials database (see NASA/TP—2002-211556).</p>
+<p>The preferred method for identifying compounds is via <em>usual name</em> followed
+by an aggregation state if the compound is not a gas. E.g. &#8216;(L)&#8217;, &#8216;(cr)&#8217;,
+&#8216;(a)&#8217;, &#8216;(b)&#8217; where &#8216;(a)&#8217; and &#8216;(b)&#8217; are for allotropes.
+Other methods are:</p>
+<blockquote>
+<div><ol class="arabic simple">
+<li>InChIKey.</li>
+<li>CAS number.</li>
+<li>IUPAC name.</li>
+</ol>
+</div></blockquote>
+<p class="rubric">Examples</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">thermopy</span> <span class="k">import</span> <span class="n">nasa9polynomials</span> <span class="k">as</span> <span class="n">nasa9</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">db</span> <span class="o">=</span> <span class="n">nasa9</span><span class="o">.</span><span class="n">Database</span><span class="p">()</span>
+</pre></div>
+</div>
+<dl class="method">
+<dt id="thermopy.nasa9polynomials.Database.list_compound">
+<code class="descname">list_compound</code><span class="sig-paren">(</span><em>x</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/thermopy/nasa9polynomials.html#Database.list_compound"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#thermopy.nasa9polynomials.Database.list_compound" title="Permalink to this definition">¶</a></dt>
+<dd><p>List the compounds for a given input.
+It is intended to be used in interactive mode.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>x</strong> (<em>str</em>) &#8211; identifier for compound being searched.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">list of tuples containing (str, str) being the &#8216;inp name&#8217; and
+the IUPAC name respectively.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">list</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Examples</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">thermopy</span> <span class="k">import</span> <span class="n">nasa9polynomials</span> <span class="k">as</span> <span class="n">nasa9</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">db</span> <span class="o">=</span> <span class="n">nasa9</span><span class="o">.</span><span class="n">Database</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">db</span><span class="o">.</span><span class="n">list_compound</span><span class="p">(</span><span class="s1">&#39;fes&#39;</span><span class="p">):</span>
+<span class="gp">... </span>    <span class="nb">print</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+<span class="go">(&#39;FeS(a)&#39;, &#39;sulfanylideneiron&#39;)</span>
+<span class="go">(&#39;FeS(b)&#39;, &#39;sulfanylideneiron&#39;)</span>
+<span class="go">(&#39;FeS(c)&#39;, &#39;sulfanylideneiron&#39;)</span>
+<span class="go">(&#39;FeS(L)&#39;, &#39;sulfanylideneiron&#39;)</span>
+<span class="go">(&#39;FeSO4(cr)&#39;, &#39;iron(2+);sulfate&#39;)</span>
+<span class="go">(&#39;FeS2(cr)&#39;, &#39;N/A&#39;)</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p>The preferred method for identifying compounds is via <em>usual name</em>
+followed by an aggregation state if the compound is not a gas. E.g.
+&#8216;(L)&#8217;, &#8216;(cr)&#8217;, &#8216;(a)&#8217;, &#8216;(b)&#8217; where &#8216;(a)&#8217; and &#8216;(b)&#8217; are for
+allotropes.
+Other methods are:</p>
+<blockquote class="last">
+<div><ol class="arabic simple">
+<li>InChIKey.</li>
+<li>CAS number.</li>
+<li>IUPAC name.</li>
+</ol>
+</div></blockquote>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt id="thermopy.nasa9polynomials.Database.set_compound">
+<code class="descname">set_compound</code><span class="sig-paren">(</span><em>x</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/thermopy/nasa9polynomials.html#Database.set_compound"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#thermopy.nasa9polynomials.Database.set_compound" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set the compound if there is one entry specified on the database.</p>
+<p>It is important to notice that due to the nature of the work of this
+database, compounds are gases unless explicitly stated otherwise.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>x</strong> (<em>str</em>) &#8211; identifier for compound being searched.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">returns a Compound object if the phase is condensed.
+Returns a CompoundIdealGas otherwise.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference internal" href="#thermopy.nasa9polynomials.Compound" title="thermopy.nasa9polynomials.Compound">Compound</a></td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Example</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Someone is looking for the element gallium but is not certain</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># how to instantiate it. One would first list the compounds:</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">thermopy</span> <span class="k">import</span> <span class="n">nasa9polynomials</span> <span class="k">as</span> <span class="n">nasa9</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">db</span> <span class="o">=</span> <span class="n">nasa9</span><span class="o">.</span><span class="n">Database</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">db</span><span class="o">.</span><span class="n">list_compound</span><span class="p">(</span><span class="s1">&#39;gallium&#39;</span><span class="p">):</span>
+<span class="gp">... </span>    <span class="nb">print</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+<span class="gp">...</span>
+<span class="go">(&#39;Ga&#39;, &#39;gallium&#39;)</span>
+<span class="go">(&#39;Ga+&#39;, &#39;gallium&#39;)</span>
+<span class="go">(&#39;GaBr&#39;, &#39;bromogallium&#39;)</span>
+<span class="go">(&#39;GaBr2&#39;, &#39;dibromogallium&#39;)</span>
+<span class="go">(&#39;GaCl&#39;, &#39;chlorogallium&#39;)</span>
+<span class="go">(&#39;GaCl2&#39;, &#39;gallium;dichloride&#39;)</span>
+<span class="go">(&#39;GaF2&#39;, &#39;difluorogallium&#39;)</span>
+<span class="go">(&#39;GaI2&#39;, &#39;diiodogallium&#39;)</span>
+<span class="go">(&#39;GaO&#39;, &#39;oxogallium&#39;)</span>
+<span class="go">(&#39;GaOH&#39;, &#39;gallium;hydroxide&#39;)</span>
+<span class="go">(&#39;Ga2Cl4&#39;, &#39;gallium;gallium;tetrachloride&#39;)</span>
+<span class="go">(&#39;Ga2O&#39;, &#39;gallium;oxygen(2-)&#39;)</span>
+<span class="go">(&#39;Ga(cr)&#39;, &#39;gallium&#39;)</span>
+<span class="go">(&#39;Ga(L)&#39;, &#39;gallium&#39;)</span>
+<span class="go">(&#39;Ga2O3(cr)&#39;, &#39;digallium;oxygen(2-)&#39;)</span>
+<span class="go">(&#39;Ga2O3(L)&#39;, &#39;digallium;oxygen(2-)&#39;)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">gallium</span> <span class="o">=</span> <span class="n">db</span><span class="o">.</span><span class="n">set_compound</span><span class="p">(</span><span class="s1">&#39;Ga&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">gallium</span><span class="p">)</span>
+<span class="go">gallium: Ga</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p>The preferred method for identifying compounds is via <em>usual name</em>
+followed by an aggregation state if the compound is not a gas. E.g.
+&#8216;(L)&#8217;, &#8216;(cr)&#8217;, &#8216;(a)&#8217;, &#8216;(b)&#8217; where &#8216;(a)&#8217; and &#8216;(b)&#8217; are for
+allotropes.
+Other methods are:</p>
+<blockquote class="last">
+<div><ol class="arabic simple">
+<li>InChIKey.</li>
+<li>CAS number.</li>
+<li>IUPAC name.</li>
+</ol>
+</div></blockquote>
+</div>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="thermopy.nasa9polynomials.Reaction">
+<em class="property">class </em><code class="descclassname">thermopy.nasa9polynomials.</code><code class="descname">Reaction</code><span class="sig-paren">(</span><em>T</em>, <em>reactants</em>, <em>products</em>, <em>reactants_coefficients</em>, <em>product_coefficients</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/thermopy/nasa9polynomials.html#Reaction"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#thermopy.nasa9polynomials.Reaction" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>Model of a chemical reaction.</p>
+<p>Model of a chemical reaction using the NASA9 Compounds.</p>
+<p>Inherits from object.</p>
+<dl class="method">
+<dt id="thermopy.nasa9polynomials.Reaction.enthalpy_reaction">
+<code class="descname">enthalpy_reaction</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/thermopy/nasa9polynomials.html#Reaction.enthalpy_reaction"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#thermopy.nasa9polynomials.Reaction.enthalpy_reaction" title="Permalink to this definition">¶</a></dt>
+<dd><p>enthalpy of the reaction.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="thermopy.nasa9polynomials.Reaction.entropy_reaction">
+<code class="descname">entropy_reaction</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/thermopy/nasa9polynomials.html#Reaction.entropy_reaction"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#thermopy.nasa9polynomials.Reaction.entropy_reaction" title="Permalink to this definition">¶</a></dt>
+<dd><p>entropy of the reaction.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="thermopy.nasa9polynomials.Reaction.gibbs_energy_reaction">
+<code class="descname">gibbs_energy_reaction</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/thermopy/nasa9polynomials.html#Reaction.gibbs_energy_reaction"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#thermopy.nasa9polynomials.Reaction.gibbs_energy_reaction" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gibbs energy of the reaction.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="thermopy.nasa9polynomials.Reaction.equilibrium_constant">
+<code class="descname">equilibrium_constant</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/thermopy/nasa9polynomials.html#Reaction.equilibrium_constant"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#thermopy.nasa9polynomials.Reaction.equilibrium_constant" title="Permalink to this definition">¶</a></dt>
+<dd><p>equilibrium constant of the reaction.</p>
+</dd></dl>
+
+<p class="rubric">Examples</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">thermopy</span> <span class="k">import</span> <span class="n">nasa9polynomials</span> <span class="k">as</span> <span class="n">nasa9</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">db</span> <span class="o">=</span> <span class="n">nasa9</span><span class="o">.</span><span class="n">Database</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">na</span> <span class="o">=</span> <span class="n">db</span><span class="o">.</span><span class="n">set_compound</span><span class="p">(</span><span class="s1">&#39;na(cr)&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># being careful to initilize solid compounds</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">water</span> <span class="o">=</span> <span class="n">db</span><span class="o">.</span><span class="n">set_compound</span><span class="p">(</span><span class="s1">&#39;h2o(l)&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># being careful to initilize liquid compounds</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">sodium_hydroxide</span> <span class="o">=</span> <span class="n">db</span><span class="o">.</span><span class="n">set_compound</span><span class="p">(</span><span class="s1">&#39;naoh(a)&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># being careful to initilize solid compounds</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">hydrogen</span> <span class="o">=</span> <span class="n">db</span><span class="o">.</span><span class="n">set_compound</span><span class="p">(</span><span class="s1">&#39;h2&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">reacts</span> <span class="o">=</span> <span class="p">(</span><span class="n">na</span><span class="p">,</span> <span class="n">water</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">prods</span> <span class="o">=</span> <span class="p">(</span><span class="n">sodium_hydroxide</span><span class="p">,</span> <span class="n">hydrogen</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">reacts_coefs</span> <span class="o">=</span> <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">prods_coefs</span> <span class="o">=</span> <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">reaction1</span> <span class="o">=</span> <span class="n">nasa9</span><span class="o">.</span><span class="n">Reaction</span><span class="p">(</span><span class="mi">300</span><span class="p">,</span> <span class="n">reacts</span><span class="p">,</span> <span class="n">prods</span><span class="p">,</span> <span class="n">reacts_coefs</span><span class="p">,</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">prods_coefs</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">reaction1</span><span class="p">)</span>
+<span class="go">&lt;reaction&gt; +2 Na(cr) +2 H2O(L)  -&gt; +2 NaOH(a) +1 H2</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">reaction1</span><span class="o">.</span><span class="n">entropy_reaction</span><span class="p">())</span>
+<span class="go">149.097547531</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">reaction1</span><span class="o">.</span><span class="n">enthalpy_reaction</span><span class="p">())</span>
+<span class="go">-279857.367433</span>
+</pre></div>
+</div>
+<p class="rubric">Notes</p>
+<p>The Reaction class does not check for imbalances of the reaction (yet).</p>
+<dl class="method">
+<dt>
+<code class="descname">enthalpy_reaction</code><span class="sig-paren">(</span><em>T=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/thermopy/nasa9polynomials.html#Reaction.enthalpy_reaction"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Calculate the enthalpy of the reaction at the standard state.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>T</strong> (<em>float</em>) &#8211; temperature.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">The enthalpy of the reaction for a given temperature.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">numpy_float</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Examples</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">thermopy</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">thermopy</span> <span class="k">import</span> <span class="n">nasa9polynomials</span> <span class="k">as</span> <span class="n">nasa9</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">db</span> <span class="o">=</span> <span class="n">nasa9</span><span class="o">.</span><span class="n">Database</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">nitric_acid</span> <span class="o">=</span> <span class="n">db</span><span class="o">.</span><span class="n">set_compound</span><span class="p">(</span><span class="s1">&#39;hno3&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># the liquid phase is not present in the database</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">naoh</span> <span class="o">=</span> <span class="n">db</span><span class="o">.</span><span class="n">set_compound</span><span class="p">(</span><span class="s1">&#39;naoh(a)&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">sodium_nitrate</span> <span class="o">=</span> <span class="n">db</span><span class="o">.</span><span class="n">set_compound</span><span class="p">(</span><span class="s1">&#39;nano3(a)&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">water</span> <span class="o">=</span> <span class="n">db</span><span class="o">.</span><span class="n">set_compound</span><span class="p">(</span><span class="s1">&#39;h2o(l)&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">reagents</span> <span class="o">=</span> <span class="p">(</span><span class="n">nitric_acid</span><span class="p">,</span> <span class="n">naoh</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">products</span> <span class="o">=</span> <span class="p">(</span><span class="n">sodium_nitrate</span><span class="p">,</span> <span class="n">water</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">reactants_stoichometry</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">prodcuts_stoichometry</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">reaction1</span> <span class="o">=</span> <span class="n">nasa9</span><span class="o">.</span><span class="n">Reaction</span><span class="p">(</span>
+<span class="gp">... </span>    <span class="mi">298</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="n">reagents</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="n">products</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="n">reactants_stoichometry</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="n">prodcuts_stoichometry</span>
+<span class="gp">... </span>    <span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">reaction1</span><span class="p">,</span> <span class="n">reaction1</span><span class="o">.</span><span class="n">enthalpy_reaction</span><span class="p">())</span>
+<span class="go">&lt;reaction&gt; +1 HNO3 +1 NaOH(a)  -&gt; +1 NaNO3(a) +1 H2O(L)</span>
+<span class="go">-193773.133358</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt>
+<code class="descname">entropy_reaction</code><span class="sig-paren">(</span><em>T=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/thermopy/nasa9polynomials.html#Reaction.entropy_reaction"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Calculate the entropy of the reaction at the standard state.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>T</strong> (<em>float</em>) &#8211; temperature.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">The entropy of the reaction for a given temperature.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">numpy_float</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Examples</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">thermopy</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">thermopy</span> <span class="k">import</span> <span class="n">nasa9polynomials</span> <span class="k">as</span> <span class="n">nasa9</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">db</span> <span class="o">=</span> <span class="n">nasa9</span><span class="o">.</span><span class="n">Database</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">nitric_acid</span> <span class="o">=</span> <span class="n">db</span><span class="o">.</span><span class="n">set_compound</span><span class="p">(</span><span class="s1">&#39;hno3&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># the liquid phase is not present in the database</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">naoh</span> <span class="o">=</span> <span class="n">db</span><span class="o">.</span><span class="n">set_compound</span><span class="p">(</span><span class="s1">&#39;naoh(a)&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">sodium_nitrate</span> <span class="o">=</span> <span class="n">db</span><span class="o">.</span><span class="n">set_compound</span><span class="p">(</span><span class="s1">&#39;nano3(a)&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">water</span> <span class="o">=</span> <span class="n">db</span><span class="o">.</span><span class="n">set_compound</span><span class="p">(</span><span class="s1">&#39;h2o(l)&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">reagents</span> <span class="o">=</span> <span class="p">(</span><span class="n">nitric_acid</span><span class="p">,</span> <span class="n">naoh</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">products</span> <span class="o">=</span> <span class="p">(</span><span class="n">sodium_nitrate</span><span class="p">,</span> <span class="n">water</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">reactants_stoichometry</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">prodcuts_stoichometry</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">reaction1</span> <span class="o">=</span> <span class="n">nasa9</span><span class="o">.</span><span class="n">Reaction</span><span class="p">(</span>
+<span class="gp">... </span>    <span class="mi">298</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="n">reagents</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="n">products</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="n">reactants_stoichometry</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="n">prodcuts_stoichometry</span>
+<span class="gp">... </span>    <span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">reaction1</span><span class="p">,</span> <span class="n">reaction1</span><span class="o">.</span><span class="n">entropy_reaction</span><span class="p">())</span>
+<span class="go">&lt;reaction&gt; +1 HNO3 +1 NaOH(a)  -&gt; +1 NaNO3(a) +1 H2O(L)</span>
+<span class="go">-145.797754143</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt>
+<code class="descname">equilibrium_constant</code><span class="sig-paren">(</span><em>T=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/thermopy/nasa9polynomials.html#Reaction.equilibrium_constant"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Calculate the equilibrium constant of the reaction at the standard
+state.</p>
+<p>Definition: K = exp(- deltaG / (R T))</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>T</strong> (<em>float</em>) &#8211; temperature.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">The Gibbs energy of the reaction for a given
+temperature.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">numpy_float</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Examples</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">thermopy</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">thermopy</span> <span class="k">import</span> <span class="n">nasa9polynomials</span> <span class="k">as</span> <span class="n">nasa9</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">db</span> <span class="o">=</span> <span class="n">nasa9</span><span class="o">.</span><span class="n">Database</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">pcl5</span> <span class="o">=</span> <span class="n">db</span><span class="o">.</span><span class="n">set_compound</span><span class="p">(</span><span class="s1">&#39;pcl5&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">pcl3</span> <span class="o">=</span> <span class="n">db</span><span class="o">.</span><span class="n">set_compound</span><span class="p">(</span><span class="s1">&#39;pcl3&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">chlorine</span> <span class="o">=</span> <span class="n">db</span><span class="o">.</span><span class="n">set_compound</span><span class="p">(</span><span class="s1">&#39;cl2&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">reagents</span> <span class="o">=</span> <span class="p">(</span><span class="n">pcl5</span><span class="p">,)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">products</span> <span class="o">=</span> <span class="p">(</span><span class="n">pcl3</span><span class="p">,</span> <span class="n">chlorine</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">reactants_stoichometry</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span><span class="p">,)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">prodcuts_stoichometry</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">reaction1</span> <span class="o">=</span> <span class="n">nasa9</span><span class="o">.</span><span class="n">Reaction</span><span class="p">(</span>
+<span class="gp">... </span>    <span class="mi">500</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="n">reagents</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="n">products</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="n">reactants_stoichometry</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="n">prodcuts_stoichometry</span>
+<span class="gp">... </span>    <span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">reaction1</span><span class="p">,</span> <span class="n">reaction1</span><span class="o">.</span><span class="n">equilibrium_constant</span><span class="p">())</span>
+<span class="go">&lt;reaction&gt; +1 PCl5  -&gt; +1 PCl3 +1 Cl2  6.39431126134e-13</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt>
+<code class="descname">gibbs_energy_reaction</code><span class="sig-paren">(</span><em>T=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/thermopy/nasa9polynomials.html#Reaction.gibbs_energy_reaction"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Calculate the Gibbs energy of the reaction at the standard state.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>T</strong> (<em>float</em>) &#8211; temperature.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">The Gibbs energy of the reaction for a given
+temperature.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">numpy_float</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Examples</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">thermopy</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">thermopy</span> <span class="k">import</span> <span class="n">nasa9polynomials</span> <span class="k">as</span> <span class="n">nasa9</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">db</span> <span class="o">=</span> <span class="n">nasa9</span><span class="o">.</span><span class="n">Database</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">pcl5</span> <span class="o">=</span> <span class="n">db</span><span class="o">.</span><span class="n">set_compound</span><span class="p">(</span><span class="s1">&#39;pcl5&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">pcl3</span> <span class="o">=</span> <span class="n">db</span><span class="o">.</span><span class="n">set_compound</span><span class="p">(</span><span class="s1">&#39;pcl3&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">chlorine</span> <span class="o">=</span> <span class="n">db</span><span class="o">.</span><span class="n">set_compound</span><span class="p">(</span><span class="s1">&#39;cl2&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">reagents</span> <span class="o">=</span> <span class="p">(</span><span class="n">pcl5</span><span class="p">,)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">products</span> <span class="o">=</span> <span class="p">(</span><span class="n">pcl3</span><span class="p">,</span> <span class="n">chlorine</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">reactants_stoichometry</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span><span class="p">,)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">prodcuts_stoichometry</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">reaction1</span> <span class="o">=</span> <span class="n">nasa9</span><span class="o">.</span><span class="n">Reaction</span><span class="p">(</span>
+<span class="gp">... </span>    <span class="mi">298</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="n">reagents</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="n">products</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="n">reactants_stoichometry</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="n">prodcuts_stoichometry</span>
+<span class="gp">... </span>    <span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">reaction1</span><span class="p">,</span> <span class="n">reaction1</span><span class="o">.</span><span class="n">gibbs_energy_reaction</span><span class="p">())</span>
+<span class="go">&lt;reaction&gt; +1 PCl5  -&gt; +1 PCl3 +1 Cl2  103038.712535</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-thermopy.units">
+<span id="thermopy-units-module"></span><h2>thermopy.units module<a class="headerlink" href="#module-thermopy.units" title="Permalink to this headline">¶</a></h2>
+<p>Units conversion module.</p>
+<p>Classes:</p>
+<blockquote>
+<div><p>Temperature: temperature object.</p>
+<p>Pressure: pressure object.</p>
+<p>Enthalpy: enthalpy object.</p>
+<p>Length: length object.</p>
+<p>Massflow: mass flow object.</p>
+<p>Massflowrate: massflowrate object.</p>
+<p>Energy: energy object.</p>
+</div></blockquote>
+<dl class="class">
+<dt id="thermopy.units.Energy">
+<em class="property">class </em><code class="descclassname">thermopy.units.</code><code class="descname">Energy</code><span class="sig-paren">(</span><em>data</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/thermopy/units.html#Energy"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#thermopy.units.Energy" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">float</span></code></p>
+<p>Energy in J, Btu, cal, kWh</p>
+<dl class="attribute">
+<dt id="thermopy.units.Energy.Btu">
+<code class="descname">Btu</code><a class="headerlink" href="#thermopy.units.Energy.Btu" title="Permalink to this definition">¶</a></dt>
+<dd><p>Property of Btu unit.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="thermopy.units.Energy.cal">
+<code class="descname">cal</code><a class="headerlink" href="#thermopy.units.Energy.cal" title="Permalink to this definition">¶</a></dt>
+<dd><p>Property of cal unit.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="thermopy.units.Energy.kWh">
+<code class="descname">kWh</code><a class="headerlink" href="#thermopy.units.Energy.kWh" title="Permalink to this definition">¶</a></dt>
+<dd><p>Property of KWh unit.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="thermopy.units.Energy.unit">
+<code class="descname">unit</code><span class="sig-paren">(</span><em>units='J'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/thermopy/units.html#Energy.unit"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#thermopy.units.Energy.unit" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set unit for energy.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="thermopy.units.Enthalpy">
+<em class="property">class </em><code class="descclassname">thermopy.units.</code><code class="descname">Enthalpy</code><span class="sig-paren">(</span><em>data</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/thermopy/units.html#Enthalpy"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#thermopy.units.Enthalpy" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">float</span></code></p>
+<p>Class that models an enthalpy measure with conversion utilities</p>
+<p>Supported units are</p>
+<ul class="simple">
+<li>Joule per kg (default)</li>
+<li>Kilojoule per kg (kJkg)</li>
+<li>Kilocalorie per kg (kcalkg)</li>
+<li>BTU per pound (Btulb)</li>
+</ul>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">h</span> <span class="o">=</span> <span class="n">Enthalpy</span><span class="p">(</span><span class="mi">1000</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">h</span><span class="o">.</span><span class="n">kJkg</span>
+<span class="go">1.0</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">h</span><span class="o">.</span><span class="n">kcalkg</span>
+<span class="go">0.2390057361376...</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">h</span><span class="o">.</span><span class="n">Btulb</span>
+<span class="go">0.42992261392949266</span>
+</pre></div>
+</div>
+<dl class="attribute">
+<dt id="thermopy.units.Enthalpy.Btulb">
+<code class="descname">Btulb</code><a class="headerlink" href="#thermopy.units.Enthalpy.Btulb" title="Permalink to this definition">¶</a></dt>
+<dd><p>Property of Btulb pressure unit.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="thermopy.units.Enthalpy.kJkg">
+<code class="descname">kJkg</code><a class="headerlink" href="#thermopy.units.Enthalpy.kJkg" title="Permalink to this definition">¶</a></dt>
+<dd><p>Property of KJkg pressure unit.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="thermopy.units.Enthalpy.kcalkg">
+<code class="descname">kcalkg</code><a class="headerlink" href="#thermopy.units.Enthalpy.kcalkg" title="Permalink to this definition">¶</a></dt>
+<dd><p>Property of kcalkg pressure unit.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="thermopy.units.Enthalpy.unit">
+<code class="descname">unit</code><span class="sig-paren">(</span><em>units='si'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/thermopy/units.html#Enthalpy.unit"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#thermopy.units.Enthalpy.unit" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set unit for Enthalpy.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="thermopy.units.Length">
+<em class="property">class </em><code class="descclassname">thermopy.units.</code><code class="descname">Length</code><span class="sig-paren">(</span><em>data</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/thermopy/units.html#Length"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#thermopy.units.Length" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">float</span></code></p>
+<p>Class that models a length measure with conversion utilities</p>
+<p>Supported units are</p>
+<ul class="simple">
+<li>meter (default)</li>
+<li>millimeter (mm)</li>
+<li>inch (inch)</li>
+<li>foot (ft)</li>
+</ul>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">l</span> <span class="o">=</span> <span class="n">Length</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">unit</span><span class="p">(</span><span class="s1">&#39;inch&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">round</span><span class="p">(</span><span class="n">l</span><span class="o">.</span><span class="n">mm</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+<span class="go">25.4</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">l</span><span class="o">.</span><span class="n">ft</span>
+<span class="go">0.0833333333333...</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">round</span><span class="p">(</span><span class="n">l</span><span class="p">,</span> <span class="mi">4</span><span class="p">)</span>
+<span class="go">0.0254</span>
+</pre></div>
+</div>
+<dl class="attribute">
+<dt id="thermopy.units.Length.ft">
+<code class="descname">ft</code><a class="headerlink" href="#thermopy.units.Length.ft" title="Permalink to this definition">¶</a></dt>
+<dd><p>Property of feet unit.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="thermopy.units.Length.inch">
+<code class="descname">inch</code><a class="headerlink" href="#thermopy.units.Length.inch" title="Permalink to this definition">¶</a></dt>
+<dd><p>Property of inch unit.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="thermopy.units.Length.mm">
+<code class="descname">mm</code><a class="headerlink" href="#thermopy.units.Length.mm" title="Permalink to this definition">¶</a></dt>
+<dd><p>Property of mm unit.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="thermopy.units.Length.unit">
+<code class="descname">unit</code><span class="sig-paren">(</span><em>units='m'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/thermopy/units.html#Length.unit"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#thermopy.units.Length.unit" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set unit for length.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="thermopy.units.Massflow">
+<em class="property">class </em><code class="descclassname">thermopy.units.</code><code class="descname">Massflow</code><span class="sig-paren">(</span><em>data</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/thermopy/units.html#Massflow"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#thermopy.units.Massflow" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">float</span></code></p>
+<p>Class that models a mass flow measure with conversion utilities</p>
+<p>Supported units are</p>
+<ul class="simple">
+<li>kg per second (default)</li>
+<li>kg per hour (kgh)</li>
+<li>pounds per second (lbs)</li>
+<li>pounds per hour (lbh)</li>
+</ul>
+<dl class="attribute">
+<dt id="thermopy.units.Massflow.kgh">
+<code class="descname">kgh</code><a class="headerlink" href="#thermopy.units.Massflow.kgh" title="Permalink to this definition">¶</a></dt>
+<dd><p>Property of kgh unit.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="thermopy.units.Massflow.lbh">
+<code class="descname">lbh</code><a class="headerlink" href="#thermopy.units.Massflow.lbh" title="Permalink to this definition">¶</a></dt>
+<dd><p>Property of lbh unit.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="thermopy.units.Massflow.lbs">
+<code class="descname">lbs</code><a class="headerlink" href="#thermopy.units.Massflow.lbs" title="Permalink to this definition">¶</a></dt>
+<dd><p>Property of lbs unit.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="thermopy.units.Massflow.unit">
+<code class="descname">unit</code><span class="sig-paren">(</span><em>units='kgs'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/thermopy/units.html#Massflow.unit"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#thermopy.units.Massflow.unit" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set unit for massflow.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="thermopy.units.Massflowrate">
+<em class="property">class </em><code class="descclassname">thermopy.units.</code><code class="descname">Massflowrate</code><span class="sig-paren">(</span><em>data</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/thermopy/units.html#Massflowrate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#thermopy.units.Massflowrate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">float</span></code></p>
+<p>Class that models a mass flow measure with conversion utilities</p>
+<p>Supported units are</p>
+<ul class="simple">
+<li> (default)</li>
+<li> (Btu)</li>
+</ul>
+<dl class="attribute">
+<dt id="thermopy.units.Massflowrate.Btu">
+<code class="descname">Btu</code><a class="headerlink" href="#thermopy.units.Massflowrate.Btu" title="Permalink to this definition">¶</a></dt>
+<dd><p>Property of Btu unit.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="thermopy.units.Massflowrate.unit">
+<code class="descname">unit</code><span class="sig-paren">(</span><em>units='default'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/thermopy/units.html#Massflowrate.unit"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#thermopy.units.Massflowrate.unit" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set unit for massflowrate.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="thermopy.units.Pressure">
+<em class="property">class </em><code class="descclassname">thermopy.units.</code><code class="descname">Pressure</code><span class="sig-paren">(</span><em>data</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/thermopy/units.html#Pressure"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#thermopy.units.Pressure" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">float</span></code></p>
+<p>Class that models a Pressure measure with conversion utilities</p>
+<p>Suported units are</p>
+<ul class="simple">
+<li>Pascal (Pa)</li>
+<li>Mega Pascal (MPa)</li>
+<li>Bar (bar)</li>
+<li>Pound per square inch (psi)</li>
+<li>Atmosphere (atm)</li>
+<li>Millimeters of water column (mmwc)</li>
+<li>Torricelli (torr)</li>
+</ul>
+<p>Normal instantiation is pressure in Pa. How much is an athmosphere?</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">p</span> <span class="o">=</span> <span class="n">Pressure</span><span class="p">(</span><span class="mf">1.0</span><span class="p">)</span><span class="o">.</span><span class="n">unit</span><span class="p">(</span><span class="s1">&#39;atm&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">p</span>
+<span class="go">101325.0</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">p</span><span class="o">.</span><span class="n">torr</span>
+<span class="go">760.0</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">p</span><span class="o">.</span><span class="n">mmwc</span>
+<span class="go">10285.839999999998</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">p</span><span class="o">.</span><span class="n">psi</span>
+<span class="go">14.69594877551345</span>
+</pre></div>
+</div>
+<dl class="attribute">
+<dt id="thermopy.units.Pressure.MPa">
+<code class="descname">MPa</code><a class="headerlink" href="#thermopy.units.Pressure.MPa" title="Permalink to this definition">¶</a></dt>
+<dd><p>Property of MPa pressure unit.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="thermopy.units.Pressure.atm">
+<code class="descname">atm</code><a class="headerlink" href="#thermopy.units.Pressure.atm" title="Permalink to this definition">¶</a></dt>
+<dd><p>Property of atm pressure unit.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="thermopy.units.Pressure.bar">
+<code class="descname">bar</code><a class="headerlink" href="#thermopy.units.Pressure.bar" title="Permalink to this definition">¶</a></dt>
+<dd><p>Property of bar pressure unit.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="thermopy.units.Pressure.mmwc">
+<code class="descname">mmwc</code><a class="headerlink" href="#thermopy.units.Pressure.mmwc" title="Permalink to this definition">¶</a></dt>
+<dd><p>Property of mmwc pressure unit.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="thermopy.units.Pressure.psi">
+<code class="descname">psi</code><a class="headerlink" href="#thermopy.units.Pressure.psi" title="Permalink to this definition">¶</a></dt>
+<dd><p>Property of psi pressure unit.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="thermopy.units.Pressure.torr">
+<code class="descname">torr</code><a class="headerlink" href="#thermopy.units.Pressure.torr" title="Permalink to this definition">¶</a></dt>
+<dd><p>Property of torr pressure unit.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="thermopy.units.Pressure.unit">
+<code class="descname">unit</code><span class="sig-paren">(</span><em>units='Pa'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/thermopy/units.html#Pressure.unit"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#thermopy.units.Pressure.unit" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set unit for pressure.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="thermopy.units.Temperature">
+<em class="property">class </em><code class="descclassname">thermopy.units.</code><code class="descname">Temperature</code><span class="sig-paren">(</span><em>data</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/thermopy/units.html#Temperature"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#thermopy.units.Temperature" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">float</span></code></p>
+<p>Class that models a temperature measure with conversion utilities</p>
+<p>Supported units are</p>
+<ul class="simple">
+<li>Kelvin</li>
+<li>Celsius</li>
+<li>Fahrenheit</li>
+</ul>
+<p>Normal instantiation is a temperature in Kelvin</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">T</span> <span class="o">=</span> <span class="n">Temperature</span><span class="p">(</span><span class="mi">100</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">T</span>
+<span class="go">100.0</span>
+</pre></div>
+</div>
+<p>But you can instantiate and specify if unit is Celsius or
+Fahrenheit</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">T</span> <span class="o">=</span> <span class="n">Temperature</span><span class="p">(</span><span class="mi">100</span><span class="p">)</span><span class="o">.</span><span class="n">unit</span><span class="p">(</span><span class="s1">&#39;F&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">T</span>
+<span class="go">310.92777777777775</span>
+</pre></div>
+</div>
+<p>Unit conversion is as easy as it gets.</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">T</span><span class="o">.</span><span class="n">C</span>
+<span class="go">37.777777777777...</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">T</span><span class="o">.</span><span class="n">F</span>
+<span class="go">99.999999999999...</span>
+</pre></div>
+</div>
+<p>You can compute with temperatures because inherits from the float
+built-in</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">T1</span> <span class="o">=</span> <span class="n">Temperature</span><span class="p">(</span><span class="mi">200</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">T2</span> <span class="o">=</span> <span class="n">Temperature</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">unit</span><span class="p">(</span><span class="s1">&#39;C&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">round</span><span class="p">(</span><span class="n">T1</span><span class="o">+</span><span class="n">T2</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+<span class="go">473.15</span>
+</pre></div>
+</div>
+<p>If you don&#8217;t want to use the class&#8217; attribute you can use the
+function <cite>getattr</cite> to get a value using the unit code.</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="nb">getattr</span><span class="p">(</span><span class="n">T</span><span class="p">,</span><span class="s1">&#39;C&#39;</span><span class="p">)</span>
+<span class="go">37.77777777777...</span>
+</pre></div>
+</div>
+<dl class="attribute">
+<dt id="thermopy.units.Temperature.C">
+<code class="descname">C</code><a class="headerlink" href="#thermopy.units.Temperature.C" title="Permalink to this definition">¶</a></dt>
+<dd><p>Property of Celsius temperature unit.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="thermopy.units.Temperature.F">
+<code class="descname">F</code><a class="headerlink" href="#thermopy.units.Temperature.F" title="Permalink to this definition">¶</a></dt>
+<dd><p>Property of Fahrenheit temperature unit.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="thermopy.units.Temperature.unit">
+<code class="descname">unit</code><span class="sig-paren">(</span><em>units='K'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/thermopy/units.html#Temperature.unit"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#thermopy.units.Temperature.unit" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set unit for temperature.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-thermopy">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-thermopy" title="Permalink to this headline">¶</a></h2>
+<dl class="docutils">
+<dt>Modules:</dt>
+<dd>Burcat: burcat thermodynamic database.
+Constants: physical constants database.
+Iapws: water and steam thermodynamic database.
+Nasa9polynomials: nasa 9 term polynomials database.
+Units: units conversion database.</dd>
+</dl>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">thermopy package</a><ul>
+<li><a class="reference internal" href="#submodules">Submodules</a></li>
+<li><a class="reference internal" href="#module-thermopy.burcat">thermopy.burcat module</a></li>
+<li><a class="reference internal" href="#module-thermopy.constants">thermopy.constants module</a></li>
+<li><a class="reference internal" href="#module-thermopy.iapws">thermopy.iapws module</a></li>
+<li><a class="reference internal" href="#module-thermopy.nasa9polynomials">thermopy.nasa9polynomials module</a></li>
+<li><a class="reference internal" href="#module-thermopy.units">thermopy.units module</a></li>
+<li><a class="reference internal" href="#module-thermopy">Module contents</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="index.html"
+                        title="previous chapter">Welcome to thermopy&#8217;s documentation!</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/thermopy.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="index.html" title="Welcome to thermopy’s documentation!"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">thermopy  documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2016, Author.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.4.
+    </div>
+  </body>
+</html>
