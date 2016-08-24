@@ -1,3 +1,7 @@
+# Documentation:
+
+https://guillemborrell.github.io/thermopy/
+
 # thermopy 
 
 Python library for thermodynamics and other handy tools. Only python3 is
