@@ -1,0 +1,59 @@
+Metadata-Version: 2.1
+Name: thermopy
+Version: 0.5.4
+Summary: Python package for thermodynamic calculations and units conversion.
+Home-page: github: https://github.com/guillemborrell/thermopy
+Author: Felipe M. Vieira
+Author-email: fmv1992@gmail.com
+License: GPL
+Keywords: thermodynamics,properties estimation
+Classifier: Development Status :: 3 - Alpha
+Classifier: Environment :: Console
+Classifier: Intended Audience :: Science/Research
+Classifier: License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)
+Classifier: Operating System :: OS Independent
+Classifier: Programming Language :: Python :: 3.4
+Classifier: Topic :: Scientific/Engineering :: Chemistry
+Classifier: Topic :: Scientific/Engineering :: Physics
+Classifier: Topic :: Software Development :: Libraries :: Python Modules
+
+
+Python library for thermodynamics and other handy tools.
+
+
+Thermodynamics (all these properties as function of temperature for thousands
+of compounds):
+
+	- Specific heat capacity
+
+	- Enthalpy
+
+	- Entropy
+
+
+Temperature independent data:
+
+	- Molecular weight
+
+	- Enthalpy of formation
+
+
+and much more.
+
+For water pressure is also an input (higher accuracy).
+
+Modelling of chemical reactions is also present. Main features:
+
+	- Equilibrium constant as a function of temperature
+
+	- Heat of reaction as a function of temperature
+
+
+Handy tools:
+
+	- Units conversion module
+
+	- Hundreds of physical constants
+
+
+See the documentation for further details and examples.
