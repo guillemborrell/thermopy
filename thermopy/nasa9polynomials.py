@@ -909,4 +909,3 @@ class Reaction(object):
         for (reag, coef) in zip(self._products, self._pcoefs):
             r = r + '+' + str(coef) + ' ' + reag.inp_name + ' '
         return """<reaction> {0}""".format(r)
-    print('test')
