@@ -768,7 +768,7 @@ class Reaction(object):
         deltah = 0
         for (coefficient, compound) in zip(self._rcoefs, self._reactants):
             deltah = deltah - coefficient * compound.enthalpy(self.T)
-        for (coefficient, compound) in zip(self._rcoefs, self._products):
+        for (coefficient, compound) in zip(self._pcoefs, self._products):
             deltah = deltah + coefficient * compound.enthalpy(self.T)
         return deltah
 
@@ -812,7 +812,7 @@ class Reaction(object):
         deltas = 0
         for (coefficient, compound) in zip(self._rcoefs, self._reactants):
             deltas = deltas - coefficient * compound.entropy(self.T)
-        for (coefficient, compound) in zip(self._rcoefs, self._products):
+        for (coefficient, compound) in zip(self._pcoefs, self._products):
             deltas = deltas + coefficient * compound.entropy(self.T)
         return deltas
 
@@ -854,7 +854,7 @@ class Reaction(object):
         deltag = 0
         for (coefficient, compound) in zip(self._rcoefs, self._reactants):
             deltag = deltag - coefficient * compound.gibbs_energy(self.T)
-        for (coefficient, compound) in zip(self._rcoefs, self._products):
+        for (coefficient, compound) in zip(self._pcoefs, self._products):
             deltag = deltag + coefficient * compound.gibbs_energy(self.T)
         return deltag
 
